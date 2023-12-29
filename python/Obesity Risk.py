@@ -5,9 +5,10 @@ import tensorflow as tf
 import numpy as np
 import pandas as pd
 from keras.callbacks import EarlyStopping, ModelCheckpoint
-from sklearn.model_selection import train_test_split,  GridSearchCV, StratifiedKFold, cross_val_predict, GridSearchCV
 from sklearn.preprocessing import OneHotEncoder,LabelEncoder, MinMaxScaler, Normalizer, RobustScaler, StandardScaler, MaxAbsScaler
-from keras.utils import to_categorical
+from sklearn.experimental import enable_halving_search_cv #정식버전이 아님!
+from sklearn.model_selection import train_test_split,GridSearchCV,HalvingGridSearchCV,RandomizedSearchCV, StratifiedKFold
+from sklearn.decomposition import PCA
 le = LabelEncoder()
 import datetime
 import time
@@ -63,21 +64,16 @@ submission_csv = pd.read_csv(path + 'sample_submission.csv')
 ##############데이터 전처리###############
 le = LabelEncoder()
 
-def perform_feature_engineering(df):
 
-    train_csv['BMI'] = train_csv['Weight'] / (train_csv['Height'] ** 2)
-    test_csv['BMI'] = test_csv['Weight'] / (test_csv['Height'] ** 2)
 
-    train_csv['bmioncp'] = train_csv['BMI'] / train_csv['NCP']
-    test_csv['bmioncp'] = test_csv['BMI'] / test_csv['NCP']
+train_csv['BMI'] = train_csv['Weight'] / (train_csv['Height'] ** 2)
+#train_csv['WIR'] = train_csv['Weight'] / train_csv['CH2O']
+train_csv['bmioncp'] = train_csv['BMI'] / train_csv['NCP']
 
-    train_csv['WIR'] = train_csv['Weight'] / train_csv['CH2O']
-    test_csv['WIR'] = test_csv['Weight'] / test_csv['CH2O']
-    
-    train_csv = perform_feature_engineering(train_csv)
-    test_csv = perform_feature_engineering(test_csv)
-    return df
 
+test_csv['BMI'] = test_csv['Weight'] / (test_csv['Height'] ** 2)
+#test_csv['WIR'] = test_csv['Weight'] / test_csv['CH2O']
+test_csv['bmioncp'] = test_csv['BMI'] / test_csv['NCP']
 
 #Gender
 train_csv['Gender']= train_csv['Gender'].str.replace("Male","0")
@@ -177,11 +173,16 @@ test_csv['MTRANS']= test_csv['MTRANS'].str.replace("Walking","4")
 #print(test_csv.isnull().sum()) #없음.
 #print(train_csv.isnull().sum()) #없음.
 
+# (['Gender', 'Age', 'Height', 'Weight', 'family_history_with_overweight',
+#        'FAVC', 'FCVC', 'NCP', 'CAEC', 'SMOKE', 'CH2O', 'SCC', 'FAF', 'TUE',
+#        'CALC', 'MTRANS', 'NObeyesdad', 'BMI'],
 
-x = train_csv.drop('NObeyesdad', axis = 1)
+
+x = train_csv.drop(['NObeyesdad'], axis = 1)
 y = train_csv['NObeyesdad']
-
 y = le.fit_transform(y)
+#test_csv = test_csv.drop(['FAVC'], axis = 1)
+
 
 # y = y.values.reshape(-1,1)
 # ohe = OneHotEncoder(sparse = False)
@@ -189,31 +190,58 @@ y = le.fit_transform(y)
 # y = ohe.transform(y)
 # print(y.shape)  
 
-from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
-from sklearn.preprocessing import StandardScaler, RobustScaler
-import time
+# from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
+# from sklearn.preprocessing import StandardScaler, RobustScaler
+# import time
 
 
-mms = MinMaxScaler()
-# mms = MinMaxScaler(feature_range=(0,1))
-# mms = StandardScaler()
-# mms = MaxAbsScaler()
-# mms = RobustScaler()
+# mms = MinMaxScaler()
+# # mms = MinMaxScaler(feature_range=(0,1))
+# # mms = StandardScaler()
+# # mms = MaxAbsScaler()
+# # mms = RobustScaler()
 
-mms.fit(x)
-x = mms.transform(x)
-test_csv=mms.transform(test_csv)
+# mms.fit(x)
+# x = mms.transform(x)
+# test_csv=mms.transform(test_csv)
 #print(x.shape, y.shape)  #(20758, 16) (20758,)
 #print(np.unique(y, return_counts= True))
 #(array([0, 1, 2, 3, 4, 5, 6]), array([2523, 3082, 2910, 3248, 4046, 2427, 2522], dtype=int64))
 
 
+# df = pd.DataFrame(x, columns= train_csv.columns)
+# print(df)    
+# df['Target(Y)'] = y
+# print(df)    
+
+# print('=================상관계수 히트맵==============================')    
+# print(df.corr())
+
+#x끼리의 상관계수가 너무 높을땐 다른 데이터에 영향을 미칠수 있어(과적합확률) 컬럼처리가 필요함.
+#y와 상관관계가 있는 데이터가 중요.
+
+# import matplotlib.pyplot as plt
+# import seaborn as sns
+# sns.set(font_scale=0.6)
+# sns.heatmap(data=df.corr(),
+#             square= True,
+#             annot=True,
+#             cbar=True)
+# plt.show()
 
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, train_size = 0.85, shuffle=True, random_state=1117, stratify= y)
+print(x.shape)
+pca = PCA(n_components=11)   # 컬럼을 몇개로 줄일것인가(숫자가 작을수록 데이터 손실이 많아짐) 
+                            #사용전에 스케일링(주로 standard)을 해서 모양을 어느정도 맞춰준 뒤 사용
+x = pca.fit_transform(x)
+test_csv = pca.transform(test_csv)
+print(x.shape)
+
+
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size = 0.9, shuffle=True, random_state=SEED1, stratify= y)
 #5 9158 19 9145
 n_splits=5
-kfold = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=1672)
+kfold = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=SEED1)
 
 # y_train = to_categorical(y_train, 7)
 # y_test = to_categorical(y_test, 7) 
@@ -223,20 +251,18 @@ kfold = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=1672)
 
 
 
-# columns_id = np.arange(0, x.shape[1])
-# categorical_features_id = columns_id[x.dtypes == object]
 
-#mms = MinMaxScaler() #(feature_range=(0,1))
-mms = StandardScaler()
-#mms = MaxAbsScaler()
-#mms = RobustScaler()
-#mms = Normalizer()
+# #mms = MinMaxScaler() #(feature_range=(0,1))
+# mms = StandardScaler()
+# #mms = MaxAbsScaler()
+# #mms = RobustScaler()
+# #mms = Normalizer()
 
 
-mms.fit(x_train)
-x_train= mms.transform(x_train)
-x_test= mms.transform(x_test)
-test_csv= mms.transform(test_csv)
+# mms.fit(x_train)
+# x_train= mms.transform(x_train)
+# x_test= mms.transform(x_test)
+# test_csv= mms.transform(test_csv)
 
 
 #==================================
@@ -256,69 +282,97 @@ from sklearn.decomposition import PCA #차원축소
 #                             random_state=42)#1001 #1117
 
 ################lgbm########################
-# lgb_params = {
-#     "application" : "multiclass",
-#     "metric": "multi_logloss",   
-#     "boost_from_average": "False", 
-#     "verbosity": 1,            
-#     "boosting_type": "gbdt",           
-#     "random_state": 42,       #42    
-#     #"num_class": 17,                
-#     'learning_rate': 0.090962211546832760,  
-#     'n_estimators': 20000,                
-#     'reg_alpha' : 0.9269816785,
-#     #'lambda_l1': 0.9967446568254372,
-#     'num_leaves' : 64,
-#     #'lambda_l2': 0.09018641437301800,   
-#     'max_depth': 60,                  
-#     'colsample_bytree': 0.40977129346872643,
-#     'subsample': 0.835797422450176,   
-#     'n_jobs' : -1,
-#     'min_child_samples': 30          
-# }
+lgb_params = {
+    "metric": "multi_logloss",   
+    #"deterministic": "true",    
 
-# model = LGBMClassifier(**lgb_params)
-################lgbm########################
-
-
-################xgb########################
-
-params = {
-    'n_estimators': 4000,
-    'learning_rate': 0.012,
-    'gamma': 0.9024196354156454324,
-    'reg_alpha': 0.99025931173755949,
-    "verbosity": 1,  
-    'reg_lambda': 0.8835667255875388,
-    'max_depth': 10,
-    'min_child_weight': 2,
-    'subsample': 0.393274050086088,
-    'colsample_bytree': 0.4579828557036317,
-    'n_jobs' : -1
+#    "device_type":"GPU",
+#    "boost_from_average": "False", 
+    "verbosity": 1,            
+    "boosting_type": "gbdt",           
+    "random_state": SEED1,       #42    
+    "num_class": 17,                
+    'learning_rate': 0.090962211546832760,  
+    'n_estimators': 20000,                
+    'reg_alpha' : 0.9269816785,
+    #'lambda_l1': 0.9967446568254372,
+    'num_leaves' : 128,
+    #'lambda_l2': 0.09018641437301800,   
+    'max_depth': 60,                  
+    'colsample_bytree': 0.40977129346872643,
+    'subsample': 0.835797422450176,   
+    'n_jobs' : -1,
+    'min_child_samples': 1          
 }
 
-#model = XGBClassifier(**params, random_state = 189)
-model = make_pipeline(MinMaxScaler(),
-                      StandardScaler(),
-                      #PCA(),
-                      XGBClassifier(**params, random_state = 189)
-                      )
+model = LGBMClassifier(**lgb_params)
+################lgbm########################
+
+# params = {
+#     'n_estimators': 4000,
+#     'learning_rate': 0.1,
+#     'gamma': 0.9024196354156454324,
+#     'reg_alpha': 0.7,
+#     "verbosity": 1,  
+#     'reg_lambda': 0.9935667255875388,
+#     'max_depth': 12,
+#     'min_child_weight': 1, #4
+#     'subsample': 0.393274050086088,
+#     'colsample_bytree': 0.4579828557036317,
+#     'n_jobs' : -1
+# }
+
+
+
 ################xgb########################
 
+# parameters = [{
+#     'n_estimators': [4000, 3000],
+#     'learning_rate': [0.92, 0.62],
+#     'gamma': [0.8024196, 0.785872],
+#     'reg_alpha': [0.99025931173755949, 0.9469289],
+#     'reg_lambda': [0.8835667255875388],
+#     'max_depth': [40, 43],
+#     'min_child_weight': [1,4],
+#     'subsample': [0.393274050086088],
+#     'colsample_bytree': [0.4579828557036317]
+# }]
+
+# model = XGBClassifier(**params, random_state = 189)
+# model = make_pipeline(#MinMaxScaler(),
+#                       #RobustScaler(),
+#                       StandardScaler(),
+#                       #PCA(),
+#                       #XGBClassifier(**params, random_state = 189)
+#                       LGBMClassifier(**params, random_state = 189)
+                      
+#                       )
+################xgb########################
+
+# model = HalvingGridSearchCV(LGBMClassifier(), 
+#                      lgb_params, 
+#                      cv=kfold, 
+#                      verbose=1, 
+#                      min_resources=20,
+#                      #n_iter=10,
+#                      refit= True, #디폴트 트루~
+#                      n_jobs=-1) #CPU 다 쓴다!
+
 ################catboost########################
-# cb = CatBoostClassifier(auto_class_weights = 'Balanced', 
-#                            iterations=50000,
-#                            learning_rate=0.002162645,
-#                            max_depth=16,
+# model = CatBoostClassifier(auto_class_weights = 'Balanced', 
+#                            iterations=5000,
+#                            learning_rate=0.032162645,
+#                            max_depth=10,
+#                            #task_type= 'GPU',
 #                            l2_leaf_reg=18,
 #                            max_bin=10,
 #                            early_stopping_rounds=70, 
 #                            random_state=98765)
 
 
-# param = {'auto_class_weights':'Balanced','iterations':10000,'early_stopping_rounds':100,'l2_leaf_reg':18,'learning_rate':0.0021626,
-#          'max_depth':16,'task_type':'GPU','max_bin':8, 'random_state':9876}
-# model = CatBoostClassifier(**param, bootstrap_type='Poisson')
+#param = {'auto_class_weights':'Balanced','iterations':10000,'early_stopping_rounds':100,'l2_leaf_reg':18,'learning_rate':0.0021626,
+#         'max_depth':16,'task_type':'GPU','max_bin':8, 'random_state':9876}
+#model = CatBoostClassifier(**param, bootstrap_type='Poisson')
 
 ################catboost########################
 
@@ -334,7 +388,7 @@ test_csv = np.asarray(test_csv).astype(np.float32)
 
 
 start_time = time.time()
-model.fit(x_train, y_train)# callbacks= [mcp])#, eval_set=(x_test, y_test))#, cat_features=categorical_features_id)
+model.fit(x_train, y_train)#, eval_set=(x_test, y_test))#, cat_features=categorical_features_id)
 end_time = time.time()
 
 
@@ -363,11 +417,12 @@ y_predict = model.predict(x_test)
 y_submit = model.predict(test_csv)
 y_submit = le.inverse_transform(y_submit)
 
-print()
 
 acc = model.score(x_test, y_test)
 print(acc)
 end_time = time.time()
+
+#print(type(model).__name__, ':', model.feature_importances_)
 print('걸린시간 :', round(end_time - start_time,2),'초')
 import datetime
 dt = datetime.datetime.now()
