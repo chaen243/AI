@@ -209,9 +209,101 @@ y = le.fit_transform(y)
 #(array([0, 1, 2, 3, 4, 5, 6]), array([2523, 3082, 2910, 3248, 4046, 2427, 2522], dtype=int64))
 
 
+# df = pd.DataFrame(x, columns= train_csv.columns)
+# print(df)    
+# df['Target(Y)'] = y
+# print(df)    
+
+# print('=================상관계수 히트맵==============================')    
+# print(df.corr())
+
+#x끼리의 상관계수가 너무 높을땐 다른 데이터에 영향을 미칠수 있어(과적합확률) 컬럼처리가 필요함.
+#y와 상관관계가 있는 데이터가 중요.
+
+# import matplotlib.pyplot as plt
+# import seaborn as sns
+# sns.set(font_scale=0.6)
+# sns.heatmap(data=df.corr(),
+#             square= True,
+#             annot=True,
+#             cbar=True)
+# plt.show()
+<<<<<<< HEAD
+
+#columns = train_csv.feature_names
+columns = x.columns
+x = pd.DataFrame(x,columns=columns)
+
+# for i in range(len(x.columns)):
+#     scaler = StandardScaler()
+#     x_1 = scaler.fit_transform(x)
+#     pca = PCA(n_components=i+1)
+#     x_1 = pca.fit_transform(x)  
+#     x_train, x_test, y_train, y_test = train_test_split(x_1, y, train_size=0.8, random_state=777, shuffle= True, stratify=y)
+
+#     #2. 모델
+#     lgb_params = {
+#     "metric": "multi_logloss",   
+#     #"deterministic": "true",    
+
+# #    "device_type":"GPU",
+# #    "boost_from_average": "False", 
+#     "verbosity": 1,            
+#     "boosting_type": "gbdt",           
+#     "random_state": SEED1,       #42    
+#     "num_class": 17,                
+#     'learning_rate': 0.090962211546832760,  
+#     'n_estimators': 20000,                
+#     'reg_alpha' : 0.9269816785,
+#     #'lambda_l1': 0.9967446568254372,
+#     'num_leaves' : 128,
+#     #'lambda_l2': 0.09018641437301800,   
+#     'max_depth': 60,                  
+#     'colsample_bytree': 0.40977129346872643,
+#     'subsample': 0.835797422450176,   
+#     'n_jobs' : -1,
+#     'min_child_samples': 1          
+# }
+
+#     model = LGBMClassifier(**lgb_params)
+    
+
+#     #3. 훈련
+#     model.fit(x_train, y_train)
+
+#     #4. 평가, 예측
+#     results = model.score(x_test, y_test)
+#     print('===============')
+#     #print(x.shape)
+#     print('feature 갯수',i+1,'개', 'model.score :',results)
+#     evr = pca.explained_variance_ratio_ #설명할수있는 변화율
+#     #n_component 선 갯수에 변화율
+
+#     print(evr)
+#     print(sum(evr))
+
+#     #evr_cunsum = np.cumsum(evr)
+#     #print(evr_cunsum)   
 
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, train_size = 0.85, shuffle=True, random_state=1117, stratify= y)
+    #print(np.unique(y_submit, return_counts= True))
+#submission_csv.to_csv(path+f"submit_{dt.day}day{dt.hour:2}{dt.minute:2}_acc_{score:4}.csv",index=False)
+
+
+
+=======
+
+
+print(x.shape)
+pca = PCA(n_components=11)   # 컬럼을 몇개로 줄일것인가(숫자가 작을수록 데이터 손실이 많아짐) 
+                            #사용전에 스케일링(주로 standard)을 해서 모양을 어느정도 맞춰준 뒤 사용
+x = pca.fit_transform(x)
+test_csv = pca.transform(test_csv)
+print(x.shape)
+>>>>>>> b3f00020f6b97894eed447d29a313f532fa379f1
+
+
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size = 0.9, shuffle=True, random_state=SEED1, stratify= y)
 #5 9158 19 9145
 n_splits=5
 kfold = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=SEED1)
@@ -224,14 +316,12 @@ kfold = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=SEED1)
 
 
 
-# columns_id = np.arange(0, x.shape[1])
-# categorical_features_id = columns_id[x.dtypes == object]
 
-#mms = MinMaxScaler() #(feature_range=(0,1))
-mms = StandardScaler()
-#mms = MaxAbsScaler()
-#mms = RobustScaler()
-#mms = Normalizer()
+# #mms = MinMaxScaler() #(feature_range=(0,1))
+# mms = StandardScaler()
+# #mms = MaxAbsScaler()
+# #mms = RobustScaler()
+# #mms = Normalizer()
 
 
 # mms.fit(x_train)
@@ -257,25 +347,27 @@ from sklearn.decomposition import PCA #차원축소
 #                             random_state=42)#1001 #1117
 
 ################lgbm########################
+<<<<<<< HEAD
 # lgb_params = {
-#     "application" : "multiclass",
-#     "metric": "multi_logloss",   
-#     "boost_from_average": "False", 
-#     "verbosity": 1,            
-#     "boosting_type": "gbdt",           
-#     "random_state": 42,       #42    
-#     #"num_class": 17,                
-#     'learning_rate': 0.090962211546832760,  
-#     'n_estimators': 20000,                
-#     'reg_alpha' : 0.9269816785,
+#     "metric": ["multi_logloss"],   
+#     #"deterministic": "true",    
+
+# #    "device_type":"GPU",
+# #    "boost_from_average": "False", 
+#     "verbosity": [-1],            
+#     "boosting_type": ["gbdt"],           
+#     "num_class": [17],                
+#     'learning_rate': [0.090962211546832760,0.21873571283690],  
+#     'n_estimators': [1000],                
+#     'reg_alpha' : [0.9269816785],
 #     #'lambda_l1': 0.9967446568254372,
-#     'num_leaves' : 64,
+#     'num_leaves' : [128],
 #     #'lambda_l2': 0.09018641437301800,   
-#     'max_depth': 60,                  
-#     'colsample_bytree': 0.40977129346872643,
-#     'subsample': 0.835797422450176,   
-#     'n_jobs' : -1,
-#     'min_child_samples': 30          
+#     'max_depth': [60,20,10],                  
+#     'colsample_bytree': [0.40977129346872643],
+#     'subsample': [0.835797422450176],   
+#     'n_jobs' : [-1],
+#     'min_child_samples': [1,2,4]          
 # }
 
 model = LGBMClassifier(**lgb_params)
@@ -313,16 +405,23 @@ params = {
     'n_jobs' : -1
 }
 
-# model = XGBClassifier(**params, random_state = 189)
-# model = make_pipeline(#MinMaxScaler(),
-#                       #RobustScaler(),
-#                       StandardScaler(),
-#                       #PCA(),
-#                       #XGBClassifier(**params, random_state = 189)
-#                       LGBMClassifier(**params, random_state = 189)
-                      
-#                       )
+#model = XGBClassifier(**params, random_state = 189)
+model = make_pipeline(MinMaxScaler(),
+                      StandardScaler(),
+                      #PCA(),
+                      XGBClassifier(**params, random_state = 189)
+                      )
 ################xgb########################
+
+# model = HalvingGridSearchCV(LGBMClassifier(), 
+#                      lgb_params, 
+#                      cv=kfold, 
+#                      verbose=1, 
+#                      min_resources=20,
+#                      #n_iter=10,
+#                      refit= True, #디폴트 트루~
+#                      n_jobs=-1) #CPU 다 쓴다!
+>>>>>>> b3f00020f6b97894eed447d29a313f532fa379f1
 
 # model = HalvingGridSearchCV(LGBMClassifier(), 
 #                      lgb_params, 
