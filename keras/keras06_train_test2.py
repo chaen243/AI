@@ -21,6 +21,7 @@ print(x_test)
 print(y_test)
 
 
+
 #2. 모델구성
 
 model = Sequential()
@@ -39,3 +40,4 @@ loss= model.evaluate(x_test, y_test) #^트레이닝한 값의 로스가 통상�
 print("로스 :", loss)
 result= model.predict([11000,7])
 print("11000의 예측값: ", result)
+
