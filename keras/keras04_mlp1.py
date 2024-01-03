@@ -21,7 +21,7 @@ print(x.shape)  # (10, 2) #shape 찍어보는거 버릇들이기!
 
 #2. 모델구성
 model = Sequential()
-model.add(Dense(1, input_dim = 2)) #열= 컬럼 = 속성 = 특성 = 차원 #(행무시, 열우선)
+model.add(Dense(1, input_dim = 2)) #'열'= '컬럼' = 속성 = 특성 = '차원' #(행무시, 열우선)
 model.add(Dense(30))
 model.add(Dense(150))
 model.add(Dense(60))

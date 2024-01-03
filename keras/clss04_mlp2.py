@@ -20,17 +20,18 @@ print(x.shape) # (10, 2) #열의 갯수만큼 input_dim을 넣을 수 있다.
 #2. 모델구성
 
 model = Sequential()
-model.add(Dense(5, input_dim = 3))
+model.add(Dense(1, input_dim = 3))
 model.add(Dense(42))
 model.add(Dense(90))
 model.add(Dense(20))
 model.add(Dense(1))
 
+
+
 #3.컴파일, 훈련
 
 model.compile(loss= 'mse', optimizer= 'adam')
-model.fit(x, y, epochs=300 , batch_size= 1)
-
+model.fit(x, y, epochs=400 , batch_size= 1)
 #4. 평가, 예측
 loss = model.evaluate(x, y)
 print("로스 :", loss)
@@ -41,6 +42,21 @@ print("[10,1.3,0]의 예측 값: ", result)
 #1/1 [==============================] - 0s 67ms/step
 #[10,1.3,0]의 예측 값:  [[10.000032]]
 #에포=300 배치=1 5,42,90,24,1
+
+#로스 : 6.190248400678167e-12
+#1/1 [==============================] - 0s 59ms/step
+#[10,1.3,0]의 예측 값:  [[10.000005]]
+#에포=4000 배치=1 단층
+
+#로스 : 0.0
+#1/1 [==============================] - 0s 64ms/step
+#[10,1.3,0]의 예측 값:  [[10.]]
+
+
+#model.add(Dense(42))
+#model.add(Dense(90))
+#model.add(Dense(20))
+#model.add(Dense(1))
 
 
 
