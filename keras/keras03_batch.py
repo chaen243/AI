@@ -22,7 +22,7 @@ model.add(Dense(1))
 
 #3. 컴파일,훈련
 model.compile(loss = 'mse', optimizer= 'adam')
-model.fit(x, y, epochs=500, batch_size= 2)# batch_size =1 = 데이터를 하나씩 잘라서 훈련하겠다  #데이터를 쪼개서 작업하는것 
+model.fit(x, y, epochs=100, batch_size= 2)# batch_size =1 = 데이터를 하나씩 잘라서 훈련하겠다  #데이터를 쪼개서 작업하는것 
                                          # batch를 자르면 그만큼 연산량이 늘어남. 일괄처리할 데이터를 정하는것.
                                          #3 batchsize보다 작은 데이터면 size에 맞게 돌림
 #4. 평가, 예측
