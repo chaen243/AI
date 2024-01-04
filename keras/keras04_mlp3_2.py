@@ -5,14 +5,14 @@ from keras.layers import Dense
 #pip install numpy(텐써플로 설치할때 자동설치)
 
 #1. 데이터
-x= np.array([range(1, 10)]) #[[1 2 3 4 5 6 7 8 9]]
-print(x)                    #(1, 9)
-print(x.shape)                    
+x= np.array([range(1, 10)]) 
+print(x)                    #[[1 2 3 4 5 6 7 8 9]]
+print(x.shape)              #(1, 10)      
 #^레인지에 대한 설명을 위한것
 
 
 x = np.array([range(10), range(21, 31), range(201, 211)])
-print(x)
+print(x)                    
 print(x.shape)
 
 x=x.T
@@ -34,7 +34,7 @@ model.add(Dense(3))
 
 #3. 컴파일, 훈련
 model.compile(loss= 'mse', optimizer= 'adam')
-model.fit(x, y, epochs=900, batch_size= 1)
+model.fit(x, y, epochs=1000, batch_size= 1)
 
 #4. 평가, 예측
 loss = model.evaluate(x, y)
