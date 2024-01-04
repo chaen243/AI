@@ -40,7 +40,7 @@ import time
 x = np.array(datasets.data)
 y = np.array(datasets.target)
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, test_size= 0.20, random_state= 4041 ) #1723
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size= 0.20, random_state= 4041 ) #4041
 
 print(x_train)          
 print(y_train)
@@ -74,8 +74,8 @@ from sklearn.metrics import r2_score
 r2 = r2_score(y_test, y_predict)
 print("R2 스코어 :", r2)
 print("걸린 시간 :", round(end_time - start_time, 2), "초")
-#로스 : 13.593951225280762
-#R2 스코어 : 0.8126408410952793
-#epochs = 5000, batch_size= 20
+#로스 : 12.19262981414795
+#R2 스코어 : 0.8319546037342391
 #test_size= 0.20, random_state= 4041
+#epochs = 5000, batch_size= 20
 # 노드 - 1, 9, 13, 9, 3, 1
