@@ -50,22 +50,29 @@ print(x_test)
 #2. 모델구성
 
 model = Sequential()
-model.add(Dense(1, input_dim= 13))
-model.add(Dense(9))
-model.add(Dense(13))
-model.add(Dense(9))
-model.add(Dense(3))
+model.add(Dense(2, input_dim= 13))
+model.add(Dense(4))
+model.add(Dense(8))
+model.add(Dense(12))
+model.add(Dense(16))
+model.add(Dense(20))
+model.add(Dense(16))
+model.add(Dense(12))
+model.add(Dense(8))
+model.add(Dense(4))
 model.add(Dense(1))
 
 
 #3. 컴파일, 훈련
-model.compile(loss= 'mse', optimizer= 'adam' )
+model.compile(loss= 'mse', optimizer= 'adam' ) #mae 2.64084 r2 0.8278   mse 12.8935 r2 0.82
+
 start_time = time.time()
-model.fit(x_train, y_train, epochs = 3000, batch_size= 100)
+model.fit(x_train, y_train, epochs = 5000, batch_size= 25)
 end_time = time.time()
 
 #4. 평가, 예측
 loss = model.evaluate(x_test, y_test)
+
 print("로스 :", loss)
 y_predict = model.predict(x_test) 
 result = model.predict(x)
@@ -80,3 +87,4 @@ print("걸린 시간 :", round(end_time - start_time, 2), "초")
 #test_size= 0.20, random_state= 4041
 #epochs = 5000, batch_size= 20
 # 노드 - 1, 9, 13, 9, 3, 1
+
