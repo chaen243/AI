@@ -8,6 +8,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import r2_score, mean_squared_error
 import time
 
+
 #1. 데이터
 path = "c:\\_data\\daicon\\ddarung\\"
 # print(path + "aaa.csv") 문자그대로 보여줌 c:\_data\daicon\ddarung\aaa.csv
@@ -52,7 +53,7 @@ print(y)
 
 
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.8, random_state = 399) #399
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.72, random_state= 2) #399
 print(x_train.shape, x_test.shape) #(929, 9) (399, 9)
 print(y_train.shape, y_test.shape) #(929,) (399,)
 
@@ -60,27 +61,31 @@ print(y_train.shape, y_test.shape) #(929,) (399,)
 #R2 스코어 : 0.6342668951889647
 #2. 모델구성
 model = Sequential()
-model.add(Dense(8, input_dim = 9))
-model.add(Dense(16))
+model.add(Dense(1, input_dim = 9))
+model.add(Dense(8))
 model.add(Dense(32))
 model.add(Dense(64))
-model.add(Dense(128))
+model.add(Dense(256))
+model.add(Dense(512))
 model.add(Dense(256))
 model.add(Dense(128))
-model.add(Dense(80))
-model.add(Dense(60))
-model.add(Dense(40))
+model.add(Dense(64))
 model.add(Dense(32))
+model.add(Dense(24))
 model.add(Dense(16))
+model.add(Dense(12))
+model.add(Dense(8))
 model.add(Dense(4))
+model.add(Dense(2))
 model.add(Dense(1))
+
 
 
 
 #3. 컴파일, 훈련
 model.compile (loss = 'mae', optimizer = 'adam') 
 start_time = time.time()
-model.fit(x_train, y_train, epochs=500, batch_size= 10 )
+model.fit(x_train, y_train, epochs=500, batch_size= 20 )
 end_time = time.time()
 
 
@@ -104,4 +109,4 @@ print("R2 스코어 :", r2)
 submission_csv['count'] = y_submit
 print(submission_csv)
 
-submission_csv.to_csv(path + "submission_09.csv", index= False)
+submission_csv.to_csv(path + "submission_17.csv", index= False)
