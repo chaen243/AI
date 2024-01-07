@@ -13,7 +13,8 @@ def rmse(y, y_predict):
 
 
 #1. 데이터
-path = "c:\\_data\\daicon\\ddarung\\"
+path = "c:\\dacon\\ddarung\\"
+#"c:\\_data\\daicon\\ddarung\\" (학원)
 # print(path + "aaa.csv") 문자그대로 보여줌 c:\_data\daicon\ddarung\aaa.csv
 
 train_csv = pd.read_csv(path + "train.csv", index_col=0) # \ \\ / // 다 가능( 예약어 사용할때 두개씩 사용) 인덱스컬럼은 0번째 컬럼이다.
@@ -40,7 +41,7 @@ submission_csv = pd.read_csv(path + "submission.csv")
 ############결측치 처리 1. 제거 ##########
 #print(train_csv.isnull().sum())
 #print(train_csv.isna().sum()) (둘다 똑같음)
-train_csv = train_csv.fillna(train_csv.min())  #결측치가 하나라도 있으면 행전체 삭제됨.
+train_csv = train_csv.fillna(train_csv.mean())  #결측치가 하나라도 있으면 행전체 삭제됨.
 test_csv = test_csv.fillna(test_csv.mean())   # (0,mean)
 #print(train_csv.isnull().sum())
 #print(train_csv.info())
@@ -56,7 +57,7 @@ y = train_csv['count']
 
 print(train_csv.index)
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.8, shuffle= False, random_state= 1002) #399 #1048 #6
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.73, test_size= 0.2, shuffle= True, random_state= 399) #399 #1048 #6
 #print(x_train.shape, x_test.shape) #(929, 9) (399, 9)
 #print(y_train.shape, y_test.shape) #(929,) (399,)
 
@@ -64,8 +65,13 @@ x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.8, shuff
 #R2 스코어 : 0.6342668951889647
 #2. 모델구성
 model = Sequential()
-model.add(Dense(1, input_dim = 9))
+model.add(Dense(9, input_dim = 9))
 model.add(Dense(12))
+model.add(Dense(24))
+model.add(Dense(64))
+model.add(Dense(128))
+model.add(Dense(256))
+model.add(Dense(512))
 model.add(Dense(256))
 model.add(Dense(128))
 model.add(Dense(64))
@@ -83,7 +89,7 @@ model.add(Dense(1))
 #3. 컴파일, 훈련
 model.compile (loss = 'mse' , optimizer = 'adam') 
 start_time = time.time()
-model.fit(x_train, y_train, epochs=543, batch_size= 10 )
+model.fit(x_train, y_train, epochs=500, batch_size= 20 )
 end_time = time.time()
 
 
@@ -109,4 +115,8 @@ print("걸린 시간 :", round(end_time - start_time, 2), "초")
 submission_csv['count'] = y_submit
 print(submission_csv)
 
-submission_csv.to_csv(path + "submission__6.csv", index= False)
+
+import time as tm
+ltm = tm.localtime(tm.time())
+save_time = f"{ltm.tm_year}{ltm.tm_mon}{ltm.tm_mday}{ltm.tm_hour}{ltm.tm_min}{ltm.tm_sec}" 
+submission_csv.to_csv(path + f"submission_{save_time}.csv", index=False)
