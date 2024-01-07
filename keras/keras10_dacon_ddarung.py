@@ -6,10 +6,9 @@ from keras.models import Sequential
 from keras.layers import Dense 
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import r2_score, mean_squared_error
-from keras.utils import custom_object_scope
+
 import time
-def rmse(y, y_predict):    
-    return mean_squared_error(y, y_predict)**0.5
+
 
 
 #1. 데이터
@@ -41,7 +40,8 @@ submission_csv = pd.read_csv(path + "submission.csv")
 ############결측치 처리 1. 제거 ##########
 #print(train_csv.isnull().sum())
 #print(train_csv.isna().sum()) (둘다 똑같음)
-train_csv = train_csv.fillna(train_csv.mean())  #결측치가 하나라도 있으면 행전체 삭제됨.
+train_csv = train_csv.fillna(train_csv.mean())
+#train_csv = train_csv.dropna()  #결측치가 하나라도 있으면 행전체 삭제됨.
 test_csv = test_csv.fillna(test_csv.mean())   # (0,mean)
 #print(train_csv.isnull().sum())
 #print(train_csv.info())
@@ -57,7 +57,7 @@ y = train_csv['count']
 
 print(train_csv.index)
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.73, test_size= 0.2, shuffle= True, random_state= 399) #399 #1048 #6
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.73,  shuffle= False, random_state= 1004) #399 #1048 #6
 #print(x_train.shape, x_test.shape) #(929, 9) (399, 9)
 #print(y_train.shape, y_test.shape) #(929,) (399,)
 
