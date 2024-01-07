@@ -66,21 +66,12 @@ x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.73,  shu
 #2. 모델구성
 model = Sequential()
 model.add(Dense(9, input_dim = 9))
-model.add(Dense(12))
-model.add(Dense(24))
-model.add(Dense(64))
-model.add(Dense(128))
-model.add(Dense(256))
-model.add(Dense(512))
-model.add(Dense(256))
-model.add(Dense(128))
-model.add(Dense(64))
-model.add(Dense(32))
-model.add(Dense(16))
-model.add(Dense(8))
-model.add(Dense(4))
-model.add(Dense(2))
+model.add(Dense(20))
+model.add(Dense(40))
+model.add(Dense(20))
+model.add(Dense(10))
 model.add(Dense(1))
+
 
 
 
