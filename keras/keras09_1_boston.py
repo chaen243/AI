@@ -66,8 +66,8 @@ model.add(Dense(1))
 #3. 컴파일, 훈련
 model.compile(loss= 'mse', optimizer= 'adam' ) #mae 2.64084 r2 0.8278   mse 12.8935 r2 0.82
 
-start_time = time.time()
-model.fit(x_train, y_train, epochs = 5000, batch_size= 25)
+start_time = time.time() #현재시간이 들어감
+model.fit(x_train, y_train, epochs = 5000, batch_size= 20)
 end_time = time.time()
 
 #4. 평가, 예측
@@ -80,7 +80,7 @@ result = model.predict(x)
 from sklearn.metrics import r2_score
 r2 = r2_score(y_test, y_predict)
 print("R2 스코어 :", r2)
-print("걸린 시간 :", round(end_time - start_time, 2), "초")
+print("걸린 시간 :", round(end_time - start_time, 2), "초") #def로 정의하지 않은 함수는 파이썬에서 기본으로 제공해주는 함수.
 
 #로스 : 11.972917556762695
 #R2 스코어 : 0.8349828030281251
