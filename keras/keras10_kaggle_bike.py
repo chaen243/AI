@@ -35,25 +35,25 @@ print(y)
 
 print(train_csv.index)
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.7, shuffle = True, random_state=157)
-x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=0.4, shuffle=True, random_state= 157)
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.7, shuffle = True, random_state=589)
+x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=0.4, shuffle=True, random_state= 589)
 print(x_train.shape, x_test.shape) #(7620, 8) (3266, 8)
 print(y_train.shape, y_test.shape) #(7620, ) (3266, )
 
 #2. 모델구성
 model = Sequential()
-model.add(Dense(4, input_dim = 8, )) #활성화함수!
-model.add(Dense(88))
-model.add(Dense(162))
+model.add(Dense(4, input_dim = 8, activation='relu')) #활성화함수!
+model.add(Dense(16,activation='relu'))
+model.add(Dense(128))
+model.add(Dense(64))
 model.add(Dense(32))
-model.add(Dense(16))
-model.add(Dense(8,  activation='relu'))
+model.add(Dense(16,  activation='relu'))
 model.add(Dense(1,))
 
 #3. 컴파일, 훈련
 model.compile (loss = 'mse', optimizer= 'adam')
 start_time = time.time()
-model.fit(x_train, y_train, epochs= 1000, batch_size = 32, validation_data= (x_val, y_val), verbose= 2)
+model.fit(x_train, y_train, epochs= 500, batch_size = 32, validation_data= (x_val, y_val), verbose= 2)
 end_time = time.time()
 
 #4. 평가, 예측
