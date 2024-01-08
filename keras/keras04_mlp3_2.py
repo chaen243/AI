@@ -7,7 +7,7 @@ from keras.layers import Dense
 #1. 데이터
 x= np.array([range(1, 10)]) 
 print(x)                    #[[1 2 3 4 5 6 7 8 9]]
-print(x.shape)              #(1, 10)      
+print(x.shape)              #(1, 9)      
 #^레인지에 대한 설명을 위한것
 
 
