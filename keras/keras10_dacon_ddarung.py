@@ -8,19 +8,18 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import r2_score, mean_squared_error
 from keras.utils import custom_object_scope
 import time
-def rmse(y, y_predict):    
-    return mean_squared_error(y, y_predict)**0.5
 
 
 #1. 데이터
 path = "c:\\_data\\daicon\\ddarung\\"
 # print(path + "aaa.csv") 문자그대로 보여줌 c:\_data\daicon\ddarung\aaa.csv
+# pandas에서 1차원- Series, 2차원이상은 DataFrame이라고 함.
 
-train_csv = pd.read_csv(path + "train.csv", index_col=0) # \ \\ / // 다 가능( 예약어 사용할때 두개씩 사용) 인덱스컬럼은 0번째 컬럼이다.
+train_csv = pd.read_csv(path + "train.csv", index_col=0) # \ \\ / // 다 가능( 예약어 사용할때 두개씩 사용) 인덱스컬럼은 0번째 컬럼이다라는뜻.
 #print(train_csv)
 test_csv = pd.read_csv(path +"test.csv", index_col=0)
 #print(test_csv)
-submission_csv = pd.read_csv(path + "submission.csv")
+submission_csv = pd.read_csv(path + "submission.csv") 
 #print(submission_csv)
 
 #print(train_csv.shape)      # (1459, 10)
@@ -54,11 +53,14 @@ x = train_csv.drop(['count'], axis=1)
 y = train_csv['count']
 #print(y)
 
+
 print(train_csv.index)
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.7, test_size= 0.3, shuffle= True, random_state= 6) #399 #1048 #6
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.55, test_size= 0.3, shuffle= True, random_state= 399) #399 #1048 #6
 #print(x_train.shape, x_test.shape) #(929, 9) (399, 9)
 #print(y_train.shape, y_test.shape) #(929,) (399,)
+x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=0.25, shuffle=True, random_state= 399)
+
 
 # 로스 : 2656.447021484375
 #R2 스코어 : 0.6342668951889647
@@ -82,7 +84,7 @@ model.add(Dense(1))
 #3. 컴파일, 훈련
 model.compile (loss = 'mse' , optimizer = 'adam') 
 start_time = time.time()
-model.fit(x_train, y_train, epochs=300, batch_size= 10 )
+model.fit(x_train, y_train, epochs=300, batch_size= 10, validation_data= (x_val, y_val))
 end_time = time.time()
 
 
