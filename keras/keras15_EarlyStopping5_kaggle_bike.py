@@ -36,20 +36,19 @@ print(y)
 
 print(train_csv.index)
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.9, shuffle = False, random_state=2)
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.65, shuffle = False, random_state=2)
 print(x_train.shape, x_test.shape) #(7620, 8) (3266, 8)
 print(y_train.shape, y_test.shape) #(7620, ) (3266, )
 
 #2. 모델구성
 model = Sequential()
-model.add(Dense(80, input_dim = 8,)) #활성화함수!
-model.add(Dense(72))
-model.add(Dense(64))
-model.add(Dense(56))
-model.add(Dense(48))
-model.add(Dense(40, activation='relu'))
-model.add(Dense(32, activation='relu'))
-model.add(Dense(16, activation='relu'))
+model.add(Dense(800, input_dim = 8,)) #활성화함수!
+model.add(Dense(600,))
+model.add(Dense(400,))
+model.add(Dense(200, ))
+model.add(Dense(128, ))
+model.add(Dense(64, ))
+model.add(Dense(32, ))
 model.add(Dense(8, activation='relu'))
 model.add(Dense(1 ))
 
@@ -58,10 +57,12 @@ model.compile (loss = 'mse', optimizer= 'adam')
 
 from keras.callbacks import EarlyStopping
 es = EarlyStopping(monitor= 'val_loss', mode= 'min',
-                   patience=21, verbose=0)
+                   patience=15, verbose=0)
 
-start_time = time.time()
-hist = model.fit(x_train, y_train, epochs= 500, batch_size = 16, validation_split= 0.28, verbose= 2,callbacks=[es])
+start_time = time.time()                            
+
+hist = model.fit(x_train, y_train, epochs= 500, batch_size = 32, validation_split= 0.32
+                 , verbose= 2,callbacks=[es])
 
 end_time = time.time()
 

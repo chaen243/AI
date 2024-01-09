@@ -98,7 +98,7 @@ print("RMSE :", rmse)
 print("=============hist=================")
 print(hist)
 print("=============hist.history=========")
-print(hist.history)             # 오늘과제 - 리스트, 딕셔너리, 튜플 공부하기
+print(hist.history)          
 print("=============loss=================")
 print(hist.history['loss']) 
 print("=============val_loss=============")
