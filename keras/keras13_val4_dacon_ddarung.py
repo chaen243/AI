@@ -39,7 +39,7 @@ submission_csv = pd.read_csv(path + "submission.csv")
 ############결측치 처리 1. 제거 ##########
 #print(train_csv.isnull().sum())
 #print(train_csv.isna().sum()) (둘다 똑같음)
-train_csv = train_csv.fillna(train_csv.mean())  #결측치가 하나라도 있으면 행전체 삭제됨.
+train_csv = train_csv.fillna(train_csv.min())  #결측치가 하나라도 있으면 행전체 삭제됨.
 test_csv = test_csv.fillna(test_csv.mean())   # (0,mean)
 #print(train_csv.isnull().sum())
 #print(train_csv.info())
@@ -56,26 +56,25 @@ y = train_csv['count']
 
 print(train_csv.index)
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.55, test_size= 0.3, shuffle= True, random_state= 399) #399 #1048 #6
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.55, test_size= 0.3, shuffle= False, random_state= 399) #399 #1048 #6
 #print(x_train.shape, x_test.shape) #(929, 9) (399, 9)
 #print(y_train.shape, y_test.shape) #(929,) (399,)
-x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=0.25, shuffle=True, random_state= 399)
-
 
 # 로스 : 2656.447021484375
 #R2 스코어 : 0.6342668951889647
 #2. 모델구성
 model = Sequential()
-model.add(Dense(1, input_dim = 9))
-model.add(Dense(9))
-model.add(Dense(15))
-model.add(Dense(27))
-model.add(Dense(45))
-model.add(Dense(27))
-model.add(Dense(15))
-model.add(Dense(9))
-model.add(Dense(3))
+model.add(Dense(1024, input_dim = 9, activation= 'relu'))
+model.add(Dense(512, activation= 'relu'))
+model.add(Dense(256, activation= 'relu'))
+model.add(Dense(128, activation= 'relu'))
+model.add(Dense(64,))
+model.add(Dense(32,))
+model.add(Dense(16, activation= 'relu'))
+model.add(Dense(8, activation= 'relu'))
+model.add(Dense(4, activation= 'relu'))
 model.add(Dense(1))
+
 
 
 
@@ -84,7 +83,7 @@ model.add(Dense(1))
 #3. 컴파일, 훈련
 model.compile (loss = 'mse' , optimizer = 'adam') 
 start_time = time.time()
-model.fit(x_train, y_train, epochs=300, batch_size= 10, validation_data= (x_val, y_val))
+model.fit(x_train, y_train, epochs=1000, batch_size= 10,validation_split= 0.26, verbose=2)
 end_time = time.time()
 
 
@@ -109,8 +108,19 @@ print("RMSE : ", rmse)
 
 
 
+
+
 ####### submission.csv 만들기 (count컬럼에 값만 넣어주면 됨) #####
 submission_csv['count'] = y_submit
 print(submission_csv)
 
-submission_csv.to_csv(path + "submission__44.csv", index= False)
+#submission_csv.to_csv(path + "submission__45.csv", index= False)
+
+import time as tm
+ltm = tm.localtime(tm.time())
+save_time = f"{ltm.tm_year}{ltm.tm_mon}{ltm.tm_mday}{ltm.tm_hour}{ltm.tm_min}{ltm.tm_sec}" 
+submission_csv.to_csv(path + f"submission_{save_time}.csv", index=False)
+
+#로스 : 3175.002197265625
+#R2 스코어 : 0.5593716340440571
+#RMSE :  56.347159447801296

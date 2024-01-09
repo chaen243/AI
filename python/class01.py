@@ -35,7 +35,7 @@ r2 = r2_score(y_test, y_predict)
 
 #in pandas
 #1차원 - Series, 2차원이상 DataFrame.
-train_csv = pd.read_csv(path + "train.csv", index_col=0) # train_csv는 path + train.csv 경로에 있고 그 0번째 컬럼은 인덱스 컬럼이다.
+train_csv = pd.read_csv(path + "train.csv", index_col=0) # train_csv는 path(경로) + train.csv 경로에 있고 그 0번째 컬럼은 인덱스 컬럼이다.
 #컬럼명(header, id, 날짜등 통상적 첫번째 컬럼은 데이터가 아닌 인덱스컬럼일 확률이 높음. 열에서는 0번째 컬럼은 인덱스 처리가 디폴트값.)
 x = train_csv.drop(['count'], axis=1) # x는 train_csv에서 count 컬럼을 제외한다.
 train_csv = train_csv.dropna() # 행에 결측치가 하나라도 있을땐 행전체를 삭제한다.

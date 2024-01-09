@@ -56,26 +56,25 @@ y = train_csv['count']
 
 print(train_csv.index)
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.55, test_size= 0.3, shuffle= True, random_state= 399) #399 #1048 #6
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.55, test_size= 0.3, shuffle= True, random_state= 6) #399 #1048 #6
 #print(x_train.shape, x_test.shape) #(929, 9) (399, 9)
 #print(y_train.shape, y_test.shape) #(929,) (399,)
-x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=0.25, shuffle=True, random_state= 399)
-
 
 # 로스 : 2656.447021484375
 #R2 스코어 : 0.6342668951889647
 #2. 모델구성
 model = Sequential()
-model.add(Dense(1, input_dim = 9))
-model.add(Dense(9))
-model.add(Dense(15))
-model.add(Dense(27))
-model.add(Dense(45))
-model.add(Dense(27))
-model.add(Dense(15))
-model.add(Dense(9))
-model.add(Dense(3))
+model.add(Dense(9, input_dim = 9, ))
+model.add(Dense(64, activation= 'relu'))
+model.add(Dense(256, activation= 'relu'))
+model.add(Dense(512, activation= 'relu'))
+model.add(Dense(1024,))
+model.add(Dense(512,))
+model.add(Dense(256, activation= 'relu'))
+model.add(Dense(64, activation= 'relu'))
+model.add(Dense(8, activation= 'relu'))
 model.add(Dense(1))
+
 
 
 
@@ -83,8 +82,12 @@ model.add(Dense(1))
 
 #3. 컴파일, 훈련
 model.compile (loss = 'mse' , optimizer = 'adam') 
+
+from keras.callbacks import EarlyStopping
+es = EarlyStopping(monitor= 'val_loss', mode= 'min',
+                   patience=15, verbose=0)
 start_time = time.time()
-model.fit(x_train, y_train, epochs=300, batch_size= 10, validation_data= (x_val, y_val))
+hist = model.fit(x_train, y_train, epochs=1000, batch_size= 5,validation_split= 0.25, verbose=2, callbacks=[es])
 end_time = time.time()
 
 
@@ -105,6 +108,8 @@ def RMSE(y_test, y_predict):
     return np.sqrt(mean_squared_error(y_test, y_predict))
 rmse = RMSE(y_test, y_predict)
 print("RMSE : ", rmse)
+print("음수갯수 :", submission_csv[submission_csv['count']<0].count())
+
 
 
 
@@ -113,4 +118,25 @@ print("RMSE : ", rmse)
 submission_csv['count'] = y_submit
 print(submission_csv)
 
-submission_csv.to_csv(path + "submission__44.csv", index= False)
+#submission_csv.to_csv(path + "submission__45.csv", index= False)
+
+import time as tm
+ltm = tm.localtime(tm.time())
+save_time = f"{ltm.tm_year}{ltm.tm_mon}{ltm.tm_mday}{ltm.tm_hour}{ltm.tm_min}{ltm.tm_sec}" 
+submission_csv.to_csv(path + f"submission_{save_time}.csv", index=False)
+
+#로스 : 3175.002197265625
+#R2 스코어 : 0.5593716340440571
+#RMSE :  56.347159447801296
+
+import matplotlib.pyplot as plt
+plt.rcParams['font.family'] = 'Malgun Gothic'
+plt.rcParams['axes.unicode_minus']= False
+plt.figure(figsize= (9,6))
+plt.plot(hist.history['loss'], c = 'red', label = 'loss', marker = '.')
+plt.plot(hist.history['val_loss'], c = 'blue', label = 'val_loss', marker = '.')
+plt.legend(loc = 'upper right')
+plt.title("따릉이 LOSS")
+plt.xlabel('epoch')
+plt.grid()
+plt.show()
