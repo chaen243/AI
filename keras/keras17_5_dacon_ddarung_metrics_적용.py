@@ -5,7 +5,7 @@ import pandas as pd
 from keras.models import Sequential
 from keras.layers import Dense 
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import r2_score, mean_squared_error
+from sklearn.metrics import r2_score, mean_squared_error, accuracy_score
 from keras.utils import custom_object_scope
 import time
 
@@ -64,10 +64,15 @@ x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.78,  shu
 #R2 스코어 : 0.6342668951889647
 #2. 모델구성
 model = Sequential()
-model.add(Dense(1028, input_dim = 9 ))
-model.add(Dense(516, activation= 'relu'))
-model.add(Dense(10, activation= 'relu'))
+model.add(Dense(1024, input_dim = 9,  ))
+model.add(Dense(512,)) 
+model.add(Dense(1024))
+model.add(Dense(2048))
+model.add(Dense(512))
+model.add(Dense(256, activation= 'relu'))
 model.add(Dense(1))
+
+
 
 
 
@@ -79,9 +84,9 @@ model.compile (loss = 'mse' , optimizer = 'adam', metrics= ['acc'])
 
 from keras.callbacks import EarlyStopping
 es = EarlyStopping(monitor= 'val_loss', mode= 'min',
-                   patience=30, verbose=0, restore_best_weights= True) #디폴트는 false
+                   patience=50, verbose=0, restore_best_weights= True) #디폴트는 false
 start_time = time.time()
-hist = model.fit(x_train, y_train, epochs=1000, batch_size= 50,validation_split= 0.38, verbose=2,
+hist = model.fit(x_train, y_train, epochs=10000, batch_size= 50,validation_split= 0.38, verbose=2,
                  callbacks=[es],)
 end_time = time.time()
 
@@ -95,10 +100,12 @@ y_submit = model.predict(test_csv)
 #print(y_submit)
 #print(y_submit.shape)
 
+
 #print(submission_csv.shape)
 print("로스 :", loss)
 print("R2 스코어 :", r2)
 print("걸린 시간 :", round(end_time - start_time, 2), "초")
+
 def RMSE(y_test, y_predict):
     return np.sqrt(mean_squared_error(y_test, y_predict))
 rmse = RMSE(y_test, y_predict)

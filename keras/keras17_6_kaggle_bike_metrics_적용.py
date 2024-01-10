@@ -3,7 +3,7 @@ import pandas as pd #판다스에 데이터는 넘파이 형태로 들어가있�
 from keras.models import Sequential
 from keras.layers import Dense
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import r2_score, mean_squared_error, mean_squared_log_error
+from sklearn.metrics import r2_score, mean_squared_error, mean_squared_log_error, accuracy_score
 import time
 from keras.callbacks import EarlyStopping
 
@@ -36,28 +36,30 @@ print(y)
 
 print(train_csv.index)
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.77, shuffle = True, random_state=8760)
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.77, shuffle = True, random_state=28)
 print(x_train.shape, x_test.shape) #(7620, 8) (3266, 8)
 print(y_train.shape, y_test.shape) #(7620, ) (3266, )
 
 #2. 모델구성
 model = Sequential()
-model.add(Dense(1024, input_dim = 8, activation= 'sigmoid')) #활성화함수!
-model.add(Dense(516,))
-model.add(Dense(256,))
-model.add(Dense(128,activation= 'relu' ))
-model.add(Dense(1 ))
+model.add(Dense(1024, input_dim = 8))
+model.add(Dense(512))
+model.add(Dense(128))
+model.add(Dense(64, ))
+model.add(Dense(32, activation='relu'))
+model.add(Dense(16, activation='relu'))
+model.add(Dense(1))
 
 #3. 컴파일, 훈련
 model.compile (loss = 'mse', optimizer= 'adam', metrics= ['acc'])
 
 from keras.callbacks import EarlyStopping
-es = EarlyStopping(monitor= 'val_loss', mode= 'min',
-                   patience=150, verbose=0, restore_best_weights= True)
+es = EarlyStopping(monitor= 'loss', mode= 'min',
+                   patience=50, verbose=0, restore_best_weights= True)
 
 start_time = time.time()                            
 
-hist = model.fit(x_train, y_train, epochs= 300, batch_size = 80, validation_split= 0.27
+hist = model.fit(x_train, y_train, epochs= 600, batch_size = 400, validation_split= 0.27
                  , verbose= 2,callbacks=[es])
 
 end_time = time.time()
@@ -68,9 +70,11 @@ y_predict = model.predict(x_test)
 r2 = r2_score(y_test, y_predict)
 y_submit = model.predict(test_csv)
 
+
 #print(y_submit)
 #print(y_submit.shape) #(6493, 1)
 #print(submission_csv.shape) #(6493, 2)
+
 
 
 
@@ -79,6 +83,8 @@ print("걸린 시간:", round(end_time - start_time, 2), "초")
 submission_csv['count'] = y_submit
 
 print(submission_csv)
+accuracy_score = ((y_test, y_submit))
+print(accuracy_score)
 
 import time as tm
 ltm = tm.localtime(tm.time())
@@ -89,6 +95,7 @@ submission_csv.to_csv(path + f"submission_{save_time}.csv", index=False)
 print("음수갯수 :", submission_csv[submission_csv['count']<0].count())
 print("로스 :", loss)
 print("R2 스코어 :", r2)
+print("정확도 :",accuracy_score)
 
 def RMSE(y_test, y_predict):
     return np.sqrt(mean_squared_error(y_test, y_predict))
@@ -130,3 +137,9 @@ plt.show()
 #R2 스코어 : 0.055240887807962324
 #RMSE :  212.06941832566426
 #RMSLE : 1.2467025777594747
+
+#
+#MSE : 22668.6015625
+#R2 스코어 : 0.36016960386561647
+#RMSE :  150.5609694781289
+#RMSLE : 1.3219243059301249

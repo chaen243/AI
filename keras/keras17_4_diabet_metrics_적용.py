@@ -10,7 +10,7 @@ datasets = load_diabetes()
 x = np.array(datasets.data)
 y = np.array(datasets.target)
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, test_size= 0.3, random_state = 442)
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size= 0.25, shuffle= True, random_state = 442)
 
 #2. 모델구성
 model = Sequential()
@@ -28,14 +28,14 @@ model.add(Dense(2))
 model.add(Dense(1))
 
 #3. 컴파일, 훈련
-model.compile(loss = 'mse', optimizer= 'adam')
+model.compile(loss = 'mse', optimizer= 'adam', metrics= 'acc')
 
 from keras.callbacks import EarlyStopping
 es = EarlyStopping(monitor= 'val_loss', mode= 'min',
-                   patience=40, verbose=0, restore_best_weights= True)
+                   patience=50, verbose=0, restore_best_weights= True)
 
 start_time = time.time()
-hist = model.fit(x_train, y_train, epochs = 100, batch_size= 5, validation_split= 0.3, callbacks= [es])
+hist = model.fit(x_train, y_train, epochs = 500, batch_size= 5, validation_split= 0.3, callbacks= [es])
 end_time = time.time()
 
 #4. 평가, 예측
@@ -64,4 +64,7 @@ plt.show()
 #R2 스코어 : 0.5959205821049586
 #True
 #로스 : 2686.110107421875
-#R2 스코어 : R2 스코어 : 0.568091475683709
+#R2 스코어 : 0.568091475683709
+#metrics
+#로스 : 2447.14013671875
+#R2 스코어 : 0.6261307996541818

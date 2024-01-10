@@ -2,7 +2,12 @@
 
 from sklearn.datasets import load_boston
 import numpy as np
-
+import pandas as pd
+from keras.models import Sequential
+from keras.layers import Dense
+from sklearn.metrics import r2_score, mean_squared_error, accuracy_score
+from sklearn.model_selection import train_test_split
+import time
 
 # 현재 사이킷런 버전 1.3.0 보스턴 안됨. 그래서 삭제
 #pip uninstall scikit-learn
@@ -31,13 +36,10 @@ print(datasets.DESCR) #Describe #행 = Tnstances #print(datasets) dataset 안에
 #train_size 0.7이상, 0.9이하
 #R2 0.8 이상
 
-from keras.models import Sequential
-from keras.layers import Dense
-import numpy as np
-from sklearn.model_selection import train_test_split
+
 import warnings
 warnings.filterwarnings('ignore')
-import time
+
 
 #1. 데이터
 
@@ -57,7 +59,7 @@ model = Sequential()
 model.add(Dense(2, input_dim= 13))
 model.add(Dense(4))
 model.add(Dense(8))
-model.add(Dense(12))
+model.add(Dense(12, activation= 'relu'))
 model.add(Dense(16))
 model.add(Dense(20))
 model.add(Dense(16))
@@ -68,12 +70,12 @@ model.add(Dense(1))
 
 
 #3. 컴파일, 훈련
-model.compile(loss= 'mse', optimizer= 'adam' ) #mae 2.64084 r2 0.8278   mse 12.8935 r2 0.82
+model.compile(loss= 'mse', optimizer= 'adam' , metrics= ['acc']) #mae 2.64084 r2 0.8278   mse 12.8935 r2 0.82
 #local minimum(현재 최소값)/ global minimum(실제 최소값)
 
 from keras.callbacks import EarlyStopping
 es = EarlyStopping(monitor= 'val_loss', mode= 'min', #min-최소치(loss, val_loss등), max-최대치(정확도.r2 등), auto(자동으로 맞춰줌)
-                   patience=20,verbose=1, restore_best_weights= False)
+                   patience=20,verbose=1, restore_best_weights= True)
 start_time = time.time() #현재시간이 들어감
 hist = model.fit(x_train, y_train, epochs = 1500, batch_size= 30, validation_split= 0.3, callbacks=[es]) #hist.history안엔 loss, val_loss가 들어있음.
 end_time = time.time()
@@ -102,7 +104,7 @@ print("R2 스코어 :", r2)
 print("=============hist=================")
 print(hist)
 print("=============hist.history=========")
-print(hist.history)             # 오늘과제 - 리스트, 딕셔너리, 튜플 공부하기
+print(hist.history)            
 print("=============loss=================")
 print(hist.history['loss']) 
 print("=============val_loss=============")
@@ -137,3 +139,8 @@ plt.show()
 #로스 : 21.81604766845703
 #RMSE : 4.670765227624014
 #R2 스코어 : 0.6993194660221262
+
+#metrics
+#로스 : 20.985191345214844
+#RMSE : 4.580959776616478
+#R2 스코어 : 0.7107707622617545
