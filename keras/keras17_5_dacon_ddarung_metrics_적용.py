@@ -48,7 +48,7 @@ test_csv = test_csv.fillna(test_csv.mean())   # (0,mean)
 
 
 ################# x와 y를 분리 ###########
-x = train_csv.drop(['count'], axis=1)
+x = train_csv.drop(['count',], axis=1)
 #print(x)
 y = train_csv['count']
 #print(y)
@@ -64,12 +64,8 @@ x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.78,  shu
 #R2 스코어 : 0.6342668951889647
 #2. 모델구성
 model = Sequential()
-model.add(Dense(1024, input_dim = 9,  ))
-model.add(Dense(512,)) 
-model.add(Dense(1024))
-model.add(Dense(2048))
-model.add(Dense(512))
-model.add(Dense(256, activation= 'relu'))
+model.add(Dense(1024, input_dim = 9, ))
+model.add(Dense(10, activation= 'relu'))
 model.add(Dense(1))
 
 
@@ -80,13 +76,13 @@ model.add(Dense(1))
     
 
 #3. 컴파일, 훈련
-model.compile (loss = 'mse' , optimizer = 'adam', metrics= ['acc']) 
+model.compile (loss = 'mse' , optimizer = 'adam', metrics= ['mse']) 
 
 from keras.callbacks import EarlyStopping
-es = EarlyStopping(monitor= 'val_loss', mode= 'min',
-                   patience=50, verbose=0, restore_best_weights= True) #디폴트는 false
+es = EarlyStopping(monitor= 'val_mse', mode= 'auto',
+                   patience=500, verbose=0, restore_best_weights= True) #디폴트는 false
 start_time = time.time()
-hist = model.fit(x_train, y_train, epochs=10000, batch_size= 50,validation_split= 0.38, verbose=2,
+hist = model.fit(x_train, y_train, epochs=10000, batch_size= 15,validation_split= 0.22, verbose=2,
                  callbacks=[es],)
 end_time = time.time()
 
@@ -101,6 +97,7 @@ y_submit = model.predict(test_csv)
 #print(y_submit.shape)
 
 
+
 #print(submission_csv.shape)
 print("로스 :", loss)
 print("R2 스코어 :", r2)
@@ -113,7 +110,7 @@ print("RMSE : ", rmse)
 print("음수갯수 :", submission_csv[submission_csv['count']<0].count())
 
 
-
+y_submit = (y_submit.round(0).astype(int)) #실수를 반올림한 정수로 나타내줌.
 
 
 ####### submission.csv 만들기 (count컬럼에 값만 넣어주면 됨) #####
@@ -125,7 +122,7 @@ print(submission_csv)
 import time as tm
 ltm = tm.localtime(tm.time())
 save_time = f"{ltm.tm_year}{ltm.tm_mon}{ltm.tm_mday}{ltm.tm_hour}{ltm.tm_min}{ltm.tm_sec}" 
-submission_csv.to_csv(path + f"submission_{save_time}.csv", index=False)
+submission_csv.to_csv(path + f"submission_{save_time}{rmse:.3f}.csv", index=False)
 
 #로스 : 3175.002197265625
 #R2 스코어 : 0.5593716340440571

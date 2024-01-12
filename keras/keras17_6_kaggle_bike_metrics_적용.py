@@ -53,7 +53,7 @@ model.add(Dense(8, activation='relu'))
 model.add(Dense(1))
 
 #3. 컴파일, 훈련
-model.compile (loss = 'mse', optimizer= 'adam', metrics= ['acc'])
+model.compile (loss = 'mse', optimizer= 'adam', metrics= ['mse'])
 
 from keras.callbacks import EarlyStopping
 es = EarlyStopping(monitor= 'val_loss', mode= 'min',
@@ -88,6 +88,7 @@ print(submission_csv)
 accuracy_score = ((y_test, y_submit))
 print(accuracy_score)
 
+y_submit = (y_submit.round(0).astype(int))
 import time as tm
 ltm = tm.localtime(tm.time())
 save_time = f"{ltm.tm_year}{ltm.tm_mon}{ltm.tm_mday}{ltm.tm_hour}{ltm.tm_min}{ltm.tm_sec}" 
