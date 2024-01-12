@@ -87,7 +87,7 @@ model.compile  (loss = 'categorical_crossentropy', optimizer = 'adam', metrics= 
 es = EarlyStopping(monitor= 'val_loss', mode= 'min',
                    patience=100, verbose=2, restore_best_weights= True) #es는 verbose2가 es 정보를 보여줌.
 start_time = time.time()
-his = model.fit(x_train, y_train, epochs= 300, batch_size=1, validation_split= 0.25, verbose=2, ) #검증모델은 간접적인 영향을 미침.
+his = model.fit(x_train, y_train, epochs= 300, batch_size=1, validation_split= 0.25, verbose=2, callbacks= [es] ) #검증모델은 간접적인 영향을 미침.
 end_time = time.time()
   
 

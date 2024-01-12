@@ -14,14 +14,14 @@ path = "c:\\_data\\daicon\\cancer\\"
 
 train_csv = pd.read_csv(path + 'train.csv', index_col=0)
 print(train_csv)
-test_csv = pd.read_csv(path +"test.csv",index_col=0  ).drop(['Insulin'], axis=1)
+test_csv = pd.read_csv(path +"test.csv",index_col=0  ).drop(['Pregnancies'], axis=1)
 
-test = train_csv['BloodPressure']
-for i in range(test.size):
-    if test[i] == 0:
-        test[i] =test.mean()
+# test = train_csv['BloodPressure']
+# for i in range(test.size):
+#     if test[i] == 0:
+#         test[i] =test.mean()
         
-train_csv['BloodPressure'] = test
+#train_csv['BloodPressure'] = test
 
 
 print(test_csv)
@@ -38,7 +38,7 @@ print(train_csv.columns) #'Pregnancies', 'Glucose', 'BloodPressure', 'SkinThickn
 
   
 
-x = train_csv.drop(['Outcome','Insulin'], axis=1)
+x = train_csv.drop(['Outcome','Pregnancies'], axis=1)
 
 #print(x)
 y = train_csv['Outcome']
@@ -54,8 +54,9 @@ x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.85, shuf
 #2. 모델구성
 
 model= Sequential()
-model.add(Dense(2048, input_dim= 7))
-model.add(Dense(10,)) 
+model.add(Dense(1, input_dim= 7))
+model.add(Dense(1024)) 
+model.add(Dense(10)) 
 model.add(Dense(1, activation= 'sigmoid'))    
    
    
@@ -63,10 +64,10 @@ model.add(Dense(1, activation= 'sigmoid'))
 model.compile (loss = 'binary_crossentropy', optimizer= 'adam', metrics= ['acc']) 
 
 from keras.callbacks import EarlyStopping
-#es = EarlyStopping(monitor= 'val_acc', mode= 'max',
-#                   patience=400, verbose=2, restore_best_weights= False) #es는 verbose2가 es 정보를 보여줌.
+es = EarlyStopping(monitor= 'val_loss', mode= 'auto',
+                   patience=400, verbose=0, restore_best_weights= True) #es는 verbose2가 es 정보를 보여줌.
 start_time = time.time()
-hist= model.fit(x_train, y_train, epochs= 5000, batch_size=10, validation_split= 0.25, verbose=2, ) #검증모델은 간접적인 영향을 미침.
+hist= model.fit(x_train, y_train, epochs= 5000, batch_size=1, validation_split= 0.2, verbose=2, callbacks= [es] ) #검증모델은 간접적인 영향을 미침.
 end_time = time.time()
   
 #4. 평가, 예측

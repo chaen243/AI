@@ -43,7 +43,7 @@ print(y_train.shape, y_test.shape) #(7620, ) (3266, )
 #2. 모델구성
 model = Sequential()
 model.add(Dense(1024, input_dim = 8,activation='sigmoid'))
-model.add(Dense(512, activation='relu'))
+model.add(Dense(512, ))
 model.add(Dense(256, activation='relu'))
 model.add(Dense(128, activation='relu'))
 model.add(Dense(64, activation='relu'))
@@ -57,11 +57,11 @@ model.compile (loss = 'mse', optimizer= 'adam', metrics= ['acc'])
 
 from keras.callbacks import EarlyStopping
 es = EarlyStopping(monitor= 'val_loss', mode= 'min',
-                   patience=200, verbose=0, restore_best_weights= True)
+                   patience=200, verbose=0, restore_best_weights= False)
 
 start_time = time.time()                            
 
-hist = model.fit(x_train, y_train, epochs= 600, batch_size = 100, validation_split= 0.27
+hist = model.fit(x_train, y_train, epochs= 600, batch_size = 50, validation_split= 0.27
                  , verbose= 2,callbacks=[es])
 
 end_time = time.time()

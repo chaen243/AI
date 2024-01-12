@@ -36,7 +36,7 @@ print(np.unique(y, return_counts= True)) #(array([1, 2, 3, 4, 5, 6, 7]), array([
 
 #y = pd.get_dummies(y)
 
-y_ohe1 = to_categorical(datasets.target)
+y_ohe1 = to_categorical(datasets.target) #0부터 라벨이 주어짐. 마지막숫자 +1만큼 라벨이 생성됨.
 y_ohe1 = y_ohe1[:, 1:]
 
 
