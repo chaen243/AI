@@ -89,10 +89,7 @@ accuracy_score = ((y_test, y_submit))
 print(accuracy_score)
 
 y_submit = (y_submit.round(0).astype(int))
-import time as tm
-ltm = tm.localtime(tm.time())
-save_time = f"{ltm.tm_year}{ltm.tm_mon}{ltm.tm_mday}{ltm.tm_hour}{ltm.tm_min}{ltm.tm_sec}" 
-submission_csv.to_csv(path + f"submission_{save_time}.csv", index=False)
+
 
 #submission_csv.to_csv(path + "submission_29.csv", index= False)
 print("음수갯수 :", submission_csv[submission_csv['count']<0].count())
@@ -111,6 +108,10 @@ def RMSLE(y_test, y_predict):
 rmsle = RMSLE(y_test, y_predict)
 print("RMSLE :", rmsle)
 
+import time as tm
+ltm = tm.localtime(tm.time())
+save_time = f"{ltm.tm_year}{ltm.tm_mon}{ltm.tm_mday}{ltm.tm_hour}{ltm.tm_min}{ltm.tm_sec}" 
+submission_csv.to_csv(path + f"submission_{save_time}{rmse:.3f}.csv", index=False)
 #MSE : 23175.111328125
 #R2 스코어 : 0.27044473122031987
 #RMSE :  152.23374956711748
