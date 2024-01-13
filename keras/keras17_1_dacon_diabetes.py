@@ -54,10 +54,9 @@ x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.85, shuf
 #2. 모델구성
 
 model= Sequential()
-model.add(Dense(1, input_dim= 7))
-model.add(Dense(1024)) 
-model.add(Dense(512, activation='relu'))
-model.add(Dense(10)) 
+model.add(Dense(1024, input_dim= 7, activation= 'relu'))
+model.add(Dense(512 )) 
+model.add(Dense(10, )) 
 model.add(Dense(1, activation= 'sigmoid'))    
    
    
@@ -65,7 +64,7 @@ model.add(Dense(1, activation= 'sigmoid'))
 model.compile (loss = 'binary_crossentropy', optimizer= 'adam', metrics= ['acc']) 
 
 from keras.callbacks import EarlyStopping
-es = EarlyStopping(monitor= 'val_acc', mode= 'max',
+es = EarlyStopping(monitor= 'acc', mode= 'max',
                    patience=500, verbose=0, restore_best_weights= True) #es는 verbose2가 es 정보를 보여줌.
 start_time = time.time()
 hist= model.fit(x_train, y_train, epochs= 5000, batch_size=1, validation_split= 0.4, verbose=2, callbacks= [es] ) #검증모델은 간접적인 영향을 미침.
