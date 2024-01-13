@@ -56,7 +56,7 @@ y = train_csv['count']
 
 print(train_csv.index)
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.78,  shuffle= False, random_state= 11) #399 #1048 #6
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.78,  shuffle= True, random_state= 11) #399 #1048 #6
 #print(x_train.shape, x_test.shape) #(929, 9) (399, 9)
 #print(y_train.shape, y_test.shape) #(929,) (399,)
 
@@ -80,9 +80,9 @@ model.compile (loss = 'mse' , optimizer = 'adam', metrics= ['mse'])
 
 from keras.callbacks import EarlyStopping
 es = EarlyStopping(monitor= 'val_mse', mode= 'auto',
-                   patience=500, verbose=0, restore_best_weights= True) #디폴트는 false
+                   patience=1000, verbose=0, restore_best_weights= True) #디폴트는 false
 start_time = time.time()
-hist = model.fit(x_train, y_train, epochs=10000, batch_size= 15,validation_split= 0.22, verbose=2,
+hist = model.fit(x_train, y_train, epochs=10000, batch_size= 15,validation_split= 0.32, verbose=2,
                  callbacks=[es],)
 end_time = time.time()
 

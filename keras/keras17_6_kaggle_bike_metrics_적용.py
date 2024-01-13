@@ -45,10 +45,6 @@ model = Sequential()
 model.add(Dense(1024, input_dim = 8,activation='sigmoid'))
 model.add(Dense(512, ))
 model.add(Dense(256, activation='relu'))
-model.add(Dense(128, activation='relu'))
-model.add(Dense(64, activation='relu'))
-model.add(Dense(32, activation='relu'))
-model.add(Dense(16, activation='relu'))
 model.add(Dense(8, activation='relu'))
 model.add(Dense(1))
 
@@ -57,7 +53,7 @@ model.compile (loss = 'mse', optimizer= 'adam', metrics= ['mse'])
 
 from keras.callbacks import EarlyStopping
 es = EarlyStopping(monitor= 'val_loss', mode= 'min',
-                   patience=200, verbose=0, restore_best_weights= False)
+                   patience=200, verbose=0, restore_best_weights= True)
 
 start_time = time.time()                            
 
@@ -111,7 +107,7 @@ print("RMSLE :", rmsle)
 import time as tm
 ltm = tm.localtime(tm.time())
 save_time = f"{ltm.tm_year}{ltm.tm_mon}{ltm.tm_mday}{ltm.tm_hour}{ltm.tm_min}{ltm.tm_sec}" 
-submission_csv.to_csv(path + f"submission_{save_time}{rmse:.3f}.csv", index=False)
+submission_csv.to_csv(path + f"submission_{save_time}{rmsle:.3f}.csv", index=False)
 #MSE : 23175.111328125
 #R2 스코어 : 0.27044473122031987
 #RMSE :  152.23374956711748

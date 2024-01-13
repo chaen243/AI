@@ -10,7 +10,7 @@ import time
 
 
 #1. 데이터
-path = "c:\\_data\\daicon\\cancer\\"
+path = "c:\\_data\\daicon\\diabetes\\"
 
 train_csv = pd.read_csv(path + 'train.csv', index_col=0)
 print(train_csv)
@@ -56,6 +56,7 @@ x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.85, shuf
 model= Sequential()
 model.add(Dense(1, input_dim= 7))
 model.add(Dense(1024)) 
+model.add(Dense(512, activation='relu'))
 model.add(Dense(10)) 
 model.add(Dense(1, activation= 'sigmoid'))    
    
@@ -64,10 +65,10 @@ model.add(Dense(1, activation= 'sigmoid'))
 model.compile (loss = 'binary_crossentropy', optimizer= 'adam', metrics= ['acc']) 
 
 from keras.callbacks import EarlyStopping
-es = EarlyStopping(monitor= 'val_loss', mode= 'auto',
-                   patience=400, verbose=0, restore_best_weights= True) #es는 verbose2가 es 정보를 보여줌.
+es = EarlyStopping(monitor= 'val_acc', mode= 'max',
+                   patience=500, verbose=0, restore_best_weights= True) #es는 verbose2가 es 정보를 보여줌.
 start_time = time.time()
-hist= model.fit(x_train, y_train, epochs= 5000, batch_size=1, validation_split= 0.2, verbose=2, callbacks= [es] ) #검증모델은 간접적인 영향을 미침.
+hist= model.fit(x_train, y_train, epochs= 5000, batch_size=1, validation_split= 0.4, verbose=2, callbacks= [es] ) #검증모델은 간접적인 영향을 미침.
 end_time = time.time()
   
 #4. 평가, 예측
@@ -83,20 +84,19 @@ print("로스 :", loss)
 
 submission_csv['Outcome'] =  np.around(y_submit) 
 
-print(submission_csv)
+
 
 import time as tm
-ltm = tm.localtime(tm.time())
-save_time = f"{ltm.tm_year}{ltm.tm_mon}{ltm.tm_mday}{ltm.tm_hour}{ltm.tm_min}{ltm.tm_sec}" 
-submission_csv.to_csv(path + f"submission_{save_time}.csv", index=False)
-
 
 def ACC(y_test, y_predict):
     return accuracy_score(y_test, np.around(y_predict))
 acc = ACC(y_test, y_predict)
-print("ACC : ", acc)
+print("정확도 : ", acc)
 
 
+ltm = tm.localtime(tm.time())
+save_time = f"{ltm.tm_year}{ltm.tm_mon}{ltm.tm_mday}{ltm.tm_hour}{ltm.tm_min}{ltm.tm_sec}" 
+submission_csv.to_csv(path + f"submission_{save_time}{acc:.3f}.csv", index=False)
 
 print("걸린 시간 :", round(end_time - start_time, 2), "초")
 
@@ -115,8 +115,8 @@ import matplotlib.pyplot as plt
 plt.rcParams['font.family'] = 'Malgun Gothic'
 plt.rcParams['axes.unicode_minus']= False
 plt.figure(figsize= (9,6))
-plt.plot(hist.history['loss'], c = 'red', label = 'loss', marker = '.')
-plt.plot(hist.history['val_loss'], c = 'blue', label = 'val_loss', marker = '.')
+#plt.plot(hist.history['loss'], c = 'red', label = 'loss', marker = '.')
+plt.plot(hist.history['val_acc'], c = 'blue', label = 'val_loss', marker = '.')
 plt.plot(hist.history['acc'], color= 'violet', label = 'acc', marker= '.')
 plt.legend(loc = 'upper right')
 plt.title("당뇨병 LOSS")
