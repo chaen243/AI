@@ -9,7 +9,6 @@ from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import OneHotEncoder
 from keras.callbacks import EarlyStopping
 import time
-from sklearn.preprocessing import LabelEncoder
 from keras.callbacks import EarlyStopping
 
 

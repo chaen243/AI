@@ -55,7 +55,7 @@ y = train_csv['count']
 
 print(train_csv.index)
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.72,  shuffle= True, random_state= 6) #399 #1048 #6
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.72,  shuffle= False, random_state= 6) #399 #1048 #6
 #print(x_train.shape, x_test.shape) #(929, 9) (399, 9)
 #print(y_train.shape, y_test.shape) #(929,) (399,)
 
@@ -78,7 +78,7 @@ model.add(Dense(1))
 model.compile (loss = 'mse' , optimizer = 'adam', metrics= ['mse']) 
 
 from keras.callbacks import EarlyStopping
-es = EarlyStopping(monitor= 'val_mse', mode= 'auto',
+es = EarlyStopping(monitor= 'val_loss', mode= 'auto',
                    patience=2000, verbose=0, restore_best_weights= True) #디폴트는 false
 start_time = time.time()
 hist = model.fit(x_train, y_train, epochs=10000, batch_size= 15,validation_split= 0.36, verbose=2,
@@ -106,8 +106,6 @@ def RMSE(y_test, y_predict):
     return np.sqrt(mean_squared_error(y_test, y_predict))
 rmse = RMSE(y_test, y_predict)
 print("RMSE : ", rmse)
-print("음수갯수 :", submission_csv[submission_csv['count']<0].count())
-
 
 y_submit = (y_submit.round(0).astype(int)) #실수를 반올림한 정수로 나타내줌.
 
