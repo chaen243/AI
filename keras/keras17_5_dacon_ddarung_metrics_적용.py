@@ -5,13 +5,12 @@ import pandas as pd
 from keras.models import Sequential
 from keras.layers import Dense 
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import r2_score, mean_squared_error, accuracy_score
-from keras.utils import custom_object_scope
+from sklearn.metrics import r2_score, mean_squared_error
 import time
 
 
 #1. 데이터
-path = "c:\\_data\\daicon\\ddarung\\"
+path = "c:\\_data\\dacon\\ddarung\\"
 # print(path + "aaa.csv") 문자그대로 보여줌 c:\_data\daicon\ddarung\aaa.csv
 # pandas에서 1차원- Series, 2차원이상은 DataFrame이라고 함.
 
@@ -56,7 +55,7 @@ y = train_csv['count']
 
 print(train_csv.index)
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.78,  shuffle= True, random_state= 11) #399 #1048 #6
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.72,  shuffle= True, random_state= 6) #399 #1048 #6
 #print(x_train.shape, x_test.shape) #(929, 9) (399, 9)
 #print(y_train.shape, y_test.shape) #(929,) (399,)
 
@@ -80,9 +79,9 @@ model.compile (loss = 'mse' , optimizer = 'adam', metrics= ['mse'])
 
 from keras.callbacks import EarlyStopping
 es = EarlyStopping(monitor= 'val_mse', mode= 'auto',
-                   patience=1000, verbose=0, restore_best_weights= True) #디폴트는 false
+                   patience=2000, verbose=0, restore_best_weights= True) #디폴트는 false
 start_time = time.time()
-hist = model.fit(x_train, y_train, epochs=10000, batch_size= 15,validation_split= 0.32, verbose=2,
+hist = model.fit(x_train, y_train, epochs=10000, batch_size= 15,validation_split= 0.36, verbose=2,
                  callbacks=[es],)
 end_time = time.time()
 
