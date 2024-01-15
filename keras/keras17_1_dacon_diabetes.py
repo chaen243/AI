@@ -10,16 +10,16 @@ import time
 
 
 #1. 데이터
-path = "c:\\_data\\daicon\\diabetes\\"
+path = "c:\\_data\\dacon\\diabetes\\"
 
 train_csv = pd.read_csv(path + 'train.csv', index_col=0)
 print(train_csv)
-test_csv = pd.read_csv(path +"test.csv",index_col=0  ).drop(['Pregnancies'], axis=1)
+test_csv = pd.read_csv(path +"test.csv",index_col=0  ).drop(['Pregnancies', 'DiabetesPedigreeFunction'], axis=1)
 
-# test = train_csv['BloodPressure']
-# for i in range(test.size):
-#     if test[i] == 0:
-#         test[i] =test.mean()
+test = train_csv['SkinThickness']
+for i in range(test.size):
+      if test[i] == 0:
+         test[i] =test.mean()
         
 #train_csv['BloodPressure'] = test
 
@@ -38,7 +38,7 @@ print(train_csv.columns) #'Pregnancies', 'Glucose', 'BloodPressure', 'SkinThickn
 
   
 
-x = train_csv.drop(['Outcome','Pregnancies'], axis=1)
+x = train_csv.drop(['Outcome','Pregnancies','DiabetesPedigreeFunction'], axis=1)
 
 #print(x)
 y = train_csv['Outcome']
@@ -54,7 +54,7 @@ x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.85, shuf
 #2. 모델구성
 
 model= Sequential()
-model.add(Dense(1024, input_dim= 7, activation= 'relu'))
+model.add(Dense(1024, input_dim= 6, activation= 'relu'))
 model.add(Dense(512 )) 
 model.add(Dense(10, )) 
 model.add(Dense(1, activation= 'sigmoid'))    
@@ -122,3 +122,6 @@ plt.title("당뇨병 LOSS")
 plt.xlabel('epoch')
 plt.grid()
 plt.show()
+
+#로스 : [1.0998154878616333, 0.6938775777816772]
+#정확도 :  0.6938775510204082

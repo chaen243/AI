@@ -11,7 +11,7 @@ from keras.callbacks import EarlyStopping
 import time
 
 #1. 데이터
-path = "C:\\_data\\daicon\\iris\\"
+path = "C:\\_data\\dacon\\iris\\"
 
 train_csv = pd.read_csv(path + 'train.csv', index_col= 0)
 print(train_csv)

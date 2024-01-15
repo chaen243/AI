@@ -9,15 +9,13 @@ from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import OneHotEncoder
 from keras.callbacks import EarlyStopping
 import time
-from sklearn.preprocessing import LabelEncoder
-from keras.callbacks import EarlyStopping
 
 
 
 #1. 데이터
-path = "C:\\_data\\daicon\\wine\\"
+path = "C:\\_data\\dacon\\wine\\"
 
-oe=OneHotEncoder(sparse=False)
+
 
 train_csv = pd.read_csv(path + 'train.csv', index_col= 0)
 print(train_csv)

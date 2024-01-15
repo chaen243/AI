@@ -10,6 +10,7 @@ from keras.callbacks import EarlyStopping
 #1. 데이터
 path = "C:\\_data\\kaggle\\bike\\"
 
+
 train_csv = pd.read_csv(path + "train.csv", index_col=0)
 print(train_csv)
 test_csv = pd.read_csv(path + "test.csv", index_col= 0)
@@ -43,21 +44,21 @@ print(y_train.shape, y_test.shape) #(7620, ) (3266, )
 #2. 모델구성
 model = Sequential()
 model.add(Dense(1024, input_dim = 8,activation='sigmoid'))
-model.add(Dense(512, ))
+model.add(Dense(512, activation='relu'))
 model.add(Dense(256, activation='relu'))
-model.add(Dense(8, activation='relu'))
-model.add(Dense(1))
+model.add(Dense(8, ))
+model.add(Dense(1, ))
 
 #3. 컴파일, 훈련
 model.compile (loss = 'mse', optimizer= 'adam', metrics= ['mse'])
 
 from keras.callbacks import EarlyStopping
-es = EarlyStopping(monitor= 'val_loss', mode= 'min',
-                   patience=200, verbose=0, restore_best_weights= True)
+es = EarlyStopping(monitor= 'loss', mode= 'min',
+                   patience=400, verbose=0, restore_best_weights= True)
 
 start_time = time.time()                            
 
-hist = model.fit(x_train, y_train, epochs= 600, batch_size = 50, validation_split= 0.27
+hist = model.fit(x_train, y_train, epochs= 1200, batch_size = 100, validation_split= 0.27
                  , verbose= 2,callbacks=[es])
 
 end_time = time.time()
@@ -82,7 +83,6 @@ submission_csv['count'] = y_submit
 
 print(submission_csv)
 accuracy_score = ((y_test, y_submit))
-print(accuracy_score)
 
 y_submit = (y_submit.round(0).astype(int))
 
