@@ -41,7 +41,7 @@ y = train_csv['species']
 print(x.shape, y.shape) #(120, 4) (120,)
 print(np.unique(y, return_counts= True)) #array([0, 1, 2] array([40, 41, 39]
 
-y = pd.get_dummies(y)
+
 
 
 
