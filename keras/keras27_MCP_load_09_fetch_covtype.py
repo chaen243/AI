@@ -1,5 +1,5 @@
 import numpy as np
-from keras.models import Sequential
+from keras.models import Sequential, load_model
 from keras.layers import Dense
 from sklearn.datasets import fetch_covtype
 from sklearn.model_selection import train_test_split
@@ -64,35 +64,35 @@ mms.fit(x_train)
 x_train= mms.transform(x_train)
 x_test= mms.transform(x_test)
 
-#2. 모델구성
+# #2. 모델구성
 
-model = Sequential()
-model.add(Dense(128, input_dim = 54))
-model.add(Dense(64, activation= 'relu'))
-model.add(Dense(32, activation= 'relu'))
-model.add(Dense(16, activation= 'relu'))
-model.add(Dense(7, activation = 'softmax'))
+# model = Sequential()
+# model.add(Dense(128, input_dim = 54))
+# model.add(Dense(64, activation= 'relu'))
+# model.add(Dense(32, activation= 'relu'))
+# model.add(Dense(16, activation= 'relu'))
+# model.add(Dense(7, activation = 'softmax'))
 
 
 
-#3. 컴파일, 훈련
-model.compile  (loss = 'categorical_crossentropy', optimizer = 'adam', metrics= 'acc')
+# #3. 컴파일, 훈련
+# model.compile  (loss = 'categorical_crossentropy', optimizer = 'adam', metrics= 'acc')
 
-es = EarlyStopping(monitor= 'val_loss', mode= 'min',
-                   patience=1000, verbose=2, restore_best_weights= True) #es는 verbose2가 es 정보를 보여줌.
-start_time = time.time()
-his = model.fit(x_train, y_train, epochs= 4000, batch_size=5000, validation_split= 0.25, verbose=2, ) #검증모델은 간접적인 영향을 미침.
-end_time = time.time()
+# es = EarlyStopping(monitor= 'val_loss', mode= 'min',
+#                    patience=1000, verbose=2, restore_best_weights= True) #es는 verbose2가 es 정보를 보여줌.
+# start_time = time.time()
+# his = model.fit(x_train, y_train, epochs= 4000, batch_size=5000, validation_split= 0.25, verbose=2, ) #검증모델은 간접적인 영향을 미침.
+# end_time = time.time()
   
 
-from keras.callbacks import EarlyStopping, ModelCheckpoint
-es = EarlyStopping(monitor = 'val_loss', mode = 'min', patience = 4000, verbose = 2, restore_best_weights= True)
-mcp = ModelCheckpoint(monitor='val_loss', mode = 'auto', verbose= 1, save_best_only=True, filepath='../_data/_save/MCP/keras26_09_MCP1.hdf5')
+# from keras.callbacks import EarlyStopping, ModelCheckpoint
+# es = EarlyStopping(monitor = 'val_loss', mode = 'min', patience = 4000, verbose = 2, restore_best_weights= True)
+# mcp = ModelCheckpoint(monitor='val_loss', mode = 'auto', verbose= 1, save_best_only=True, filepath='../_data/_save/MCP/keras26_09_MCP1.hdf5')
 
-model.compile(loss= 'categorical_crossentropy', optimizer= 'adam', metrics= 'acc' ) #mae 2.64084 r2 0.8278   mse 12.8935 r2 0.82
-hist = model.fit(x_train, y_train, callbacks=[es,mcp], epochs= 4000, batch_size = 800, validation_split= 0.25)
+# model.compile(loss= 'categorical_crossentropy', optimizer= 'adam', metrics= 'acc' ) #mae 2.64084 r2 0.8278   mse 12.8935 r2 0.82
+# hist = model.fit(x_train, y_train, callbacks=[es,mcp], epochs= 4000, batch_size = 800, validation_split= 0.25)
 
-
+model = load_model('../_data/_save/MCP/keras26_09_MCP1.hdf5')
 
 #4. 평가, 예측
 
