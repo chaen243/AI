@@ -1,4 +1,4 @@
-#09-1 copy
+#23-1 copy
 
 
 from sklearn.datasets import load_boston
@@ -85,8 +85,14 @@ model.add(Dense(13))
 model.add(Dense(9))
 model.add(Dense(3))
 model.add(Dense(1))
+model.summary()
+
+model.save("c:\_data\_save\keras24_save_model.h5")  #..=상위폴더    .=현재 작업하는 폴더  #절대경로
+#model.save("..\_data\-savskeras24_save_model.h5")  #..=상위폴더  #상대경로
 
 
+
+'''
 #3. 컴파일, 훈련
 model.compile(loss= 'mse', optimizer= 'adam' ) #mae 2.64084 r2 0.8278   mse 12.8935 r2 0.82
 start_time = time.time() #현재시간이 들어감
@@ -132,5 +138,5 @@ print("걸린 시간 :", round(end_time - start_time, 2), "초") #def로 정의�
 #로스 : 12.295846939086914
 #R2 스코어 : 0.8305320050569783
 
-
+'''
 

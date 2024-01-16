@@ -1,9 +1,9 @@
-#09-1 copy
+#23-1 copy
 
 
 from sklearn.datasets import load_boston
 
-from keras.models import Sequential
+from keras.models import Sequential, load_model
 from keras.layers import Dense
 import numpy as np
 from sklearn.model_selection import train_test_split
@@ -86,13 +86,19 @@ model.add(Dense(9))
 model.add(Dense(3))
 model.add(Dense(1))
 
+model.summary()
 
-#3. 컴파일, 훈련
+
+
+
+
+# #3. 컴파일, 훈련
+from keras.callbacks import EarlyStopping, ModelCheckpoint
+es = EarlyStopping(monitor = 'val_loss', mode = 'min', patience = 10, verbose = 2, restore_best_weights= True)
+mcp = ModelCheckpoint(monitor='val_loss', mode = 'auto', verbose= 1, save_best_only=True, filepath='../_data/_save/MCP/keras25_MCP1.hdf5')
+
 model.compile(loss= 'mse', optimizer= 'adam' ) #mae 2.64084 r2 0.8278   mse 12.8935 r2 0.82
-start_time = time.time() #현재시간이 들어감
-model.fit(x_train, y_train, epochs= 5000, batch_size = 20, validation_split= 0.27)
-end_time = time.time()
-
+hist = model.fit(x_train, y_train, callbacks=[es,mcp], epochs= 200, batch_size = 20, validation_split= 0.27)
 
 
 
@@ -107,7 +113,14 @@ from sklearn.metrics import r2_score
 r2 = r2_score(y_test, y_predict)
 print("로스 :", results)
 print("R2 스코어 :", r2)
-print("걸린 시간 :", round(end_time - start_time, 2), "초") #def로 정의하지 않은 함수는 파이썬에서 기본으로 제공해주는 함수.
+#print("걸린 시간 :", round(end_time - start_time, 2), "초") #def로 정의하지 않은 함수는 파이썬에서 기본으로 제공해주는 함수.
+
+print('===================================')
+print(hist.history['val_loss'])
+print('===================================')
+
+
+
 
 #로스 : 13.562579154968262
 #R2 스코어 : 0.8130732165577592

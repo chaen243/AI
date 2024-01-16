@@ -108,7 +108,7 @@ x = train_csv.drop(['대출등급'], axis = 1)
 mms = MinMaxScaler()
 mms.fit(x)
 x = mms.transform(x)
-test_csv=mms.transform(x)
+test_csv=mms.transform(test_csv)
 
 #print(x)
 y = train_csv['대출등급']
@@ -144,9 +144,23 @@ print(np.unique(y, return_counts= True)) #Name: 근로기간, Length: 96294, dty
 #train_csv = train_csv.dropna(axis=0)
 #test_csv = train_csv.dropna(axis=0)
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.72,  shuffle= True, random_state= 2872, stratify= y) #399 #1048 #6
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.72,  shuffle= True, random_state= 301, stratify= y) 
+
      
      
+from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
+from sklearn.preprocessing import StandardScaler, RobustScaler
+
+mms = MinMaxScaler()
+#mms = StandardScaler()
+#mms = MaxAbsScaler()
+#mms = RobustScaler()
+
+mms.fit(x_train)
+x_train= mms.transform(x_train)
+x_test= mms.transform(x_test)
+
+
         
 #for label in x_test:
 #    if label not in le.classes_: # unseen label 데이터인 경우( )
@@ -166,11 +180,11 @@ x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.72,  shu
 #2. 모델구성
 
 model = Sequential()
-model.add(Dense(512, input_shape = (13, ),activation='relu'))
-model.add(Dense(256, ))
-model.add(Dense(128))
-model.add(Dense(64))
-model.add(Dense(32))
+model.add(Dense(512, input_dim = 13,activation='sigmoid'))
+model.add(Dense(256,)) # activation='relu' ))
+model.add(Dense(128,))# activation='relu'))
+model.add(Dense(64, ))
+model.add(Dense(32, activation='relu'))
 model.add(Dense(16,activation='relu'))
 model.add(Dense(7, activation = 'softmax'))
 
@@ -183,9 +197,9 @@ x_test = np.asarray(x_test).astype(np.float32)
 test_csv = np.asarray(test_csv).astype(np.float32)
 model.compile (loss = 'categorical_crossentropy', optimizer= 'adam', metrics= 'acc')
 
-es = EarlyStopping(monitor= 'val_acc', mode = 'max', patience= 2000, verbose = 0, restore_best_weights= True)
+es = EarlyStopping(monitor= 'val_acc', mode = 'max', patience= 10000, verbose = 0, restore_best_weights= True)
 start_time = time.time()
-hist = model.fit(x_train, y_train, epochs = 10000, batch_size= 1500, validation_split= 0.35, verbose=2, callbacks= [es])
+hist = model.fit(x_train, y_train, epochs = 100000, batch_size= 2000, validation_split= 0.2, verbose=2, callbacks= [es])
 end_time = time.time()
 
 #4. 평가, 예측
@@ -202,6 +216,7 @@ y_test = np.argmax(y_test,axis=1)
 
 f1 = f1_score(y_test,y_predict,average='weighted')
 print("=========================\nF1: ",f1)
+print("mms = MaxAbsScaler")
 
 y_submit = le.inverse_transform(y_submit)
 
@@ -224,10 +239,23 @@ plt.xlabel('epoch')
 plt.grid()
 plt.show()
 
+#minmax
+#로스 : 0.45476970076560974
+#정확도 : 0.8460853695869446
+
+#mms = StandardScaler()
+
+#로스 : 0.46329641342163086
+#정확도 : 0.8380373120307922
+
+#mms = MaxAbsScaler()
+#로스 : 0.44124674797058105
+#F1:  0.8497932009729917
 
 
-
-
+#mms = RobustScaler()
+#로스 : 0.3884388208389282
+#F1:  0.865791228309671
 
 
 

@@ -1,9 +1,9 @@
-#09-1 copy
+#23-1 copy
 
 
 from sklearn.datasets import load_boston
 
-from keras.models import Sequential
+from keras.models import Sequential, load_model
 from keras.layers import Dense
 import numpy as np
 from sklearn.model_selection import train_test_split
@@ -78,13 +78,21 @@ x_test= mms.transform(x_test)
 
 #2. 모델구성
 
-model = Sequential()
-model.add(Dense(1, input_dim= 13))
-model.add(Dense(9))
-model.add(Dense(13))
-model.add(Dense(9))
-model.add(Dense(3))
-model.add(Dense(1))
+# model = Sequential()
+# model.add(Dense(1, input_dim= 13))
+# model.add(Dense(9))
+# model.add(Dense(13))
+# model.add(Dense(9))
+# model.add(Dense(3))
+# model.add(Dense(1))
+# model.save("..\_data\_save\keras24_save_model.h5")  #..=상위폴더  #상대경로
+
+model = load_model("..\_data\_save\keras24_save_model.h5")
+
+model.summary()
+
+
+
 
 
 #3. 컴파일, 훈련
