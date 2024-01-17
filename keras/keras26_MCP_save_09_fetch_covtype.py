@@ -76,6 +76,20 @@ model.add(Dense(7, activation = 'softmax'))
 
 
 #3. 컴파일, 훈련
+import datetime
+date= datetime.datetime.now()
+# print(date) #2024-01-17 11:00:58.591406
+# print(type(date)) #<class 'datetime.datetime'>
+date = date.strftime("%m%d-%H%M") #m=month, M=minutes
+# print(date) #0117_1100
+# print(type(date)) #<class 'str'>
+
+path= '../_data/_save/MCP/_k26/' #경로(스트링data (문자))
+filename = '{epoch:04d}-{val_loss:.4f}.hdf5' #filename= 에포4자리수-발로스는 소숫점4자리까지 표시. 예)1000-0.3333.hdf5
+filepath = "".join([path, 'k26_9', date, "_", filename]) #""공간에 ([])를 합쳐라.
+
+
+
 model.compile  (loss = 'categorical_crossentropy', optimizer = 'adam', metrics= 'acc')
 
 es = EarlyStopping(monitor= 'val_loss', mode= 'min',
@@ -87,7 +101,7 @@ end_time = time.time()
 
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 es = EarlyStopping(monitor = 'val_loss', mode = 'min', patience = 4000, verbose = 2, restore_best_weights= True)
-mcp = ModelCheckpoint(monitor='val_loss', mode = 'auto', verbose= 1, save_best_only=True, filepath='../_data/_save/MCP/keras26_09_MCP1.hdf5')
+mcp = ModelCheckpoint(monitor='val_loss', mode = 'auto', verbose= 1, save_best_only=True, filepath=filepath)
 
 model.compile(loss= 'categorical_crossentropy', optimizer= 'adam', metrics= 'acc' ) #mae 2.64084 r2 0.8278   mse 12.8935 r2 0.82
 hist = model.fit(x_train, y_train, callbacks=[es,mcp], epochs= 4000, batch_size = 800, validation_split= 0.25)
@@ -142,3 +156,5 @@ print("acc :", acc)
 
 #로스 : 0.2773851752281189
 #acc : 0.8917695520469984
+
+#로스 : 0.2504320442676544

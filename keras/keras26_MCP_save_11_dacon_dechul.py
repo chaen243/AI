@@ -126,7 +126,7 @@ y = ohe.fit_transform(y)
 #print(train_csv)
 
 #print(y.shape) #(96294,)
-print(np.unique(y, return_counts= True)) #Name: 근로기간, Length: 96294, dtype: float64
+#print(np.unique(y, return_counts= True)) #Name: 근로기간, Length: 96294, dtype: float64
 
 
 #for data in train_loan_time:
@@ -144,17 +144,17 @@ print(np.unique(y, return_counts= True)) #Name: 근로기간, Length: 96294, dty
 #train_csv = train_csv.dropna(axis=0)
 #test_csv = train_csv.dropna(axis=0)
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.72,  shuffle= True, random_state= 301, stratify= y) 
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.7,  shuffle= True, random_state= 9876, stratify= y) 
 
      
      
 from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
 from sklearn.preprocessing import StandardScaler, RobustScaler
 
-mms = MinMaxScaler()
+#mms = MinMaxScaler()
 #mms = StandardScaler()
 #mms = MaxAbsScaler()
-#mms = RobustScaler()
+mms = RobustScaler()
 
 mms.fit(x_train)
 x_train= mms.transform(x_train)
@@ -180,17 +180,30 @@ x_test= mms.transform(x_test)
 #2. 모델구성
 
 model = Sequential()
-model.add(Dense(512, input_dim = 13,activation='sigmoid'))
-model.add(Dense(256,)) # activation='relu' ))
-model.add(Dense(128,))# activation='relu'))
-model.add(Dense(64, ))
-model.add(Dense(32, activation='relu'))
-model.add(Dense(16,activation='relu'))
+model.add(Dense(1024, input_shape= (13,),activation='sigmoid'))
+model.add(Dense(512,activation='relu'))
+model.add(Dense(256,activation='relu'))
+model.add(Dense(128,activation='relu'))
+model.add(Dense(10,activation='relu'))
+model.add(Dense(10,activation='relu'))
 model.add(Dense(7, activation = 'softmax'))
 
 
 
 #3. 컴파일, 훈련
+
+import datetime
+date= datetime.datetime.now()
+# print(date) #2024-01-17 11:00:58.591406
+# print(type(date)) #<class 'datetime.datetime'>
+date = date.strftime("%m%d-%H%M") #m=month, M=minutes
+# print(date) #0117_1100
+# print(type(date)) #<class 'str'>
+
+path= '../_data/_save/MCP/_k26/' #경로(스트링data (문자))
+filename = '{epoch:04d}-{val_loss:.4f}.hdf5' #filename= 에포4자리수-발로스는 소숫점4자리까지 표시. 예)1000-0.3333.hdf5
+filepath = "".join([path, 'k26_11', date, "_", filename]) #""공간에 ([])를 합쳐라.
+
 
 x_train = np.asarray(x_train).astype(np.float32)
 x_test = np.asarray(x_test).astype(np.float32)
@@ -198,11 +211,11 @@ test_csv = np.asarray(test_csv).astype(np.float32)
 
 
 from keras.callbacks import EarlyStopping, ModelCheckpoint
-es = EarlyStopping(monitor = 'val_loss', mode = 'min', patience = 1000, verbose = 0, restore_best_weights= True)
-mcp = ModelCheckpoint(monitor='val_loss', mode = 'auto', verbose= 1, save_best_only=True, filepath='../_data/_save/MCP/keras26_11_MCP1.hdf5')
+es = EarlyStopping(monitor = 'val_loss', mode = 'auto', patience = 1000, verbose = 0, restore_best_weights= True)
+mcp = ModelCheckpoint(monitor='val_loss', mode = 'auto', verbose= 1, save_best_only=True, filepath=filepath)
 
-model.compile(loss= 'mse', optimizer= 'adam', metrics= 'acc' ) #mae 2.64084 r2 0.8278   mse 12.8935 r2 0.82
-hist = model.fit(x_train, y_train, callbacks=[es,mcp], epochs= 15000, batch_size = 2500, validation_split= 0.2)
+model.compile(loss= 'categorical_crossentropy', optimizer= 'adam', metrics= 'acc' ) #mae 2.64084 r2 0.8278   mse 12.8935 r2 0.82
+hist = model.fit(x_train, y_train, callbacks=[es,mcp], epochs= 15000, batch_size = 250, validation_split= 0.2, verbose=2)
 
 
 #4. 평가, 예측
@@ -217,7 +230,7 @@ y_predict = np.argmax(y_predict,axis=1)
 y_submit = np.argmax(model.predict(test_csv,verbose=0),axis=1)
 y_test = np.argmax(y_test,axis=1)
 
-f1 = f1_score(y_test,y_predict,average='weighted')
+f1 = f1_score(y_test,y_predict,average='macro')
 print("=========================\nF1: ",f1)
 
 
@@ -226,8 +239,8 @@ y_submit = le.inverse_transform(y_submit)
 import datetime
 dt = datetime.datetime.now()
 submission_csv['대출등급'] = y_submit
-submission_csv.to_csv(path+f"submit_{dt.day}day{dt.hour:2}{dt.minute:2}_F1{f1:4}.csv",index=False)
-
+if f1 > 0.9:
+    submission_csv.to_csv(path+f"submit_{dt.day}day{dt.hour:2}{dt.minute:2}_F1{f1:4}.csv",index=False)
 
 # import matplotlib.pyplot as plt
 # plt.rcParams['font.family'] = 'Malgun Gothic'

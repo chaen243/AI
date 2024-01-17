@@ -2,7 +2,7 @@
 
 import numpy as np
 from keras.models import Sequential
-from keras.layers import Dense
+from keras.layers import Dense, Dropout
 from sklearn.model_selection import train_test_split
 from sklearn.datasets import fetch_california_housing
 import time
@@ -30,7 +30,9 @@ x_test= mms.transform(x_test)
 model = Sequential()
 model.add(Dense(8, input_dim = 8))
 model.add(Dense(16))
+model.add(Dropout(0.5))
 model.add(Dense(10, activation= 'relu'))
+model.add(Dropout(0.5))
 model.add(Dense(8))
 model.add(Dense(4))
 model.add(Dense(1))
@@ -44,9 +46,9 @@ date = date.strftime("%m%d-%H%M") #m=month, M=minutes
 # print(date) #0117_1100
 # print(type(date)) #<class 'str'>
 
-path= '../_data/_save/MCP/_k26/' #경로(스트링data (문자))
+path= 'c:/_data/_save/MCP/_k28/' #경로(스트링data (문자))
 filename = '{epoch:04d}-{val_loss:.4f}.hdf5' #filename= 에포4자리수-발로스는 소숫점4자리까지 표시. 예)1000-0.3333.hdf5
-filepath = "".join([path, 'k26_2', date, "_", filename]) #""공간에 ([])를 합쳐라.
+filepath = "".join([path, 'k28_2_', date, "_", filename]) #""공간에 ([])를 합쳐라.
 
 
 model.compile(loss = 'mse', optimizer= 'adam', metrics= 'acc')
@@ -112,3 +114,7 @@ plt.show()
 
 # 로스 : 0.34980008006095886
 # R2 스코어 : 0.7353341827552138
+
+#dropput
+#로스 : 0.43307042121887207
+#R2 스코어 : 0.6723302365646293

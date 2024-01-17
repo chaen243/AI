@@ -44,7 +44,7 @@ x_test= mms.transform(x_test)
 
 # model.compile(loss= 'mse', optimizer= 'adam' ) #mae 2.64084 r2 0.8278   mse 12.8935 r2 0.82
 # hist = model.fit(x_train, y_train, callbacks=[es,mcp], epochs= 700, batch_size = 200, validation_split= 0.27)
-model = load_model('../_data/_save/MCP/keras26_02_MCP.hdf5')
+model = load_model('C:\_data\_save\MCP\_k26\k26_20117-1310_0390-0.3428.hdf5')
 
 
 
@@ -99,3 +99,6 @@ print("R2 스코어 :", r2)
 #RobustScaler
 #로스 : [0.34082022309303284, 0.002583979396149516]
 #R2 스코어 : 0.7421286277994633
+
+# 로스 : 0.34980008006095886
+# R2 스코어 : 0.7353341827552138

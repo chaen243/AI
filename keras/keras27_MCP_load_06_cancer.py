@@ -64,7 +64,7 @@ x_test= mms.transform(x_test)
 # model.compile(loss= 'binary_crossentropy', optimizer= 'adam',metrics=['acc',])
 # hist = model.fit(x_train, y_train, callbacks=[es,mcp], epochs= 2300, batch_size = 16, validation_split= 0.25)
 
-model = load_model('../_data/_save/MCP/keras26_06_MCP.hdf5')
+model = load_model('../_data/_save/MCP/_k26/k26_60117-1311_0006-0.0752.hdf5')
 
 
 
@@ -121,3 +121,5 @@ print("ACC : ", acc)
 #mms = RobustScaler()
 #ACC :  0.9836065573770492
 #로스 :  [0.07321718335151672,
+
+#ACC :  0.9890710382513661

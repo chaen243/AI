@@ -96,7 +96,7 @@ x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.72,  shu
 # hist = model.fit(x_train, y_train, callbacks=[es,mcp], epochs=1000, batch_size = 15, validation_split= 0.36)
 
 
-model = load_model('../_data/_save/MCP/keras26_04_MCP.hdf5')
+model = load_model('../_data/_save/MCP/_k26/k26_40117-1310_1570-2524.0613.hdf5')
 #4. 평가, 예측
 loss = model.evaluate(x_test, y_test)
 y_predict = model.predict(x_test)
@@ -173,3 +173,7 @@ submission_csv.to_csv(path + f"submission_{save_time}{rmse:.3f}.csv", index=Fals
 #mms = RobustScaler()
 #R2 스코어 : 0.6925418908853859
 #RMSE :  43.887711905291766
+
+
+# R2 스코어 : 0.6350364816315133
+# RMSE :  47.81615942211361

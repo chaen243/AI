@@ -3,7 +3,7 @@
 import numpy as np
 import pandas as pd
 from keras.models import Sequential
-from keras.layers import Dense 
+from keras.layers import Dense, Dropout 
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import r2_score, mean_squared_error
 import time
@@ -73,6 +73,9 @@ mms = RobustScaler()
 
 model = Sequential()
 model.add(Dense(1024, input_dim = 9, ))
+model.add(Dropout(0.05))
+model.add(Dense(512, activation= 'relu'))
+model.add(Dropout(0.05))
 model.add(Dense(10, activation= 'relu'))
 model.add(Dense(1))
 
@@ -92,9 +95,9 @@ date = date.strftime("%m%d-%H%M") #m=month, M=minutes
 # print(date) #0117_1100
 # print(type(date)) #<class 'str'>
 
-path= '../_data/_save/MCP/_k26/' #경로(스트링data (문자))
+path= 'c:/_data/_save/MCP/_k28/' #경로(스트링data (문자))
 filename = '{epoch:04d}-{val_loss:.4f}.hdf5' #filename= 에포4자리수-발로스는 소숫점4자리까지 표시. 예)1000-0.3333.hdf5
-filepath = "".join([path, 'k26_4', date, "_", filename]) #""공간에 ([])를 합쳐라.
+filepath = "".join([path, 'k28_4', date, "_", filename]) #""공간에 ([])를 합쳐라.
 
 
 
@@ -104,7 +107,7 @@ es = EarlyStopping(monitor = 'val_loss', mode = 'min', patience = 1000, verbose 
 mcp = ModelCheckpoint(monitor='val_loss', mode = 'auto', verbose= 1, save_best_only=True, filepath=filepath)
 
 model.compile(loss= 'mse', optimizer= 'adam' ) #mae 2.64084 r2 0.8278   mse 12.8935 r2 0.82
-hist = model.fit(x_train, y_train, callbacks=[es,mcp], epochs=2000, batch_size = 15, validation_split= 0.36)
+hist = model.fit(x_train, y_train, callbacks=[es,mcp], epochs=4000, batch_size = 25, validation_split= 0.36)
 
 
 
@@ -137,6 +140,7 @@ print(submission_csv)
 
 #submission_csv.to_csv(path + "submission__45.csv", index= False)
 
+path = "c:\\_data\\daicon\\ddarung\\"
 import time as tm
 ltm = tm.localtime(tm.time())
 save_time = f"{ltm.tm_year}{ltm.tm_mon}{ltm.tm_mday}{ltm.tm_hour}{ltm.tm_min}{ltm.tm_sec}" 
@@ -192,3 +196,8 @@ submission_csv.to_csv(path + f"submission_{save_time}{rmse:.3f}.csv", index=Fals
 
 # R2 스코어 : 0.6350364816315133
 # RMSE :  47.81615942211361
+
+
+#drop
+#R2 스코어 : 0.710561916616094
+#RMSE :  42.58217106385377

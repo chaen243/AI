@@ -1,7 +1,7 @@
 from sklearn.datasets import load_diabetes
 import numpy as np
 from keras.models import Sequential
-from keras.layers import Dense
+from keras.layers import Dense, Dropout
 from sklearn.model_selection import train_test_split
 import time
 
@@ -30,9 +30,11 @@ model = Sequential()
 model.add(Dense(5, input_dim = 10))
 model.add(Dense(12))
 model.add(Dense(24))
+model.add(Dropout(0.1))
 model.add(Dense(48))
 model.add(Dense(64))
 model.add(Dense(32))
+model.add(Dropout(0.1))
 model.add(Dense(20))
 model.add(Dense(8))
 model.add(Dense(6))
@@ -52,17 +54,17 @@ date = date.strftime("%m%d-%H%M") #m=month, M=minutes
 # print(date) #0117_1100
 # print(type(date)) #<class 'str'>
 
-path= '../_data/_save/MCP/_k26/' #경로(스트링data (문자))
+path= 'c:/_data/_save/MCP/_k26/' #경로(스트링data (문자))
 filename = '{epoch:04d}-{val_loss:.4f}.hdf5' #filename= 에포4자리수-발로스는 소숫점4자리까지 표시. 예)1000-0.3333.hdf5
 filepath = "".join([path, 'k26_7', date, "_", filename]) #""공간에 ([])를 합쳐라.
 
 
 from keras.callbacks import EarlyStopping, ModelCheckpoint
-es = EarlyStopping(monitor = 'val_loss', mode = 'min', patience = 10, verbose = 2, restore_best_weights= True)
+es = EarlyStopping(monitor = 'val_loss', mode = 'min', patience = 100, verbose = 2, restore_best_weights= True)
 mcp = ModelCheckpoint(monitor='val_loss', mode = 'auto', verbose= 1, save_best_only=True, filepath=filepath)
 
 model.compile(loss= 'mse', optimizer= 'adam', metrics= 'acc' ) #mae 2.64084 r2 0.8278   mse 12.8935 r2 0.82
-hist = model.fit(x_train, y_train, callbacks=[es,mcp], epochs= 500, batch_size = 5, validation_split= 0.3)
+hist = model.fit(x_train, y_train, callbacks=[es,mcp], epochs= 1000, batch_size = 1, validation_split= 0.3)
 
 
 #4. 평가, 예측
@@ -117,3 +119,7 @@ print("R2 스코어 :", r2)
 
 # 로스 : [2399.122802734375, 0.0]
 # R2 스코어 : 0.6334668088106798
+
+
+#로스 : [2895.499267578125, 0.0]
+#R2 스코어 : 0.5576314094885668

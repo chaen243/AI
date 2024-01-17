@@ -3,7 +3,7 @@
 import numpy as np
 import pandas as pd
 from keras.models import Sequential
-from keras.layers import Dense
+from keras.layers import Dense, Dropout
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import OneHotEncoder
@@ -72,14 +72,18 @@ x_train= mms.transform(x_train)
 x_test= mms.transform(x_test)
 
 
+
 #2. 모델구성
 
 model = Sequential()
 model.add(Dense(100, input_dim = 12))
+model.add(Dropout(0.3))
 model.add(Dense(90))
 model.add(Dense(80))
+model.add(Dropout(0.2))
 model.add(Dense(70))
 model.add(Dense(60))
+model.add(Dropout(0.1))
 model.add(Dense(20))
 model.add(Dense(7, activation = 'softmax'))
 
@@ -88,7 +92,8 @@ x_test = np.asarray(x_test).astype(np.float32)
 test_csv = np.asarray(test_csv).astype(np.float32)
 
 
-#3. 컴파일, 훈련
+
+# #3. 컴파일, 훈련
 import datetime
 date= datetime.datetime.now()
 # print(date) #2024-01-17 11:00:58.591406
@@ -97,16 +102,19 @@ date = date.strftime("%m%d-%H%M") #m=month, M=minutes
 # print(date) #0117_1100
 # print(type(date)) #<class 'str'>
 
-path= '../_data/_save/MCP/_k26/' #경로(스트링data (문자))
+path= 'c:/_data/_save/MCP/_k28/' #경로(스트링data (문자))
 filename = '{epoch:04d}-{val_loss:.4f}.hdf5' #filename= 에포4자리수-발로스는 소숫점4자리까지 표시. 예)1000-0.3333.hdf5
-filepath = "".join([path, 'k26_10', date, "_", filename]) #""공간에 ([])를 합쳐라.
+filepath = "".join([path, 'k28_8-', date, "_", filename]) #""공간에 ([])를 합쳐라.
+
 
 
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 es = EarlyStopping(monitor = 'val_acc', mode = 'max', patience = 200, verbose = 0, restore_best_weights= True)
-mcp = ModelCheckpoint(monitor='val_acc', mode = 'auto', verbose= 0, save_best_only=True, filepath= filepath)
-model.compile (loss = 'categorical_crossentropy', optimizer= 'adam', metrics= 'acc')
+mcp = ModelCheckpoint(monitor='val_acc', mode = 'max', verbose= 1, save_best_only=True, filepath=filepath)
+model.compile(loss= 'categorical_crossentropy', optimizer= 'adam', metrics= 'acc' ) #mae 2.64084 r2 0.8278   mse 12.8935 r2 0.82
 hist = model.fit(x_train, y_train, callbacks=[es,mcp], epochs= 2000, batch_size = 10, validation_split= 0.4)
+
+
 
 
 #4. 평가, 예측
@@ -131,7 +139,6 @@ submission_csv['quality'] = y_submit
 acc = accuracy_score(y_predict, y_test)
 ltm = time.localtime(time.time())
 print("acc :", acc)
-print("로스 :", results[0])
 save_time = f"{ltm.tm_year}{ltm.tm_mon}{ltm.tm_mday}{ltm.tm_hour}{ltm.tm_min}{ltm.tm_sec}" 
 submission_csv.to_csv(path+f"submission_{save_time}e.csv", index=False)
 
@@ -141,24 +148,31 @@ submission_csv.to_csv(path+f"submission_{save_time}e.csv", index=False)
 #print("걸린 시간 :", round(end_time - start_time, 2), "초" )
 print(np.unique(y_submit))
 
-#minmax
-#acc : 0.5581818181818182
-#로스 : 1.0659217834472656
 
-#StandardScaler
+
+#mms = MinMaxScaler()
+#로스 : 1.0762532949447632
+#acc : 0.5527272727272727
+
+#mms = StandardScaler()
+#로스 : 1.060926079750061
 #acc : 0.5681818181818182
-#로스 : 1.0569180250167847
 
-#MaxAbsScaler()
-#acc : 0.5709090909090909
-#로스 : 1.0683833360671997
+#mms = MaxAbsScaler()
+#로스 : 1.0695488452911377
+#acc : 0.5581818181818182
 
 #mms = RobustScaler()
-#acc : 0.5609090909090909
-#로스 : 1.0590828657150269
+#로스 : 1.0639983415603638
+#acc : 0.5636363636363636
 
-#acc : 0.56
-#로스 : 1.0596133470535278
+#로스 : 1.0716124773025513
+#acc : 0.5681818181818182
 
-# acc : 0.5554545454545454
-# 로스 : 1.0685160160064697
+#로스 : 1.0631638765335083
+#acc : 0.5654545454545454
+
+
+
+#로스 : 1.0702488422393799
+#acc : 0.5654545454545454

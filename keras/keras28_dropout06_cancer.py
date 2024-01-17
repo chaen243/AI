@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from sklearn.datasets import load_breast_cancer
 from keras.models import Sequential
-from keras.layers import Dense
+from keras.layers import Dense, Dropout
 from sklearn.metrics import r2_score, mean_squared_error, accuracy_score
 from sklearn.model_selection import train_test_split
 import time
@@ -48,9 +48,12 @@ x_test= mms.transform(x_test)
 
 model = Sequential()
 model.add(Dense (1024, input_dim = 30,))
+model.add(Dropout(0.3))
 model.add(Dense (512, activation= 'relu'))
 model.add(Dense (256,  ))
+model.add(Dropout(0.3))
 model.add(Dense (128))
+model.add(Dropout(0.3))
 model.add(Dense (64))
 model.add(Dense (1,  activation= 'sigmoid')) #이진분류에서는 최종레이어 액티베이션은 100% 무조건 시그모이드!
 
@@ -64,9 +67,9 @@ date = date.strftime("%m%d-%H%M") #m=month, M=minutes
 # print(date) #0117_1100
 # print(type(date)) #<class 'str'>
 
-path= '../_data/_save/MCP/_k26/' #경로(스트링data (문자))
+path= 'c:/_data/_save/MCP/_k26/' #경로(스트링data (문자))
 filename = '{epoch:04d}-{val_loss:.4f}.hdf5' #filename= 에포4자리수-발로스는 소숫점4자리까지 표시. 예)1000-0.3333.hdf5
-filepath = "".join([path, 'k26_6', date, "_", filename]) #""공간에 ([])를 합쳐라.
+filepath = "".join([path, 'k26_6_', date, "_", filename]) #""공간에 ([])를 합쳐라.
 
 
 
@@ -138,3 +141,6 @@ print("ACC : ", acc)
 #ACC :  1.0
 
 #ACC :  0.9890710382513661
+
+#drop
+#ACC :  1.0

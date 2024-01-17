@@ -95,7 +95,7 @@ x_test= mms.transform(x_test)
 # model.compile (loss = 'categorical_crossentropy', optimizer= 'adam', metrics= 'acc')
 # hist = model.fit(x_train, y_train, callbacks=[es,mcp], epochs= 2000, batch_size = 10, validation_split= 0.4)
 
-model = load_model('../_data/_save/MCP/keras26_10_MCP1.hdf5')
+model = load_model('../_data/_save/MCP/_k26/k26_100117-1311_0207-1.0878.hdf5')
 
 
 x_train = np.asarray(x_train).astype(np.float32)
@@ -149,3 +149,6 @@ print(np.unique(y_submit))
 #mms = RobustScaler()
 #acc : 0.5609090909090909
 #로스 : 1.0590828657150269
+
+#acc : 0.5554545454545454
+#로스 : 1.0685160160064697

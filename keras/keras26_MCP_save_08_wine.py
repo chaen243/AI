@@ -91,9 +91,23 @@ test_csv = np.asarray(test_csv).astype(np.float32)
 
 
 # #3. 컴파일, 훈련
+import datetime
+date= datetime.datetime.now()
+# print(date) #2024-01-17 11:00:58.591406
+# print(type(date)) #<class 'datetime.datetime'>
+date = date.strftime("%m%d-%H%M") #m=month, M=minutes
+# print(date) #0117_1100
+# print(type(date)) #<class 'str'>
+
+path= '../_data/_save/MCP/_k26/' #경로(스트링data (문자))
+filename = '{epoch:04d}-{val_loss:.4f}.hdf5' #filename= 에포4자리수-발로스는 소숫점4자리까지 표시. 예)1000-0.3333.hdf5
+filepath = "".join([path, 'k26_8', date, "_", filename]) #""공간에 ([])를 합쳐라.
+
+
+
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 es = EarlyStopping(monitor = 'val_acc', mode = 'max', patience = 200, verbose = 0, restore_best_weights= True)
-mcp = ModelCheckpoint(monitor='val_acc', mode = 'max', verbose= 1, save_best_only=True, filepath='../_data/_save/MCP/keras26_08_MCP1.hdf5')
+mcp = ModelCheckpoint(monitor='val_acc', mode = 'max', verbose= 1, save_best_only=True, filepath=filepath)
 model.compile(loss= 'categorical_crossentropy', optimizer= 'adam', metrics= 'acc' ) #mae 2.64084 r2 0.8278   mse 12.8935 r2 0.82
 hist = model.fit(x_train, y_train, callbacks=[es,mcp], epochs= 2000, batch_size = 10, validation_split= 0.4)
 
@@ -151,3 +165,6 @@ print(np.unique(y_submit))
 
 #로스 : 1.0716124773025513
 #acc : 0.5681818181818182
+
+#로스 : 1.0631638765335083
+#acc : 0.5654545454545454

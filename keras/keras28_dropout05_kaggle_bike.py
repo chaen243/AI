@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd #판다스에 데이터는 넘파이 형태로 들어가있음.
 from keras.models import Sequential
-from keras.layers import Dense
+from keras.layers import Dense, Dropout
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import r2_score, mean_squared_error, mean_squared_log_error, accuracy_score
 import time
@@ -57,8 +57,10 @@ x_test= mms.transform(x_test)
 #2. 모델구성
 model = Sequential()
 model.add(Dense(1024, input_dim = 8))
+model.add(Dropout(0.3))
 model.add(Dense(512,))
 model.add(Dense(256,))
+model.add(Dropout(0.3))
 model.add(Dense(8, activation='relu'))
 model.add(Dense(1,  activation='relu'))
 
@@ -71,9 +73,9 @@ date = date.strftime("%m%d-%H%M") #m=month, M=minutes
 # print(date) #0117_1100
 # print(type(date)) #<class 'str'>
 
-path= '../_data/_save/MCP/_k26/' #경로(스트링data (문자))
+path= 'c:/_data/_save/MCP/_k28/' #경로(스트링data (문자))
 filename = '{epoch:04d}-{val_loss:.4f}.hdf5' #filename= 에포4자리수-발로스는 소숫점4자리까지 표시. 예)1000-0.3333.hdf5
-filepath = "".join([path, 'k26_5', date, "_", filename]) #""공간에 ([])를 합쳐라.
+filepath = "".join([path, 'k28_5_', date, "_", filename]) #""공간에 ([])를 합쳐라.
 
 
 end_time = time.time()
@@ -130,6 +132,8 @@ def RMSLE(y_test, y_predict):
 rmsle = RMSLE(y_test, y_predict)
 print("로스 :", loss)
 print("RMSLE :", rmsle)
+
+path = "C:\\_data\\kaggle\\bike\\"
 
 import time as tm
 ltm = tm.localtime(tm.time())
@@ -193,3 +197,7 @@ plt.show()
 
 # 로스 : [42169.30859375, 42169.30859375]
 # RMSLE : 1.256816372989663
+
+#dropout
+#로스 : [41944.92578125, 41944.92578125]
+#RMSLE : 1.2272235558710434

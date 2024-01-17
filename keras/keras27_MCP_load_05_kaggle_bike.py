@@ -74,7 +74,7 @@ x_test= mms.transform(x_test)
 # model.compile(loss= 'mse', optimizer= 'adam', metrics='mse' ) #mae 2.64084 r2 0.8278   mse 12.8935 r2 0.82
 # hist = model.fit(x_train, y_train, callbacks=[es,mcp], epochs= 1200, batch_size = 100, validation_split= 0.27)
 
-model = load_model('../_data/_save/MCP/keras26_05_MCP.hdf5')
+model = load_model('../_data/_save/MCP/_k26/k26_50117-1310_0019-36408.8867.hdf5')
 
 
 #4. 평가, 예측
@@ -174,3 +174,6 @@ submission_csv.to_csv(path + f"submission_{save_time}{rmsle:.3f}.csv", index=Fal
 #mms = RobustScaler()
 #로스 : [45134.109375, 45134.109375]
 #RMSLE : 1.2113118872869002
+
+# 로스 : [42169.30859375, 42169.30859375]
+# RMSLE : 1.256816372989663

@@ -1,6 +1,5 @@
-
-#09-1 copy
-
+#5번에서 저장된 파일을 불러서 ㅗㄹ드한 결과치가 저장된 파일이름과 동일한지 판단
+#세이브 loss로 하고 맞는지 판단!
 
 from sklearn.datasets import load_boston
 
@@ -87,30 +86,64 @@ x_test= mms.transform(x_test)
 # model.add(Dense(3))
 # model.add(Dense(1))
 
+# model.summary()
+
+
+
+
 
 # # #3. 컴파일, 훈련
 # from keras.callbacks import EarlyStopping, ModelCheckpoint
-# es = EarlyStopping(monitor = 'val_loss', mode = 'min', patience = 100, verbose = 2, restore_best_weights= True)
-# mcp = ModelCheckpoint(monitor='val_loss', mode = 'auto', verbose= 1, save_best_only=True, filepath='../_data/_save/MCP/keras26_MCP.hdf5')
+# import datetime
+# date= datetime.datetime.now()
+# # print(date) #2024-01-17 11:00:58.591406
+# # print(type(date)) #<class 'datetime.datetime'>
+# date = date.strftime("%m%d-%H%M") #m=month, M=minutes
+# # print(date) #0117_1100
+# # print(type(date)) #<class 'str'>
+
+# path= '../_data/_save/MCP/_k25/' #경로(스트링data (문자))
+# filename = '{epoch:04d}-{val_loss:.4f}.hdf5' #filename= 에포4자리수-발로스는 소숫점4자리까지 표시. 예)1000-0.3333.hdf5
+# filepath = "".join([path, 'k25_', date, "_", filename]) #""공간에 ([])를 합쳐라.
+
+
 
 # model.compile(loss= 'mse', optimizer= 'adam' ) #mae 2.64084 r2 0.8278   mse 12.8935 r2 0.82
-# hist = model.fit(x_train, y_train, callbacks=[es,mcp], epochs= 2000, batch_size = 20, validation_split= 0.27)
+# es = EarlyStopping(monitor = 'val_loss', 
+#                    mode = 'auto', 
+#                    patience = 10, 
+#                    verbose = 2, 
+#                    restore_best_weights= True)
+# mcp = ModelCheckpoint(monitor='val_loss', 
+#                       mode = 'auto', verbose= 1, 
+#                       save_best_only= True, 
+#                       filepath= filepath)
 
 
+#hist = model.fit(x_train, y_train, callbacks=[es,mcp], epochs= 1000, batch_size = 20, validation_split= 0.27)
 
-model = load_model('C:\_data\_save\MCP\_k26\k26_1_0117-1308_0483-21.7545.hdf5')
+#model.save('../_data/_save/keras25_3_save_model.h5')
+#model = load_model('../_data/_save/keras25_.hdf5')
+
+
+model= load_model("C:\_data\_save\MCP\_k25\k25_0117-1224_0184-22.3901.hdf5")
 #4. 평가, 예측
-results = model.evaluate(x_test, y_test)
-
-
-y_predict = model.predict(x_test) 
-result = model.predict(x)
-
-from sklearn.metrics import r2_score
+print("=============기본출력===============")
+loss = model.evaluate(x_test, y_test, verbose=0)
+y_predict = model.predict(x_test, verbose=0) 
 r2 = r2_score(y_test, y_predict)
-print("로스 :", results)
+print("로스 :", loss)
 print("R2 스코어 :", r2)
+
+
 #print("걸린 시간 :", round(end_time - start_time, 2), "초") #def로 정의하지 않은 함수는 파이썬에서 기본으로 제공해주는 함수.
+
+print('===================================')
+#print(hist.history['val_loss'])
+print('===================================')
+
+
+
 
 #로스 : 13.562579154968262
 #R2 스코어 : 0.8130732165577592
@@ -136,7 +169,11 @@ print("R2 스코어 :", r2)
 #R2 스코어 : 0.8305320050569783
 
 
-#로스 : 12.284931182861328
-#R2 스코어 : 0.830682458020847
+#restore_best_weights
+#save_best_only
 
-
+#restore_best_weights/save_best_only
+#True,True 갱신된 에포만 저장
+#True,False 에포별로 전체저장
+#False,True 갱신된 에포만 저장
+#False,False 에포 전체 저장

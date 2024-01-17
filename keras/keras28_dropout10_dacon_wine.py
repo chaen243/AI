@@ -3,7 +3,7 @@
 import numpy as np
 import pandas as pd
 from keras.models import Sequential
-from keras.layers import Dense
+from keras.layers import Dense, Dropout
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import OneHotEncoder
@@ -76,10 +76,13 @@ x_test= mms.transform(x_test)
 
 model = Sequential()
 model.add(Dense(100, input_dim = 12))
+model.add(Dropout(0.4))
 model.add(Dense(90))
 model.add(Dense(80))
+model.add(Dropout(0.2))
 model.add(Dense(70))
 model.add(Dense(60))
+model.add(Dropout(0.2))
 model.add(Dense(20))
 model.add(Dense(7, activation = 'softmax'))
 
@@ -97,9 +100,9 @@ date = date.strftime("%m%d-%H%M") #m=month, M=minutes
 # print(date) #0117_1100
 # print(type(date)) #<class 'str'>
 
-path= '../_data/_save/MCP/_k26/' #경로(스트링data (문자))
+path= 'c:/_data/_save/MCP/_k28/' #경로(스트링data (문자))
 filename = '{epoch:04d}-{val_loss:.4f}.hdf5' #filename= 에포4자리수-발로스는 소숫점4자리까지 표시. 예)1000-0.3333.hdf5
-filepath = "".join([path, 'k26_10', date, "_", filename]) #""공간에 ([])를 합쳐라.
+filepath = "".join([path, 'k28_10_', date, "_", filename]) #""공간에 ([])를 합쳐라.
 
 
 from keras.callbacks import EarlyStopping, ModelCheckpoint

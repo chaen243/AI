@@ -50,7 +50,7 @@ x_test= mms.transform(x_test)
 # model.compile(loss= 'mse', optimizer= 'adam', metrics= 'acc' ) #mae 2.64084 r2 0.8278   mse 12.8935 r2 0.82
 # hist = model.fit(x_train, y_train, callbacks=[es,mcp], epochs= 500, batch_size = 5, validation_split= 0.3)
 
-model = load_model('../_data/_save/MCP/keras26_07_MCP.hdf5')
+model = load_model('../_data/_save/MCP/_k26/k26_70117-1448_0008-3357.7290.hdf5')
 #4. 평가, 예측
 loss = model.evaluate(x_test, y_test)
 print("로스 :", loss)
@@ -102,3 +102,7 @@ print("R2 스코어 :", r2)
 #R2 스코어 : 0.5795696017777313
 
 #R2 스코어 : 0.6368696550774082
+
+
+#로스 : [2522.253173828125, 0.0]
+#R2 스코어 : 0.6146551831720167

@@ -1,6 +1,6 @@
 import numpy as np
-from keras.models import Sequential, load_model
-from keras.layers import Dense
+from keras.models import Sequential
+from keras.layers import Dense,Dropout
 from sklearn.datasets import fetch_covtype
 from sklearn.model_selection import train_test_split
 import pandas as pd
@@ -64,35 +64,42 @@ mms.fit(x_train)
 x_train= mms.transform(x_train)
 x_test= mms.transform(x_test)
 
-# #2. 모델구성
+#2. 모델구성
 
-# model = Sequential()
-# model.add(Dense(128, input_dim = 54))
-# model.add(Dense(64, activation= 'relu'))
-# model.add(Dense(32, activation= 'relu'))
-# model.add(Dense(16, activation= 'relu'))
-# model.add(Dense(7, activation = 'softmax'))
+model = Sequential()
+model.add(Dense(128, input_dim = 54))
+model.add(Dropout(0.4))
+model.add(Dense(64, activation= 'relu'))
+model.add(Dense(32, activation= 'relu'))
+model.add(Dropout(0.2))
+model.add(Dense(16, activation= 'relu'))
+model.add(Dense(7, activation = 'softmax'))
 
 
 
-# #3. 컴파일, 훈련
-# model.compile  (loss = 'categorical_crossentropy', optimizer = 'adam', metrics= 'acc')
+#3. 컴파일, 훈련
+import datetime
+date= datetime.datetime.now()
+# print(date) #2024-01-17 11:00:58.591406
+# print(type(date)) #<class 'datetime.datetime'>
+date = date.strftime("%m%d-%H%M") #m=month, M=minutes
+# print(date) #0117_1100
+# print(type(date)) #<class 'str'>
 
-# es = EarlyStopping(monitor= 'val_loss', mode= 'min',
-#                    patience=1000, verbose=2, restore_best_weights= True) #es는 verbose2가 es 정보를 보여줌.
-# start_time = time.time()
-# his = model.fit(x_train, y_train, epochs= 4000, batch_size=5000, validation_split= 0.25, verbose=2, ) #검증모델은 간접적인 영향을 미침.
-# end_time = time.time()
+path= 'c:/_data/_save/MCP/_k28/' #경로(스트링data (문자))
+filename = '{epoch:04d}-{val_loss:.4f}.hdf5' #filename= 에포4자리수-발로스는 소숫점4자리까지 표시. 예)1000-0.3333.hdf5
+filepath = "".join([path, 'k28_9', date, "_", filename]) #""공간에 ([])를 합쳐라.
+
+
+
+model.compile  (loss = 'categorical_crossentropy', optimizer = 'adam', metrics= 'acc')
+es = EarlyStopping(monitor= 'val_loss', mode= 'min',
+                   patience=1000, verbose=2, restore_best_weights= True) #es는 verbose2가 es 정보를 보여줌.
+start_time = time.time()
+his = model.fit(x_train, y_train, epochs= 4000, batch_size=10000, validation_split= 0.25, verbose=2, ) #검증모델은 간접적인 영향을 미침.
+end_time = time.time()
   
 
-# from keras.callbacks import EarlyStopping, ModelCheckpoint
-# es = EarlyStopping(monitor = 'val_loss', mode = 'min', patience = 4000, verbose = 2, restore_best_weights= True)
-# mcp = ModelCheckpoint(monitor='val_loss', mode = 'auto', verbose= 1, save_best_only=True, filepath='../_data/_save/MCP/keras26_09_MCP1.hdf5')
-
-# model.compile(loss= 'categorical_crossentropy', optimizer= 'adam', metrics= 'acc' ) #mae 2.64084 r2 0.8278   mse 12.8935 r2 0.82
-# hist = model.fit(x_train, y_train, callbacks=[es,mcp], epochs= 4000, batch_size = 800, validation_split= 0.25)
-
-model = load_model('../_data/_save/MCP/_k26/k26_90117-1404_3351-0.2441.hdf5')
 
 #4. 평가, 예측
 
@@ -142,3 +149,8 @@ print("acc :", acc)
 
 #로스 : 0.2773851752281189
 #acc : 0.8917695520469984
+
+#로스 : 0.2504320442676544
+
+#로스 : 0.339504599571228
+#acc : 0.8600777951165779

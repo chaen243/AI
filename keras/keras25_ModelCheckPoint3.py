@@ -1,5 +1,4 @@
-
-#09-1 copy
+#23-1 copy
 
 
 from sklearn.datasets import load_boston
@@ -77,40 +76,65 @@ x_test= mms.transform(x_test)
 
 
 
-# #2. 모델구성
+#2. 모델구성
 
-# model = Sequential()
-# model.add(Dense(1, input_dim= 13))
-# model.add(Dense(9))
-# model.add(Dense(13))
-# model.add(Dense(9))
-# model.add(Dense(3))
-# model.add(Dense(1))
+model = Sequential()
+model.add(Dense(1, input_dim= 13))
+model.add(Dense(9))
+model.add(Dense(13))
+model.add(Dense(9))
+model.add(Dense(3))
+model.add(Dense(1))
 
-
-# # #3. 컴파일, 훈련
-# from keras.callbacks import EarlyStopping, ModelCheckpoint
-# es = EarlyStopping(monitor = 'val_loss', mode = 'min', patience = 100, verbose = 2, restore_best_weights= True)
-# mcp = ModelCheckpoint(monitor='val_loss', mode = 'auto', verbose= 1, save_best_only=True, filepath='../_data/_save/MCP/keras26_MCP.hdf5')
-
-# model.compile(loss= 'mse', optimizer= 'adam' ) #mae 2.64084 r2 0.8278   mse 12.8935 r2 0.82
-# hist = model.fit(x_train, y_train, callbacks=[es,mcp], epochs= 2000, batch_size = 20, validation_split= 0.27)
+model.summary()
 
 
 
-model = load_model('C:\_data\_save\MCP\_k26\k26_1_0117-1308_0483-21.7545.hdf5')
+
+
+# #3. 컴파일, 훈련
+from keras.callbacks import EarlyStopping, ModelCheckpoint
+es = EarlyStopping(monitor = 'val_loss', mode = 'min', patience = 10, verbose = 2, restore_best_weights= False)
+mcp = ModelCheckpoint(monitor='val_loss', mode = 'auto', verbose= 1, save_best_only=True, filepath='../_data/_save/MCP/keras25_MCP3.hdf5')
+
+model.compile(loss= 'mse', optimizer= 'adam' ) #mae 2.64084 r2 0.8278   mse 12.8935 r2 0.82
+hist = model.fit(x_train, y_train, callbacks=[es,mcp], epochs= 200, batch_size = 20, validation_split= 0.27)
+
+model.save('../_data/_save/keras25_3_save_model.h5')
+#model = load_model('../_data/_save/keras25_.hdf5')
+
 #4. 평가, 예측
-results = model.evaluate(x_test, y_test)
-
-
-y_predict = model.predict(x_test) 
-result = model.predict(x)
-
-from sklearn.metrics import r2_score
+print("=============기본출력===============")
+results = model.evaluate(x_test, y_test, verbose=0)
+y_predict = model.predict(x_test, verbose=0) 
 r2 = r2_score(y_test, y_predict)
 print("로스 :", results)
 print("R2 스코어 :", r2)
+
+print("==========================2. load_model 출력 ================") #ModelCheckpoint가 잘 들어갔는지 확인
+model2 = load_model('../_data/_save/keras25_3_save_model.h5')
+results2 = model2.evaluate(x_test, y_test, verbose=0)
+y_predict2 = model2.predict(x_test, verbose=0) 
+r2 = r2_score(y_test, y_predict)
+print("로스 :", results)
+print("R2 스코어 :", r2)
+
+print("==========================3. load_model 출력 ================") #ModelCheckpoint가 잘 들어갔는지 확인
+model3 = load_model('../_data/_save/MCP/keras25_MCP3.hdf5')
+results3 = model3.evaluate(x_test, y_test, verbose=0)
+y_predict3 = model3.predict(x_test, verbose=0) 
+r2 = r2_score(y_test, y_predict)
+print("로스 :", results)
+print("R2 스코어 :", r2)
+
 #print("걸린 시간 :", round(end_time - start_time, 2), "초") #def로 정의하지 않은 함수는 파이썬에서 기본으로 제공해주는 함수.
+
+# print('===================================')
+# print(hist.history['val_loss'])
+# print('===================================')
+
+
+
 
 #로스 : 13.562579154968262
 #R2 스코어 : 0.8130732165577592
@@ -135,8 +159,5 @@ print("R2 스코어 :", r2)
 #로스 : 12.295846939086914
 #R2 스코어 : 0.8305320050569783
 
-
-#로스 : 12.284931182861328
-#R2 스코어 : 0.830682458020847
 
 
