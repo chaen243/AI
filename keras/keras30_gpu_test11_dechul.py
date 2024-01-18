@@ -68,14 +68,14 @@ for i in range(len(train_working_time)):
     if data == 'Unknown':
         train_working_time.iloc[i] = np.NaN
     elif data == '10+ years' or data == '10+years':
-        train_working_time.iloc[i] = int(18)
+        train_working_time.iloc[i] = int(20)
     elif data == '< 1 year' or data == '<1 year':
-        train_working_time.iloc[i] = int(0.5)
+        train_working_time.iloc[i] = int(0.9)
     else:
         train_working_time.iloc[i] = int(data.split()[0])
         
     
-train_working_time = train_working_time.fillna(train_working_time.min())
+train_working_time = train_working_time.fillna(train_working_time.max())
 
 #print(train_working_time)
 
@@ -84,9 +84,9 @@ for i in range(len(test_working_time)):
     if data == 'Unknown':
         test_working_time.iloc[i] = np.NaN
     elif data == '10+ years' or data == '10+years':
-        test_working_time.iloc[i] = int(15)
+        test_working_time.iloc[i] = int(18)
     elif data == '< 1 year' or data == '<1 year':
-        test_working_time.iloc[i] = int(0.5)
+        test_working_time.iloc[i] = int(0.9)
     else:
         test_working_time.iloc[i] = int(data.split()[0])
     
@@ -182,7 +182,7 @@ y = ohe.fit_transform(y)
 #print(np.unique(y, return_counts= True)) #Name: 근로기간, Length: 96294, dtype: float64
 
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.7,  shuffle= True, random_state= 9876, stratify= y) 
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.8,  shuffle= True, random_state= 9876, stratify= y) 
 
      
      
@@ -190,9 +190,9 @@ from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
 from sklearn.preprocessing import StandardScaler, RobustScaler
 
 #mms = MinMaxScaler()
-mms = StandardScaler()
+#mms = StandardScaler()
 #mms = MaxAbsScaler()
-#mms = RobustScaler()
+mms = RobustScaler()
 
 mms.fit(x_train)
 x_train= mms.transform(x_train)
