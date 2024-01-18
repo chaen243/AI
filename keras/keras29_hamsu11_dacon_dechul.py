@@ -4,8 +4,8 @@
 #값 일부 자르기 (label encoder)
 #값 자른거 수치화까지!
 
-from keras.models import Sequential
-from keras.layers import Dense,Dropout
+from keras.models import Sequential, Model
+from keras.layers import Dense,Dropout, Input
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -212,111 +212,122 @@ test_csv= mms.transform(test_csv)
 
 # #2. 모델구성
 
+
+
 model = Sequential()  
-model.add(Dense(7, input_shape= (13,), activation='swish'))
-model.add(Dense(512, activation='swish'))
-model.add(Dropout(0.03))
-model.add(Dense(7, activation='swish'))
-model.add(Dense(256, activation='swish'))
-model.add(Dense(7, activation='swish'))
-model.add(Dense(128, activation='swish'))
+model.add(Dense(7, input_shape= (13,), activation='relu'))
+model.add(Dense(512, activation='relu'))
+model.add(Dropout(0.05))
+model.add(Dense(7, activation='relu'))
+model.add(Dense(256, activation='relu'))
+model.add(Dense(7, activation='relu'))
+model.add(Dense(128, activation='relu'))
 model.add(Dense(7, activation = 'softmax'))
 
-# model = Sequential()  
-# model.add(Dense(7, input_shape= (13,), activation='relu'))
-# model.add(Dense(512, activation='relu'))
-# model.add(Dropout(0.05))
-# model.add(Dense(7, activation='relu'))
-# model.add(Dense(256, activation='relu'))
-# model.add(Dense(7, activation='relu'))
-# model.add(Dense(128, activation='relu'))
-# model.add(Dense(7, activation = 'softmax'))
 
 
-#3. 컴파일, 훈련
+#2. 모델구성
 
-import datetime
-date= datetime.datetime.now()
-# print(date) #2024-01-17 11:00:58.591406
-# print(type(date)) #<class 'datetime.datetime'>
-date = date.strftime("%m%d-%H%M") #m=month, M=minutes
-# print(date) #0117_1100
-# print(type(date)) #<class 'str'>
+ip = input(shape= (13,))
+d1 = Dense(7)(ip)
+d2 = Dense(512)(d1)
+dr1 = Dropout(0.05)(d2)
+d3 = Dense(7)(dr1)
+d4 = Dense(256)(d3)
+d5 = Dense(7)(d4)
+d6 = Dense(128)(d5)
+op = Dense(7)(d6)
 
-path1= 'C:/_data/_save/MCP/_k28/' #경로(스트링data (문자))
-filename = '{epoch:04d}-{val_loss:.4f}.hdf5' #filename= 에포4자리수-발로스는 소숫점4자리까지 표시. 예)1000-0.3333.hdf5
-filepath = "".join([path1, 'k28_11_', date, "_", filename]) #""공간에 ([])를 합쳐라.
-
-
-x_train = np.asarray(x_train).astype(np.float32)
-x_test = np.asarray(x_test).astype(np.float32)
-test_csv = np.asarray(test_csv).astype(np.float32)
+model = Model(inputs = ip, outputs= op)
 
 
-from keras.callbacks import EarlyStopping, ModelCheckpoint
-es = EarlyStopping(monitor = 'val_loss', mode = 'auto', patience = 5000, verbose = 0, restore_best_weights= True)
-mcp = ModelCheckpoint(monitor='val_loss', mode = 'auto', verbose= 1, save_best_only=True, filepath= filepath)
-
-model.compile(loss= 'categorical_crossentropy', optimizer= 'adam', metrics= 'acc' ) #mae 2.64084 r2 0.8278   mse 12.8935 r2 0.82
-hist = model.fit(x_train, y_train, callbacks=[es,mcp], epochs= 20000, batch_size = 300, validation_split= 0.2, verbose=2)
 
 
-#4. 평가, 예측
 
-results = model.evaluate(x_test, y_test)
-print("로스 :", results[0])
-print("정확도 :" , results[1])
+# #3. 컴파일, 훈련
 
-y_predict = model.predict(x_test, verbose=0)
-y_predict = np.argmax(y_predict,axis=1)
+# import datetime
+# date= datetime.datetime.now()
+# # print(date) #2024-01-17 11:00:58.591406
+# # print(type(date)) #<class 'datetime.datetime'>
+# date = date.strftime("%m%d-%H%M") #m=month, M=minutes
+# # print(date) #0117_1100
+# # print(type(date)) #<class 'str'>
 
-y_submit = np.argmax(model.predict(test_csv),axis=1)
-y_test = np.argmax(y_test,axis=1)
-
-f1 = f1_score(y_test,y_predict,average='macro')
-print("F1: ",f1)
-
-
-y_submit = le.inverse_transform(y_submit)
-
-import datetime
-dt = datetime.datetime.now()
-submission_csv['대출등급'] = y_submit
-
-submission_csv.to_csv(path+f"submit_{dt.day}day{dt.hour:2}{dt.minute:2}_F1_{f1:4}.csv",index=False)
+# path1= 'C:/_data/_save/MCP/_k28/' #경로(스트링data (문자))
+# filename = '{epoch:04d}-{val_loss:.4f}.hdf5' #filename= 에포4자리수-발로스는 소숫점4자리까지 표시. 예)1000-0.3333.hdf5
+# filepath = "".join([path1, 'k28_11_', date, "_", filename]) #""공간에 ([])를 합쳐라.
 
 
-import matplotlib.pyplot as plt
-plt.rcParams['font.family'] = 'Malgun Gothic'
-plt.rcParams['axes.unicode_minus']= False
-plt.figure(figsize= (9,6))
-plt.plot(hist.history['f1'], c = 'red', label = 'loss', marker = '.')
-plt.plot(hist.history['val_acc'], c = 'pink', label = 'val_acc', marker = '.')
-plt.plot(hist.history['val_loss'], c = 'blue', label = 'val_loss', marker = '.')
-
-plt.legend(loc = 'upper right')
-plt.title("대출등급 LOSS")
-plt.xlabel('epoch')
-plt.grid()
-plt.show()
-
-#minmax
-#로스 : 0.45476970076560974
-#정확도 : 0.8460853695869446
-
-#mms = StandardScaler()
-
-#로스 : 0.46329641342163086
-#정확도 : 0.8380373120307922
-
-#mms = MaxAbsScaler()
-#로스 : 0.44124674797058105
-#F1:  0.8497932009729917
+# x_train = np.asarray(x_train).astype(np.float32)
+# x_test = np.asarray(x_test).astype(np.float32)
+# test_csv = np.asarray(test_csv).astype(np.float32)
 
 
-#mms = RobustScaler()
-#로스 : 0.3884388208389282
-#F1:  0.865791228309671
+# from keras.callbacks import EarlyStopping, ModelCheckpoint
+# es = EarlyStopping(monitor = 'val_loss', mode = 'auto', patience = 5000, verbose = 0, restore_best_weights= True)
+# mcp = ModelCheckpoint(monitor='val_loss', mode = 'auto', verbose= 1, save_best_only=True, filepath= filepath)
+
+# model.compile(loss= 'categorical_crossentropy', optimizer= 'adam', metrics= 'acc' ) #mae 2.64084 r2 0.8278   mse 12.8935 r2 0.82
+# hist = model.fit(x_train, y_train, callbacks=[es,mcp], epochs= 20000, batch_size = 300, validation_split= 0.2, verbose=2)
+
+
+# #4. 평가, 예측
+
+# results = model.evaluate(x_test, y_test)
+# print("로스 :", results[0])
+# print("정확도 :" , results[1])
+
+# y_predict = model.predict(x_test, verbose=0)
+# y_predict = np.argmax(y_predict,axis=1)
+
+# y_submit = np.argmax(model.predict(test_csv),axis=1)
+# y_test = np.argmax(y_test,axis=1)
+
+# f1 = f1_score(y_test,y_predict,average='macro')
+# print("F1: ",f1)
+
+
+# y_submit = le.inverse_transform(y_submit)
+
+# import datetime
+# dt = datetime.datetime.now()
+# submission_csv['대출등급'] = y_submit
+
+# submission_csv.to_csv(path+f"submit_{dt.day}day{dt.hour:2}{dt.minute:2}_F1_{f1:4}.csv",index=False)
+
+
+# import matplotlib.pyplot as plt
+# plt.rcParams['font.family'] = 'Malgun Gothic'
+# plt.rcParams['axes.unicode_minus']= False
+# plt.figure(figsize= (9,6))
+# plt.plot(hist.history['f1'], c = 'red', label = 'loss', marker = '.')
+# plt.plot(hist.history['val_acc'], c = 'pink', label = 'val_acc', marker = '.')
+# plt.plot(hist.history['val_loss'], c = 'blue', label = 'val_loss', marker = '.')
+
+# plt.legend(loc = 'upper right')
+# plt.title("대출등급 LOSS")
+# plt.xlabel('epoch')
+# plt.grid()
+# plt.show()
+
+# #minmax
+# #로스 : 0.45476970076560974
+# #정확도 : 0.8460853695869446
+
+# #mms = StandardScaler()
+
+# #로스 : 0.46329641342163086
+# #정확도 : 0.8380373120307922
+
+# #mms = MaxAbsScaler()
+# #로스 : 0.44124674797058105
+# #F1:  0.8497932009729917
+
+
+# #mms = RobustScaler()
+# #로스 : 0.3884388208389282
+# #F1:  0.865791228309671
 
 
 

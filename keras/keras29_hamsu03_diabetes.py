@@ -1,0 +1,155 @@
+from sklearn.datasets import load_diabetes
+import numpy as np
+from keras.models import Sequential, Model
+from keras.layers import Dense, Dropout, Input
+from sklearn.model_selection import train_test_split
+import time
+
+#1. 데이터
+datasets = load_diabetes()
+x = np.array(datasets.data)
+y = np.array(datasets.target)
+
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size= 0.25, shuffle= True, random_state = 442)
+
+from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
+from sklearn.preprocessing import StandardScaler, RobustScaler
+
+#mms = MinMaxScaler()
+#mms = StandardScaler()
+#mms = MaxAbsScaler()
+mms = RobustScaler()
+
+mms.fit(x_train)
+x_train= mms.transform(x_train)
+x_test= mms.transform(x_test)
+
+#2. 모델구성
+model = Sequential()
+model.add(Dense(5, input_dim = 10))
+model.add(Dense(12))
+model.add(Dropout(0.4))
+model.add(Dense(24))
+model.add(Dense(48))
+model.add(Dropout(0.4))
+model.add(Dense(64))
+model.add(Dense(32))
+model.add(Dropout(0.4))
+model.add(Dense(20))
+model.add(Dropout(0.3))
+model.add(Dense(8))
+model.add(Dense(6))
+model.add(Dense(4))
+model.add(Dense(2))
+model.add(Dense(1))
+
+
+model.summary()
+
+#2. 모델구성
+input1 = Input(shape= (10,))
+dense1 = Dense(5)(input1)
+dense2 = Dense(12)(dense1)
+drop1 = Dropout(0.4)(dense2)
+dense3 = Dense(24)(drop1)
+dense4 = Dense(48)(dense3)
+drop2 = Dropout(0.4)(dense4)
+dense5 = Dense(64)(drop2)
+dense6 = Dense(32)(dense5)
+drop3 = Dropout(0.4)(dense6)
+dense7 = Dense(20)(drop3)
+drop4 = Dropout(0.3)(dense7)
+dense8 = Dense(8)(drop4)
+dense9 = Dense(6)(dense8)
+dense10 = Dense(4)(dense9)
+dense11 = Dense(2)(dense10)
+output1 = Dense(1)(dense11)
+
+model = Model(inputs = input1, outputs = output1)
+
+model.summary()
+
+
+# #3. 컴파일, 훈련
+# import datetime
+# date= datetime.datetime.now()
+# # print(date) #2024-01-17 11:00:58.591406
+# # print(type(date)) #<class 'datetime.datetime'>
+# date = date.strftime("%m%d-%H%M") #m=month, M=minutes
+# # print(date) #0117_1100
+# # print(type(date)) #<class 'str'>
+
+# path= 'c:/_data/_save/MCP/_k28/' #경로(스트링data (문자))
+# filename = '{epoch:04d}-{val_loss:.4f}.hdf5' #filename= 에포4자리수-발로스는 소숫점4자리까지 표시. 예)1000-0.3333.hdf5
+# filepath = "".join([path, 'k28_3_', date, "_", filename]) #""공간에 ([])를 합쳐라.
+
+
+
+# from keras.callbacks import EarlyStopping, ModelCheckpoint
+# es = EarlyStopping(monitor = 'val_loss', mode = 'min', patience = 100, verbose = 0, restore_best_weights= True)
+# mcp = ModelCheckpoint(monitor='val_loss', mode = 'auto', verbose= 1, save_best_only=True, filepath= filepath)
+
+# model.compile(loss= 'mse', optimizer= 'adam', metrics= 'acc' ) #mae 2.64084 r2 0.8278   mse 12.8935 r2 0.82
+# hist = model.fit(x_train, y_train, callbacks=[es,mcp], epochs= 500, batch_size = 5, validation_split= 0.3)
+
+
+
+
+# #4. 평가, 예측
+# loss = model.evaluate(x_test, y_test)
+# print("로스 :", loss)
+# y_predict = model.predict(x_test)
+# result = model.predict(x)
+# from sklearn.metrics import r2_score
+# r2 = r2_score(y_test, y_predict)
+# print("R2 스코어 :", r2)
+#print("걸린 시간 :", round(end_time - start_time, 2), "초")
+# import matplotlib.pyplot as plt
+# plt.rcParams['font.family'] = 'Malgun Gothic'
+# plt.rcParams['axes.unicode_minus']= False
+# plt.figure(figsize= (9,6))
+# plt.plot(hist.history['loss'], c = 'red', label = 'loss', marker = '.')
+# plt.plot(hist.history['val_loss'], c = 'blue', label = 'val_loss', marker = '.')
+# plt.legend(loc = 'upper right')
+# plt.title("당뇨병 LOSS")
+# plt.xlabel('epoch')
+# plt.ylabel('loss')
+# plt.grid()
+# plt.show()
+#False
+#로스 : 2513.03662109375
+#R2 스코어 : 0.5959205821049586
+#True
+#로스 : 2686.110107421875
+#R2 스코어 : 0.568091475683709
+#metrics
+#로스 : 2447.14013671875
+#R2 스코어 : 0.6261307996541818
+
+#Minmax
+#로스 : [2500.25244140625, 0.0]
+#R2 스코어 : 0.6180163855817093
+
+#mms = StandardScaler()
+#로스 : [2428.520263671875, 0.0]
+#R2 스코어 : 0.6289755074020189
+
+#mms = MaxAbsScaler()
+#로스 : [2432.334716796875, 0.0]
+#R2 스코어 : 0.628392741450306
+
+#mms = RobustScaler()
+#로스 : [2365.630126953125, 0.0]
+#R2 스코어 : 0.638583722078695
+
+
+#R2 스코어 : 0.6263246797371085
+
+# 로스 : [2412.950927734375, 0.0]
+# R2 스코어 : 0.6313541425612113
+
+
+
+#dropout
+#로스 : [2512.75390625, 0.0]
+#R2 스코어 : 0.6161064529014573

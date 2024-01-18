@@ -68,14 +68,14 @@ for i in range(len(train_working_time)):
     if data == 'Unknown':
         train_working_time.iloc[i] = np.NaN
     elif data == '10+ years' or data == '10+years':
-        train_working_time.iloc[i] = int(15)
+        train_working_time.iloc[i] = int(18)
     elif data == '< 1 year' or data == '<1 year':
         train_working_time.iloc[i] = int(0.5)
     else:
         train_working_time.iloc[i] = int(data.split()[0])
         
     
-train_working_time = train_working_time.fillna(train_working_time.mean())
+train_working_time = train_working_time.fillna(train_working_time.min())
 
 #print(train_working_time)
 
@@ -116,9 +116,7 @@ test_loan_perpose = test_loan_perpose.fillna(method='ffill')
 test_csv['대출목적'] = test_loan_perpose
 
 
-train_csv = train_csv.dropna(axis=0)
-test_csv = test_csv.dropna(axis=0)
-     
+
 
 
 
@@ -212,25 +210,25 @@ test_csv= mms.transform(test_csv)
 
 # #2. 모델구성
 
-model = Sequential()  
-model.add(Dense(7, input_shape= (13,), activation='swish'))
-model.add(Dense(512, activation='swish'))
-model.add(Dropout(0.03))
-model.add(Dense(7, activation='swish'))
-model.add(Dense(256, activation='swish'))
-model.add(Dense(7, activation='swish'))
-model.add(Dense(128, activation='swish'))
-model.add(Dense(7, activation = 'softmax'))
-
 # model = Sequential()  
-# model.add(Dense(7, input_shape= (13,), activation='relu'))
-# model.add(Dense(512, activation='relu'))
+# model.add(Dense(7, input_shape= (13,), activation='swish'))
+# model.add(Dense(512, activation='swish'))
 # model.add(Dropout(0.05))
-# model.add(Dense(7, activation='relu'))
-# model.add(Dense(256, activation='relu'))
-# model.add(Dense(7, activation='relu'))
-# model.add(Dense(128, activation='relu'))
+# model.add(Dense(7, activation='swish'))
+# model.add(Dense(256, activation='swish'))
+# model.add(Dense(7, activation='swish'))
+# model.add(Dense(128, activation='swish'))
 # model.add(Dense(7, activation = 'softmax'))
+
+model = Sequential()  
+model.add(Dense(7, input_shape= (13,), activation='relu'))
+model.add(Dense(512, activation='relu'))
+model.add(Dropout(0.05))
+model.add(Dense(7, activation='relu'))
+model.add(Dense(256, activation='relu'))
+model.add(Dense(7, activation='relu'))
+model.add(Dense(128, activation='relu'))
+model.add(Dense(7, activation = 'softmax'))
 
 
 #3. 컴파일, 훈련
@@ -254,11 +252,13 @@ test_csv = np.asarray(test_csv).astype(np.float32)
 
 
 from keras.callbacks import EarlyStopping, ModelCheckpoint
-es = EarlyStopping(monitor = 'val_loss', mode = 'auto', patience = 5000, verbose = 0, restore_best_weights= True)
+es = EarlyStopping(monitor = 'val_loss', mode = 'auto', patience = 1357, verbose = 0, restore_best_weights= True)
 mcp = ModelCheckpoint(monitor='val_loss', mode = 'auto', verbose= 1, save_best_only=True, filepath= filepath)
 
 model.compile(loss= 'categorical_crossentropy', optimizer= 'adam', metrics= 'acc' ) #mae 2.64084 r2 0.8278   mse 12.8935 r2 0.82
-hist = model.fit(x_train, y_train, callbacks=[es,mcp], epochs= 20000, batch_size = 300, validation_split= 0.2, verbose=2)
+start_time = time.time()
+hist = model.fit(x_train, y_train, callbacks=[es, mcp], epochs= 98765, batch_size = 500, validation_split= 0.35, verbose=2)
+end_time = time.time()
 
 
 #4. 평가, 예측
@@ -266,6 +266,8 @@ hist = model.fit(x_train, y_train, callbacks=[es,mcp], epochs= 20000, batch_size
 results = model.evaluate(x_test, y_test)
 print("로스 :", results[0])
 print("정확도 :" , results[1])
+print("걸린 시간 :", round(end_time - start_time, 2), "초")
+
 
 y_predict = model.predict(x_test, verbose=0)
 y_predict = np.argmax(y_predict,axis=1)
@@ -290,7 +292,7 @@ import matplotlib.pyplot as plt
 plt.rcParams['font.family'] = 'Malgun Gothic'
 plt.rcParams['axes.unicode_minus']= False
 plt.figure(figsize= (9,6))
-plt.plot(hist.history['f1'], c = 'red', label = 'loss', marker = '.')
+# plt.plot(hist.history['f1_score'], c = 'red', label = 'f1', marker = '.')
 plt.plot(hist.history['val_acc'], c = 'pink', label = 'val_acc', marker = '.')
 plt.plot(hist.history['val_loss'], c = 'blue', label = 'val_loss', marker = '.')
 
@@ -319,6 +321,9 @@ plt.show()
 #F1:  0.865791228309671
 
 
+#cpu
+#걸린 시간 : 4938.4 초
+#gpu
 
 
 
