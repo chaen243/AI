@@ -68,9 +68,9 @@ for i in range(len(train_working_time)):
     if data == 'Unknown':
         train_working_time.iloc[i] = np.NaN
     elif data == '10+ years' or data == '10+years':
-        train_working_time.iloc[i] = int(20)
+        train_working_time.iloc[i] = int(15)
     elif data == '< 1 year' or data == '<1 year':
-        train_working_time.iloc[i] = int(0.9)
+        train_working_time.iloc[i] = int(0.6)
     else:
         train_working_time.iloc[i] = int(data.split()[0])
         
@@ -84,9 +84,9 @@ for i in range(len(test_working_time)):
     if data == 'Unknown':
         test_working_time.iloc[i] = np.NaN
     elif data == '10+ years' or data == '10+years':
-        test_working_time.iloc[i] = int(18)
+        test_working_time.iloc[i] = int(15)
     elif data == '< 1 year' or data == '<1 year':
-        test_working_time.iloc[i] = int(0.9)
+        test_working_time.iloc[i] = int(0.6)
     else:
         test_working_time.iloc[i] = int(data.split()[0])
     
@@ -173,6 +173,19 @@ y= y.reshape(-1,1)
 ohe = OneHotEncoder(sparse= False)
 y = ohe.fit_transform(y)
 
+
+     
+from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
+from sklearn.preprocessing import StandardScaler, RobustScaler
+
+mms = MinMaxScaler(feature_range=(2,5))
+#mms = StandardScaler()
+#mms = MaxAbsScaler()
+#mms = RobustScaler()
+
+mms.fit(x)
+x = mms.transform(x)
+test_csv=mms.transform(test_csv)
 #print(x.shape, y.shape)  #(96294, 13) (96294, 7)
 #print(np.unique(y, return_counts= True)) #array(['A', 'B', 'C', 'D', 'E', 'F', 'G'], dtype=object), array([16772, 28817, 27623, 13354,  7354,  1954,   420],
 
@@ -185,14 +198,16 @@ y = ohe.fit_transform(y)
 x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.8,  shuffle= True, random_state= 9876, stratify= y) 
 
      
-     
+#민맥스 - 스탠다드
 from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
-from sklearn.preprocessing import StandardScaler, RobustScaler
+from sklearn.preprocessing import StandardScaler, RobustScaler, Normalizer
 
-#mms = MinMaxScaler()
-#mms = StandardScaler()
+#mms = MinMaxScaler(feature_range=(1,5))
+mms = StandardScaler()
 #mms = MaxAbsScaler()
-mms = RobustScaler()
+#mms = RobustScaler()
+#mms = Normalizer()
+
 
 mms.fit(x_train)
 x_train= mms.transform(x_train)
@@ -210,25 +225,27 @@ test_csv= mms.transform(test_csv)
 
 # #2. 모델구성
 
-# model = Sequential()  
-# model.add(Dense(7, input_shape= (13,), activation='swish'))
-# model.add(Dense(512, activation='swish'))
-# model.add(Dropout(0.05))
-# model.add(Dense(7, activation='swish'))
-# model.add(Dense(256, activation='swish'))
-# model.add(Dense(7, activation='swish'))
-# model.add(Dense(128, activation='swish'))
-# model.add(Dense(7, activation = 'softmax'))
-
 model = Sequential()  
-model.add(Dense(7, input_shape= (13,), activation='relu'))
-model.add(Dense(512, activation='relu'))
+model.add(Dense(3, input_shape= (13,), activation='sigmoid'))
+model.add(Dense(512, activation='swish'))
 model.add(Dropout(0.05))
-model.add(Dense(7, activation='relu'))
-model.add(Dense(256, activation='relu'))
-model.add(Dense(7, activation='relu'))
-model.add(Dense(128, activation='relu'))
+model.add(Dense(7, activation='swish'))
+model.add(Dense(256, activation='swish'))
+model.add(Dense(5, activation='swish'))
+model.add(Dense(128, activation='swish'))
+model.add(Dense(6, activation='swish'))
+model.add(Dense(64, activation='swish'))
 model.add(Dense(7, activation = 'softmax'))
+
+# model = Sequential()  
+# model.add(Dense(7, input_shape= (13,), activation='relu'))
+# model.add(Dense(512, activation='relu'))
+# model.add(Dropout(0.05))
+# model.add(Dense(7, activation='relu'))
+# model.add(Dense(256, activation='relu'))
+# model.add(Dense(7, activation='relu'))
+# model.add(Dense(128, activation='relu'))
+# model.add(Dense(7, activation = 'softmax'))
 
 
 #3. 컴파일, 훈련
