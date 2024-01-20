@@ -40,38 +40,37 @@ print(x_test.shape)
 from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
 from sklearn.preprocessing import StandardScaler, RobustScaler, Normalizer
 
-#mms = MinMaxScaler(feature_range=(1,5))
-mms = StandardScaler()
+#mms = MinMaxScaler(feature_range=(0,1))
+#mms = StandardScaler()
 #mms = MaxAbsScaler()
 #mms = RobustScaler()
 x_train = x_train.reshape(-1,1)
 x_test = x_test.reshape(-1,1)
 
 
-mms.fit(x_train)
-mms.fit(x_test)
-x_train= mms.transform(x_train)
-x_test= mms.transform(x_test)
+#mms.fit(x_train)
+#mms.fit(x_test)
+#x_train= mms.transform(x_train)
+#x_test= mms.transform(x_test)
 
 y_train = to_categorical(y_train)
 y_test = to_categorical(y_test)
 
 #2.모델
 model = Sequential()
-model.add(Conv2D(100, (2,2),
-                 input_shape= (32, 32, 3), activation= 'swish')) #첫 아웃풋 = filter
+model.add(Conv2D(40, (2,2),
+                 input_shape= (32, 32, 3), activation= 'relu')) #첫 아웃풋 = filter
 # shape = (batch_size, rows, columns, channels)
 # shape = (batch_size, heights, widths, channels)
-model.add(Conv2D(80, kernel_size=(2,2), activation= 'swish'))
-model.add(Conv2D(80, kernel_size=(2,2), activation= 'swish'))
-model.add(Conv2D(80, kernel_size=(2,2), activation= 'swish'))
-model.add(Conv2D(80, kernel_size=(2,2), activation= 'swish'))
-model.add(Conv2D(80, (2,2), activation= 'swish')) 
-model.add(Conv2D(60, (2,2), activation= 'swish')) 
+model.add(Conv2D(35, (2,2), activation= 'relu')) 
 model.add(Flatten()) #(n,22*22*15)의 모양을 펴져있는 모양으로 변형.
-model.add(Dense(40, activation= 'swish'))
+model.add(Dense(30, activation= 'relu'))
 # shape = (batch_size(=model.fit의 batch_size와 같음.), input_dim) 
-model.add(Dense(20, activation='swish'))
+model.add(Dense(25, activation= 'relu'))
+model.add(Dense(20, activation= 'relu'))
+model.add(Dense(15, activation= 'relu'))
+model.add(Dense(10, activation= 'relu'))
+model.add(Dense(5, activation= 'relu'))
 model.add(Dense(10, activation= 'softmax'))
 
 
@@ -87,11 +86,11 @@ x_test = x_test.reshape ( (-1, 32, 32, 3))
 
 #3. 컴파일, 훈련
 model.compile( loss= 'categorical_crossentropy', optimizer= 'adam', metrics= 'acc')
-es = EarlyStopping(monitor = 'val_loss', mode = 'auto', patience = 50, verbose = 0, restore_best_weights= True)
+es = EarlyStopping(monitor = 'val_loss', mode = 'auto', patience = 299, verbose = 0, restore_best_weights= True)
 mcp = ModelCheckpoint(monitor='val_loss', mode = 'auto', verbose= 1, save_best_only=True, filepath= filepath)
 
 start_time = time.time()
-model.fit( x_train, y_train, batch_size=500, verbose=2, epochs= 200, validation_split=0.2)
+model.fit( x_train, y_train, batch_size=1000, verbose=2, epochs= 300, validation_split=0.3, callbacks= [es,mcp])
 end_time =time.time()
 
 #4. 평가, 예측

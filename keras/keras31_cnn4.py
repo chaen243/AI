@@ -54,7 +54,7 @@ model.add(Conv2D(30, (2,2),
 model.add(Conv2D(filters=20, kernel_size=(2,2)))
 model.add(Conv2D(10, (2,2))) 
 model.add(Flatten()) #(n,22*22*15)의 모양을 펴져있는 모양으로 변형.
-model.add(Dense(1000))
+model.add(Dense(500))
 model.add(Dropout(0.05))
 # shape = (batch_size(=model.fit의 batch_size와 같음.), input_dim) 
 model.add(Dense(20, activation='swish'))
@@ -103,7 +103,7 @@ es = EarlyStopping(monitor = 'val_loss', mode = 'auto', patience = 50, verbose =
 mcp = ModelCheckpoint(monitor='val_loss', mode = 'auto', verbose= 1, save_best_only=True, filepath= filepath)
 
 start_time = time.time()
-model.fit( x_train, y_train, batch_size=216, verbose=2, epochs= 200, validation_split=0.2)
+model.fit( x_train, y_train, batch_size=216, verbose=2, epochs= 200, validation_split=0.2,callbacks=[es,mcp])
 end_time =time.time()
 
 #4. 평가, 예측
