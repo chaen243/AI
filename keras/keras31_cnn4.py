@@ -51,13 +51,17 @@ model.add(Conv2D(10, (2,2),
                  input_shape= (28, 28, 1), activation= 'swish')) #첫 아웃풋 = filter
 # shape = (batch_size, rows, columns, channels)
 # shape = (batch_size, heights, widths, channels)
-model.add(Conv2D(filters=20, kernel_size=(2,2), activation= 'swish'))
-model.add(Conv2D(40, (2,2), activation= 'swish')) 
-model.add(Conv2D(20, (1,1), activation= 'swish')) 
+model.add(Conv2D(filters=20, kernel_size=(3,3), activation= 'swish'))
+model.add(Conv2D(20, (2,2), activation= 'swish')) 
+model.add(Conv2D(40, (2,2), activation= 'swish'))
+model.add(Conv2D(30, (2,2), activation= 'swish'))%
+model.add(Conv2D(20, (2,2), activation= 'swish'))  
+model.add(Conv2D(20, (2,2), activation= 'swish')) 
 model.add(Flatten()) #(n,22*22*15)의 모양을 펴져있는 모양으로 변형.
-model.add(Dense(40, activation= 'swish'))
+model.add(Dense(35, activation= 'swish'))
 # shape = (batch_size(=model.fit의 batch_size와 같음.), input_dim) 
 model.add(Dense(20, activation='swish'))
+model.add(Dense(10, activation='swish'))
 model.add(Dense(10, activation= 'softmax'))
 
 
@@ -111,3 +115,7 @@ results = model.evaluate(x_test,y_test)
 print('loss:', results[0])
 print('acc:',  results[1])
 print('걸린시간 :' , end_time - start_time, "초" )
+
+# loss: 0.05508973449468613
+# acc: 0.9861000180244446
+# 걸린시간 : 352.47554993629456 초
