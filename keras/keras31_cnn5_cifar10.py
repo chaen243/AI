@@ -2,7 +2,7 @@ from keras.datasets import cifar10
 import numpy as np
 import pandas as pd
 from keras.models import Sequential
-from keras.layers import Dense, Conv2D, Flatten, Dropout
+from keras.layers import Dense, MaxPooling2D, Conv2D, Flatten, Dropout
 from keras.utils import to_categorical
 
 
@@ -40,38 +40,58 @@ print(x_test.shape)
 from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
 from sklearn.preprocessing import StandardScaler, RobustScaler, Normalizer
 
-#mms = MinMaxScaler(feature_range=(0,1))
-#mms = StandardScaler()
-#mms = MaxAbsScaler()
-#mms = RobustScaler()
-x_train = x_train.reshape(-1,1)
-x_test = x_test.reshape(-1,1)
 
-
-#mms.fit(x_train)
-#mms.fit(x_test)
-#x_train= mms.transform(x_train)
-#x_test= mms.transform(x_test)
 
 y_train = to_categorical(y_train)
 y_test = to_categorical(y_test)
 
+(x_train, x_valid) = x_train[5000:], x_train[:5000]
+(y_train, y_valid) = y_train[5000:], y_train[:5000]
+
+#mms = MinMaxScaler(feature_range=(0,1))
+#mms = StandardScaler()
+#mms = MaxAbsScaler()
+#mms = RobustScaler()
+
+
+
+# x_train = mms.fit_transform(x_train.reshape(-1, x_train.shape[-1])).reshape(x_train.shape)
+# X_test = mms.transform(x_test.reshape(-1, x_test.shape[-1])).reshape(x_test.shape)
+# X_valid = mms.transform(x_valid.reshape(-1, x_valid.shape[-1])).reshape(x_valid.shape)
+
 #2.모델
 model = Sequential()
-model.add(Conv2D(40, (2,2),
-                 input_shape= (32, 32, 3), activation= 'relu')) #첫 아웃풋 = filter
-# shape = (batch_size, rows, columns, channels)
-# shape = (batch_size, heights, widths, channels)
-model.add(Conv2D(35, (2,2), activation= 'relu')) 
-model.add(Flatten()) #(n,22*22*15)의 모양을 펴져있는 모양으로 변형.
-model.add(Dense(30, activation= 'relu'))
-# shape = (batch_size(=model.fit의 batch_size와 같음.), input_dim) 
-model.add(Dense(25, activation= 'relu'))
-model.add(Dense(20, activation= 'relu'))
-model.add(Dense(15, activation= 'relu'))
-model.add(Dense(10, activation= 'relu'))
-model.add(Dense(5, activation= 'relu'))
-model.add(Dense(10, activation= 'softmax'))
+# model.add(Conv2D(32, (3,3),
+#                  input_shape= (32, 32, 3), activation= 'relu')) #첫 아웃풋 = filter
+# # shape = (batch_size, rows, columns, channels)
+# # shape = (batch_size, heights, widths, channels)
+# model.add(MaxPooling2D(pool_size=(2, 2)))
+# model.add(Conv2D(32, (3,3), activation= 'relu')) 
+# model.add(MaxPooling2D(pool_size=(2, 2)))
+# model.add(Conv2D(32, (2,2), activation= 'relu')) 
+# model.add(Conv2D(32, (2,2), activation= 'relu'))
+# model.add(MaxPooling2D(pool_size=(2, 2))) 
+# model.add(Flatten()) #(n,22*22*15)의 모양을 펴져있는 모양으로 변형.
+# # shape = (batch_size(=model.fit의 batch_size와 같음.), input_dim) 
+# model.add(Dense(10, activation= 'softmax'))
+# Convolutional Block (Conv-Conv-Pool-Dropout)
+model.add(Conv2D(32, (3, 3), activation='relu', padding='same', input_shape=(32, 32, 3)))
+model.add(Conv2D(32, (3, 3), activation='relu', padding='same'))
+model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(Dropout(0.25))
+
+# Convolutional Block (Conv-Conv-Pool-Dropout)
+model.add(Conv2D(64, (3, 3), activation='relu', padding='same'))
+model.add(Conv2D(64, (3, 3), activation='relu', padding='same'))
+model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(Dropout(0.25))
+
+# Classifying
+model.add(Flatten())
+model.add(Dense(512, activation='relu'))
+model.add(Dropout(0.5))
+model.add(Dense(10, activation='softmax'))
+
 
 
 
@@ -81,8 +101,8 @@ filepath = "C:\_data\_save\MCP\_k31"
 from keras.callbacks import EarlyStopping,ModelCheckpoint
 import time
 
-x_train = x_train.reshape ( (-1, 32, 32, 3))
-x_test = x_test.reshape ( (-1, 32, 32, 3))
+#x_train = x_train.reshape ( (x_train.shape[0], 32, 32, 3))
+#x_test = x_test.reshape ( (x_test.shape[0], 32, 32, 3))
 
 #3. 컴파일, 훈련
 model.compile( loss= 'categorical_crossentropy', optimizer= 'adam', metrics= 'acc')
@@ -90,7 +110,7 @@ es = EarlyStopping(monitor = 'val_loss', mode = 'auto', patience = 299, verbose 
 mcp = ModelCheckpoint(monitor='val_loss', mode = 'auto', verbose= 1, save_best_only=True, filepath= filepath)
 
 start_time = time.time()
-model.fit( x_train, y_train, batch_size=1000, verbose=2, epochs= 300, validation_split=0.3, callbacks= [es,mcp])
+model.fit(x_train, y_train, batch_size=500, verbose=2, epochs= 500, validation_data=(x_valid,y_valid),shuffle=True, callbacks= [es,mcp])
 end_time =time.time()
 
 #4. 평가, 예측
@@ -99,3 +119,6 @@ print('loss:', results[0])
 print('acc:',  results[1])
 print('걸린시간 :' , end_time - start_time, "초" )
 
+# loss: 0.6674924492835999
+# acc: 0.7788000106811523
+# 걸린시간 : 459.2906882762909 초
