@@ -47,13 +47,12 @@ y_test = pd.get_dummies(y_test)
 
 #2.모델
 model = Sequential()
-model.add(Conv2D(50, (2,2),
+model.add(Conv2D(30, (2,2),
                  input_shape= (28, 28, 1))) #첫 아웃풋 = filter
 # shape = (batch_size, rows, columns, channels)
 # shape = (batch_size, heights, widths, channels)
 model.add(Conv2D(filters=20, kernel_size=(2,2)))
 model.add(Conv2D(10, (2,2))) 
-model.add(Conv2D(10, (1,1))) 
 model.add(Flatten()) #(n,22*22*15)의 모양을 펴져있는 모양으로 변형.
 model.add(Dense(500))
 model.add(Dropout(0.05))

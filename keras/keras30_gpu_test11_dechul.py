@@ -76,7 +76,7 @@ for i in range(len(train_working_time)):
         train_working_time.iloc[i] = int(data.split()[0])
         
     
-train_working_time = train_working_time.fillna(train_working_time.mean())
+train_working_time = train_working_time.fillna(train_working_time.max())
 
 #print(train_working_time)
 
@@ -91,7 +91,7 @@ for i in range(len(test_working_time)):
     else:
         test_working_time.iloc[i] = int(data.split()[0])
     
-test_working_time = test_working_time.fillna(test_working_time.mean())
+test_working_time = test_working_time.fillna(test_working_time.min())
 
 train_csv['근로기간'] = train_working_time
 test_csv['근로기간'] = test_working_time 
@@ -111,22 +111,8 @@ for i in range(len(test_loan_perpose)):
     data = test_loan_perpose.iloc[i]
     if data == '결혼':
         test_loan_perpose.iloc[i] = np.NaN
-        
 
-# for i in range(len(test_loan_perpose)):
-#     data = test_loan_perpose.iloc[i]
-#     if data == '기타':
-#         test_loan_perpose.iloc[i] = np.NaN
-               
-# for i in range(len(train_loan_perpose)):
-#     data = train_loan_perpose.iloc[i]
-#     if data == '기타':
-#         train_loan_perpose.iloc[i] = np.NaN
-        
-
-test_loan_perpose = test_loan_perpose.fillna(method='bfill')
-train_loan_perpose = train_loan_perpose.fillna(method='ffill')
-
+test_loan_perpose = test_loan_perpose.fillna(method='ffill')
 
 test_csv['대출목적'] = test_loan_perpose
 train_csv['대출목적'] = train_loan_perpose
@@ -186,26 +172,23 @@ y = train_csv['대출등급']
 
 y = le.fit_transform(y)
 
-
-
-# ohe = OneHotEncoder(sparse = False)
-# ohe.fit(y)
-# y_ohe = ohe.transform(y)
-# print(y_ohe.shape)  
+y= y.reshape(-1,1)
+ohe = OneHotEncoder(sparse= False)
+y = ohe.fit_transform(y)
 
 
      
 from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
 from sklearn.preprocessing import StandardScaler, RobustScaler
 
-mms = MinMaxScaler(feature_range=(2,4))
+mms = MinMaxScaler(feature_range=(2,5))
 #mms = StandardScaler()
 #mms = MaxAbsScaler()
 #mms = RobustScaler()
 
-mms.fit(x)
-x = mms.transform(x)
-test_csv=mms.transform(test_csv)
+#mms.fit(x)
+#x = mms.transform(x)
+#test_csv=mms.transform(test_csv)
 #print(x.shape, y.shape)  #(96294, 13) (96294, 7)
 #print(np.unique(y, return_counts= True)) #array(['A', 'B', 'C', 'D', 'E', 'F', 'G'], dtype=object), array([16772, 28817, 27623, 13354,  7354,  1954,   420],
 
@@ -246,35 +229,17 @@ test_csv= mms.transform(test_csv)
 
 # #2. 모델구성
 
-model = Sequential()
-model.add(Dense(50, input_dim=13, activation='relu'))
-model.add(Dense(10, activation='relu'))
-model.add(Dense(80, activation='relu'))
-model.add(BatchNormalization())
-model.add(Dense(10, activation='relu'))
-model.add(Dense(70, activation='relu'))
-model.add(Dense(10, activation='relu'))
-model.add(Dense(60, activation='relu'))
-model.add(Dense(10, activation='relu'))
-model.add(Dense(50, activation='relu'))
-model.add(Dense(10, activation='relu'))
-model.add(Dense(40, activation='relu'))
-model.add(Dense(10, activation='relu'))
-model.add(Dense(50, activation='relu'))
-model.add(Dense(7, activation='softmax'))
-
-'''
-model = Sequential()  
-model.add(Dense(3, input_shape= (13,), activation='swish'))
-model.add(Dense(512, activation='swish'))
-model.add(Dropout(0.05))
-model.add(Dense(7, activation='swish'))
-model.add(Dense(256, activation='swish'))
-model.add(Dense(5, activation='swish'))
-model.add(Dense(128, activation='swish'))
-model.add(Dense(6, activation='swish'))
-model.add(Dense(64, activation='swish'))
-model.add(Dense(7, activation = 'softmax'))
+# model = Sequential()  
+# model.add(Dense(3, input_shape= (13,), activation='sigmoid'))
+# model.add(Dense(512, activation='swish'))
+# model.add(Dropout(0.05))
+# model.add(Dense(7, activation='swish'))
+# model.add(Dense(256, activation='swish'))
+# model.add(Dense(5, activation='swish'))
+# model.add(Dense(128, activation='swish'))
+# model.add(Dense(6, activation='swish'))
+# model.add(Dense(64, activation='swish'))
+# model.add(Dense(7, activation = 'softmax'))
 
 model = Sequential()  
 model.add(Dense(7, input_shape= (13,), activation='relu'))
