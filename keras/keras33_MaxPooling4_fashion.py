@@ -24,8 +24,8 @@ import time
 x_train = x_train.reshape(-1, 28, 28, 1)
 x_test = x_test.reshape(-1, 28, 28, 1)
 
-#print(x_train.shape, x_test.shape) #(60000, 28, 28, 1) (10000, 28, 28, 1)
-
+print(x_train.shape, x_test.shape) #(60000, 28, 28, 1) (10000, 28, 28, 1)
+'''
 x_train = x_train.astype('float32')/255
 x_test = x_test.astype('float32')/255
 
@@ -105,4 +105,4 @@ print('걸린시간 :' , end_time - start_time, "초" )
 # loss: 0.319594144821167
 # acc: 0.8884000182151794
 # 걸린시간 : 156.79107069969177 초
-
+'''
