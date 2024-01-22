@@ -1,15 +1,10 @@
-# 원핫, 모델 완성!
-# acc 0.985 이상
-
-
 import numpy as np
 from keras.datasets import mnist
 import pandas as pd
 import matplotlib.pyplot as plt
 from keras.models import Sequential
-from keras.layers import Dense, Conv2D, Flatten, Dropout
-from keras.callbacks import EarlyStopping, ModelCheckpoint
-import time
+from keras.layers import Dense, Conv2D, Flatten
+
 
 
 #1. 데이터
@@ -38,28 +33,33 @@ x_test = x_test.reshape(x_test.shape[0],x_test.shape[1] ,x_test.shape[2], 1)
 print(x_train.shape, x_test.shape)
 
 
-
 y_train = pd.get_dummies(y_train)
 y_test = pd.get_dummies(y_test)
 
 
 
-
 #2.모델
 model = Sequential()
-model.add(Conv2D(30, (2,2),
-                 input_shape= (28, 28, 1))) #첫 아웃풋 = filter
+model.add(Conv2D(9, (2,2), strides=2, padding='same',
+                 input_shape= (28, 28, 1),)) #첫 아웃풋 = filter
+# padding='valid'- 디폴트./
+# 모양유지- padding= 'same' (전사이즈 유지됨.)
+# stride 끝에 남은 데이터는 제거된다.
+#kernel_size 디폴트값-1
 # shape = (batch_size, rows, columns, channels)
 # shape = (batch_size, heights, widths, channels)
-model.add(Conv2D(filters=20, kernel_size=(2,2)))
-model.add(Conv2D(10, (2,2))) 
+
+model.add(Conv2D(filters=10, kernel_size=(3,3)))
+model.add(Conv2D(15, (4,4))) 
 model.add(Flatten()) #(n,22*22*15)의 모양을 펴져있는 모양으로 변형.
-model.add(Dense(500))
-model.add(Dropout(0.05))
+model.add(Dense(units=8))#나가는 출력값
+model.add(Dense(7, input_shape=(8,)))
 # shape = (batch_size(=model.fit의 batch_size와 같음.), input_dim) 
-model.add(Dense(20, activation='swish'))
+model.add(Dense(6))
+model.add(Dense(5, activation='swish'))
 model.add(Dense(10, activation= 'softmax'))
 
+model.summary()
 
 #batch_size는 전체 행에서 원하는만큼 행을 나눠 훈련) 레이어별로 다르게 지정 불가. (SHAPE ERROR 뜸.)
 # model.summary()
@@ -94,20 +94,15 @@ model.add(Dense(10, activation= 'softmax'))
 
 
 
-filepath = "C:\_data\_save\MCP\_k31"
 
 
+'''
 #3. 컴파일, 훈련
 model.compile( loss= 'categorical_crossentropy', optimizer= 'adam', metrics= 'acc')
-es = EarlyStopping(monitor = 'val_loss', mode = 'auto', patience = 50, verbose = 0, restore_best_weights= True)
-mcp = ModelCheckpoint(monitor='val_loss', mode = 'auto', verbose= 1, save_best_only=True, filepath= filepath)
-
-start_time = time.time()
-model.fit( x_train, y_train, batch_size=216, verbose=2, epochs= 200, validation_split=0.2,callbacks=[es,mcp])
-end_time =time.time()
+model.fit( x_train, y_train, batch_size=32, verbose=1, epochs= 100, validation_split=0.2)
 
 #4. 평가, 예측
 results = model.evaluate(x_test,y_test)
 print('loss:', results[0])
 print('acc:',  results[1])
-print('걸린시간 :' , end_time - start_time, "초" )
+'''

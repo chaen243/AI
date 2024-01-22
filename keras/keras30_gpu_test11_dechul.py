@@ -5,7 +5,7 @@
 #값 자른거 수치화까지!
 
 from keras.models import Sequential
-from keras.layers import Dense,Dropout
+from keras.layers import Dense,Dropout, BatchNormalization
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -15,6 +15,7 @@ from keras.callbacks import EarlyStopping
 import time
 import warnings
 warnings.filterwarnings(action='ignore')
+from keras.utils import to_categorical
 
 
 #1. 데이터
@@ -75,7 +76,7 @@ for i in range(len(train_working_time)):
         train_working_time.iloc[i] = int(data.split()[0])
         
     
-train_working_time = train_working_time.fillna(train_working_time.max())
+train_working_time = train_working_time.fillna(train_working_time.mean())
 
 #print(train_working_time)
 
@@ -102,7 +103,7 @@ test_csv['근로기간'] = test_working_time
 
 #대출목적 전처리
 test_loan_perpose = test_csv['대출목적']
-train_loan_perpose = test_csv['대출목적']
+train_loan_perpose = train_csv['대출목적']
 
 
 
@@ -110,10 +111,26 @@ for i in range(len(test_loan_perpose)):
     data = test_loan_perpose.iloc[i]
     if data == '결혼':
         test_loan_perpose.iloc[i] = np.NaN
+        
 
-test_loan_perpose = test_loan_perpose.fillna(method='ffill')
+# for i in range(len(test_loan_perpose)):
+#     data = test_loan_perpose.iloc[i]
+#     if data == '기타':
+#         test_loan_perpose.iloc[i] = np.NaN
+               
+# for i in range(len(train_loan_perpose)):
+#     data = train_loan_perpose.iloc[i]
+#     if data == '기타':
+#         train_loan_perpose.iloc[i] = np.NaN
+        
+
+test_loan_perpose = test_loan_perpose.fillna(method='bfill')
+train_loan_perpose = train_loan_perpose.fillna(method='ffill')
+
 
 test_csv['대출목적'] = test_loan_perpose
+train_csv['대출목적'] = train_loan_perpose
+
 
 
 
@@ -169,16 +186,19 @@ y = train_csv['대출등급']
 
 y = le.fit_transform(y)
 
-y= y.reshape(-1,1)
-ohe = OneHotEncoder(sparse= False)
-y = ohe.fit_transform(y)
+
+
+# ohe = OneHotEncoder(sparse = False)
+# ohe.fit(y)
+# y_ohe = ohe.transform(y)
+# print(y_ohe.shape)  
 
 
      
 from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
 from sklearn.preprocessing import StandardScaler, RobustScaler
 
-mms = MinMaxScaler(feature_range=(2,5))
+mms = MinMaxScaler(feature_range=(2,4))
 #mms = StandardScaler()
 #mms = MaxAbsScaler()
 #mms = RobustScaler()
@@ -197,23 +217,24 @@ test_csv=mms.transform(test_csv)
 
 x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.8,  shuffle= True, random_state= 9876, stratify= y) 
 
-     
+y_train = to_categorical(y_train, 7)
+y_test = to_categorical(y_test, 7) 
 #민맥스 - 스탠다드
 from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
 from sklearn.preprocessing import StandardScaler, RobustScaler, Normalizer
 
 #mms = MinMaxScaler(feature_range=(1,5))
-mms = StandardScaler()
+#mms = StandardScaler()
 #mms = MaxAbsScaler()
-#mms = RobustScaler()
-#mms = Normalizer()
+mms = RobustScaler()
+
 
 
 mms.fit(x_train)
 x_train= mms.transform(x_train)
 x_test= mms.transform(x_test)
 test_csv= mms.transform(test_csv)
-#1standard swish (0.90), 4standard relu (0.88)완 2robust swish(0.90)완 3robust relu (0.88)(완)
+
         
 
  
@@ -225,22 +246,40 @@ test_csv= mms.transform(test_csv)
 
 # #2. 모델구성
 
-# model = Sequential()  
-# model.add(Dense(3, input_shape= (13,), activation='sigmoid'))
-# model.add(Dense(512, activation='swish'))
-# model.add(Dropout(0.05))
-# model.add(Dense(7, activation='swish'))
-# model.add(Dense(256, activation='swish'))
-# model.add(Dense(5, activation='swish'))
-# model.add(Dense(128, activation='swish'))
-# model.add(Dense(6, activation='swish'))
-# model.add(Dense(64, activation='swish'))
-# model.add(Dense(7, activation = 'softmax'))
+model = Sequential()
+model.add(Dense(50, input_dim=13, activation='relu'))
+model.add(Dense(10, activation='relu'))
+model.add(Dense(80, activation='relu'))
+model.add(BatchNormalization())
+model.add(Dense(10, activation='relu'))
+model.add(Dense(70, activation='relu'))
+model.add(Dense(10, activation='relu'))
+model.add(Dense(60, activation='relu'))
+model.add(Dense(10, activation='relu'))
+model.add(Dense(50, activation='relu'))
+model.add(Dense(10, activation='relu'))
+model.add(Dense(40, activation='relu'))
+model.add(Dense(10, activation='relu'))
+model.add(Dense(50, activation='relu'))
+model.add(Dense(7, activation='softmax'))
+
+'''
+model = Sequential()  
+model.add(Dense(3, input_shape= (13,), activation='swish'))
+model.add(Dense(512, activation='swish'))
+model.add(Dropout(0.05))
+model.add(Dense(7, activation='swish'))
+model.add(Dense(256, activation='swish'))
+model.add(Dense(5, activation='swish'))
+model.add(Dense(128, activation='swish'))
+model.add(Dense(6, activation='swish'))
+model.add(Dense(64, activation='swish'))
+model.add(Dense(7, activation = 'softmax'))
 
 model = Sequential()  
 model.add(Dense(7, input_shape= (13,), activation='relu'))
 model.add(Dense(512, activation='relu'))
-model.add(Dropout(0.05))
+#model.add(Dropout(0.05))
 model.add(Dense(7, activation='relu'))
 model.add(Dense(128, activation='relu'))
 model.add(Dense(7, activation='relu'))
@@ -249,8 +288,7 @@ model.add(Dense(32, activation='relu'))
 #model.add(Dense(7, activation='relu'))
 #model.add(Dense(128, activation='relu'))
 model.add(Dense(7, activation = 'softmax'))
-
-
+'''
 #3. 컴파일, 훈련
 
 import datetime
@@ -277,7 +315,7 @@ mcp = ModelCheckpoint(monitor='val_loss', mode = 'auto', verbose= 1, save_best_o
 
 model.compile(loss= 'categorical_crossentropy', optimizer= 'adam', metrics= 'acc' ) #mae 2.64084 r2 0.8278   mse 12.8935 r2 0.82
 start_time = time.time()
-hist = model.fit(x_train, y_train, callbacks=[es, mcp], epochs= 98765, batch_size = 500, validation_split= 0.35, verbose=2)
+hist = model.fit(x_train, y_train, callbacks=[es, mcp], epochs= 98765, batch_size = 500, validation_split= 0.15, verbose=2)
 end_time = time.time()
 
 
