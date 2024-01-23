@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from keras.models import Sequential
 from keras.layers import Dense, MaxPooling2D, Conv2D, Flatten, Dropout
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from keras.utils import to_categorical
 
 
@@ -32,22 +33,27 @@ print(np.unique(y_train, return_counts= True))
 y_train = to_categorical(y_train)
 y_test = to_categorical(y_test)
 
-(x_train, x_valid) = x_train[5000:], x_train[:5000]
-(y_train, y_valid) = y_train[5000:], y_train[:5000]
 
+
+
+# x_train = x_train.reshape(60000, 28, 28, 1)
+# x_test = x_test.reshape(10000, 28, 28, 1)
+
+# print(x_train.shape[0]) #60000
 
 #스케일링1-1 
+#x_train = x_train/255. #1.0 0.0
+#x_test = x_test/255.
 
-x_train = x_train.astype('float32')/255.
-x_test = x_test.astype('float32')/255.
-
-
+# loss: 0.19173261523246765
+# acc: 0.9474999904632568
 
 #스케일링 1-2
 # x_train = (x_train - 127.5)/127.5
 # x_test = (x_test - 127.5)/127.5
 
-
+# loss: 0.19397728145122528
+# acc: 0.9456999897956848
 
 #numpy에서 연산할땐 부동소수점을 만들어 주는게 연산이 빨라지고 성능도 좋아질수있음.
 #이미지데이터에서는 민맥스를 많이 사용.
@@ -59,20 +65,22 @@ x_test = x_test.astype('float32')/255.
 # x_train = scaler.fit_transform(x_train)
 # x_test = scaler.transform(x_test)
 
-
-
+#loss: 0.17799176275730133
+#acc: 0.9465000033378601
 
 # # 스케일링2-2
-# x_train = x_train.reshape(-1, 28*28) #1.0 0.0
-# x_test = x_test.reshape(-1, 28*28)
+x_train = x_train.reshape(60000, 28*28,3) #1.0 0.0
+x_test = x_test.reshape(10000, 28*28,3)
 
-# scaler = StandardScaler()
-# x_train = scaler.fit_transform(x_train)
-# x_test = scaler.transform(x_test)
+scaler = StandardScaler()
+x_train = scaler.fit_transform(x_train)
+x_test = scaler.transform(x_test)
 
-
+# loss: 0.22253981232643127
+# acc: 0.9469000101089478
 # 정규화 MinMaxScaler
 # 일반화 standardScaler
+
 
 
 print(x_train.shape, x_test.shape)
@@ -147,6 +155,4 @@ print('loss:', results[0])
 print('acc:',  results[1])
 print('걸린시간 :' , end_time - start_time, "초" )
 
-# loss: 0.6674924492835999
-# acc: 0.7788000106811523
-# 걸린시간 : 459.2906882762909 초
+
