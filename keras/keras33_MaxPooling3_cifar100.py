@@ -29,7 +29,7 @@ from keras.utils import to_categorical
 #        500, 500, 500, 500, 500, 500, 500, 500, 500]
 
 
-
+#민맥스!
 x_train = x_train.astype('float32')/255
 x_test = x_test.astype('float32')/255
 

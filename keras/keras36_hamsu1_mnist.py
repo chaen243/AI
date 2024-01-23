@@ -6,10 +6,9 @@ import numpy as np
 from keras.datasets import mnist
 import pandas as pd
 import matplotlib.pyplot as plt
-from keras.models import Sequential
-from keras.layers import Dense, Conv2D, Flatten, Dropout
+from keras.models import Sequential, Model
+from keras.layers import Dense, Conv2D, Flatten, Dropout, MaxPooling2D, Input
 from keras.callbacks import EarlyStopping, ModelCheckpoint
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
 import time
 
 
@@ -32,46 +31,9 @@ print(pd.value_counts(y_test))
 
 # print(x_train.shape[0]) #60000
 
-#스케일링1-1 
-#x_train = x_train/255. #1.0 0.0
-#x_test = x_test/255.
 
-# loss: 0.19173261523246765
-# acc: 0.9474999904632568
-
-#스케일링 1-2
-# x_train = (x_train - 127.5)/127.5
-# x_test = (x_test - 127.5)/127.5
-
-# loss: 0.19397728145122528
-# acc: 0.9456999897956848
-
-#numpy에서 연산할땐 부동소수점을 만들어 주는게 연산이 빨라지고 성능도 좋아질수있음.
-#이미지데이터에서는 민맥스를 많이 사용.
-# 스케일링 2-1
-# x_train = x_train.reshape(-1, 28*28) #1.0 0.0
-# x_test = x_test.reshape(-1, 28*28)
-
-# scaler = MinMaxScaler()
-# x_train = scaler.fit_transform(x_train)
-# x_test = scaler.transform(x_test)
-
-#loss: 0.17799176275730133
-#acc: 0.9465000033378601
-
-# # 스케일링2-2
-x_train = x_train.reshape(-1, 28*28) #1.0 0.0
-x_test = x_test.reshape(-1, 28*28)
-
-scaler = StandardScaler()
-x_train = scaler.fit_transform(x_train)
-x_test = scaler.transform(x_test)
-
-# loss: 0.22253981232643127
-# acc: 0.9469000101089478
-# 정규화 MinMaxScaler
-# 일반화 standardScaler
-
+x_train = x_train.reshape(-1, 28, 28, 1)
+x_test = x_test.reshape(x_test.shape[0],x_test.shape[1] ,x_test.shape[2], 1)
 
 print(x_train.shape, x_test.shape)
 
@@ -80,25 +42,45 @@ print(x_train.shape, x_test.shape)
 y_train = pd.get_dummies(y_train)
 y_test = pd.get_dummies(y_test)
 
-print(np.max(x_train), np.min(x_test))
 
-x_train = x_train.reshape(60000, 28, 28, 1)
-x_test = x_test.reshape(10000, 28, 28, 1)
+
 
 #2.모델
 model = Sequential()
-model.add(Conv2D(30, (2,2),
-                 input_shape= (28, 28, 1))) #첫 아웃풋 = filter
+model.add(Conv2D(50, (2,2),
+                 input_shape= (28, 28, 1),padding='same')) #첫 아웃풋 = filter
 # shape = (batch_size, rows, columns, channels)
 # shape = (batch_size, heights, widths, channels)
-model.add(Conv2D(filters=20, kernel_size=(2,2)))
+model.add(Conv2D(filters=20, kernel_size=(2,2), strides=2))
+#model.add(MaxPooling2D())
 model.add(Conv2D(10, (2,2))) 
+model.add(Conv2D(10, (1,1))) 
 model.add(Flatten()) #(n,22*22*15)의 모양을 펴져있는 모양으로 변형.
 model.add(Dense(500))
 model.add(Dropout(0.05))
 # shape = (batch_size(=model.fit의 batch_size와 같음.), input_dim) 
 model.add(Dense(20, activation='swish'))
 model.add(Dense(10, activation= 'softmax'))
+
+model.summary()
+
+input = Input(shape=x_train.shape[1:])
+c1 = Conv2D(50, (2,2), padding= 'same')(input)
+c2 = Conv2D(10, (2,2), )(c1)
+m1 = MaxPooling2D()(c2)
+c3 = Conv2D(10, (2,2))(m1)
+c4 = Conv2D(10, (1,1))(c3)
+f1 = Flatten()(c4)
+d1 = Dense(500)(f1)
+dr1 = Dropout(0.05)(d1)
+d2 = Dense(20, activation= 'swish')(dr1)
+op1 = Dense(10, activation= 'softmax')(d2)
+model = Model(inputs= ip1, outputs= op1)
+
+model.summary()
+
+
+
 
 
 #batch_size는 전체 행에서 원하는만큼 행을 나눠 훈련) 레이어별로 다르게 지정 불가. (SHAPE ERROR 뜸.)
@@ -132,7 +114,7 @@ model.add(Dense(10, activation= 'softmax'))
 # Non-trainable params: 0
 # _________________________________________________________________
 
-
+'''
 
 filepath = "C:\_data\_save\MCP\_k31"
 
@@ -152,6 +134,14 @@ print('loss:', results[0])
 print('acc:',  results[1])
 print('걸린시간 :' , end_time - start_time, "초" )
 
-# loss: 0.16547049582004547
-# acc: 0.9526000022888184
-# 걸린시간 : 26.87352156639099 초
+# #padding/
+# loss: 0.1907665878534317
+# acc: 0.9490000009536743model
+# 걸린시간 : 56.741090059280396 초
+
+
+# #MaxPooling
+# loss: 0.08347584307193756
+# acc: 0.9758999943733215
+# 걸린시간 : 36.64556956291199 초
+'''

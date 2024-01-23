@@ -5,7 +5,7 @@
 #값 자른거 수치화까지!
 
 from keras.models import Sequential
-from keras.layers import Dense,Dropout, BatchNormalization
+from keras.layers import Dense,Dropout, BatchNormalization,Conv2D,Flatten, MaxPooling2D
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -198,7 +198,7 @@ y = le.fit_transform(y)
 from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
 from sklearn.preprocessing import StandardScaler, RobustScaler
 
-mms = MinMaxScaler(feature_range=(1,3))
+mms = MinMaxScaler(feature_range=(1,2))
 #mms = StandardScaler()
 #mms = MaxAbsScaler()
 #mms = RobustScaler()
@@ -215,12 +215,13 @@ test_csv=mms.transform(test_csv)
 #print(np.unique(y, return_counts= True)) #Name: 근로기간, Length: 96294, dtype: float64
 
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.9,  shuffle= True, random_state= 279, stratify= y) #170 #279 
 
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.85,  shuffle= True, random_state= 279, stratify= y) #170 #279 
+
+# print(x_test.shape) #(14445, 13, 1, 1)
+# print(x_train.shape) #(81849, 13, 1, 1)
 y_train = to_categorical(y_train, 7)
 y_test = to_categorical(y_test, 7) 
-
-
 #민맥스 - 스탠다드
 from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
 from sklearn.preprocessing import StandardScaler, RobustScaler, Normalizer
@@ -230,6 +231,9 @@ from sklearn.preprocessing import StandardScaler, RobustScaler, Normalizer
 #mms = MaxAbsScaler()
 mms = RobustScaler()
 
+x_train= x_train.reshape(-1,1)
+x_test= x_test.reshape(-1,1)
+test_csv= test_csv.reshape(-1,1)
 
 
 mms.fit(x_train)
@@ -237,8 +241,15 @@ x_train= mms.transform(x_train)
 x_test= mms.transform(x_test)
 test_csv= mms.transform(test_csv)
 
-        
+# x_train= x_train.reshape(-1,1)
+# x_test= x_test.reshape(-1,1)
+# test_csv= test_csv.reshape(-1,1)
 
+x_test = x_test.reshape(14445, 13, 1, 1)
+x_train = x_train.reshape(81849, 13, 1, 1)
+test_csv = test_csv.reshape(64197, 13, 1, 1)
+
+       
  
 #encoder.fit(y_train)
 #y_train = encoder.transform(y_train)
@@ -248,8 +259,24 @@ test_csv= mms.transform(test_csv)
 
 # #2. 모델구성
 
+model= Sequential()
+model.add(Conv2D(10, (1,1), input_shape= (13,1,1), padding= 'same', activation= 'relu'))
+model.add(Conv2D(10,(2,1), activation= 'relu', padding='same'))
+model.add(Flatten())
+model.add(Dense(200, activation= 'relu'))
+model.add(Dense(20, activation='relu'))
+model.add(Dense(7, activation= 'softmax'))
+
+
+
+
+
+
+
+
+
 # model = Sequential()
-# model.add(Dense(20, input_dim=13, activation='relu'))
+# model.add(Dense(50, input_dim=13, activation='relu'))
 # model.add(Dense(10, activation='relu'))
 # model.add(Dense(80, activation='relu'))
 # model.add(Dense(10, activation='relu'))
@@ -264,12 +291,11 @@ test_csv= mms.transform(test_csv)
 # model.add(Dense(50, activation='relu'))
 # model.add(Dense(7, activation='softmax'))
 
-
+'''
 model = Sequential()
 model.add(Dense(10, input_dim=13, activation='swish'))
 model.add(Dense(20, activation='swish'))
 model.add(Dense(80, activation='swish'))
-model.add(BatchNormalization())
 #model.add(Dropout(0.2))
 #model.add(Dense(10, activation='swish'))
 #model.add(Dense(70, activation='swish'))
@@ -284,7 +310,7 @@ model.add(Dense(50, activation='swish'))
 #model.add(Dropout(0.2))
 model.add(Dense(7, activation='softmax'))
 
-'''
+
 model = Sequential()  
 model.add(Dense(3, input_shape= (13,), activation='swish'))
 model.add(Dense(512, activation='swish'))
@@ -330,13 +356,15 @@ x_test = np.asarray(x_test).astype(np.float32)
 test_csv = np.asarray(test_csv).astype(np.float32)
 
 
+
+
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 es = EarlyStopping(monitor = 'val_loss', mode = 'auto', patience = 2468, verbose = 0, restore_best_weights= True)
 mcp = ModelCheckpoint(monitor='val_loss', mode = 'auto', verbose= 1, save_best_only=True, filepath= filepath)
 
 model.compile(loss= 'categorical_crossentropy', optimizer= 'adam', metrics= 'acc' ) #mae 2.64084 r2 0.8278   mse 12.8935 r2 0.82
 start_time = time.time()
-hist = model.fit(x_train, y_train, callbacks=[es, mcp], epochs= 98765, batch_size = 500, validation_split= 0.25, verbose=2)
+hist = model.fit(x_train, y_train, callbacks=[es, mcp], epochs= 98765, batch_size = 500, validation_split= 0.2, verbose=2)
 end_time = time.time()
 
 
@@ -404,10 +432,8 @@ plt.show()
 #걸린 시간 : 4938.4 초
 #gpu
 
-
-
-
-
-
-
-
+# cnn
+# 로스 : 0.4533825218677521
+# 정확도 : 0.8333679437637329
+# 걸린 시간 : 548.73 초
+# F1:  0.7890283816093876

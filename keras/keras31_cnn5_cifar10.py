@@ -24,23 +24,10 @@ print(np.unique(y_train, return_counts= True))
 #x_test = x_test.reshape(x_test.shape[0],x_test.shape[1] ,x_test.shape[2], 3)
 
 
-x_train = x_train.astype('float32')/255
-x_test = x_test.astype('float32')/255
 
 
-
-print(x_train.shape)
-print(x_test.shape)
-
-
-
-
-
-
-from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
-from sklearn.preprocessing import StandardScaler, RobustScaler, Normalizer
-
-
+#print(x_train.shape)
+#print(x_test.shape)
 
 y_train = to_categorical(y_train)
 y_test = to_categorical(y_test)
@@ -48,16 +35,57 @@ y_test = to_categorical(y_test)
 (x_train, x_valid) = x_train[5000:], x_train[:5000]
 (y_train, y_valid) = y_train[5000:], y_train[:5000]
 
-#mms = MinMaxScaler(feature_range=(0,1))
-#mms = StandardScaler()
-#mms = MaxAbsScaler()
-#mms = RobustScaler()
+
+#스케일링1-1 
+
+x_train = x_train.astype('float32')/255.
+x_test = x_test.astype('float32')/255.
 
 
 
-# x_train = mms.fit_transform(x_train.reshape(-1, x_train.shape[-1])).reshape(x_train.shape)
-# X_test = mms.transform(x_test.reshape(-1, x_test.shape[-1])).reshape(x_test.shape)
-# X_valid = mms.transform(x_valid.reshape(-1, x_valid.shape[-1])).reshape(x_valid.shape)
+#스케일링 1-2
+# x_train = (x_train - 127.5)/127.5
+# x_test = (x_test - 127.5)/127.5
+
+
+
+#numpy에서 연산할땐 부동소수점을 만들어 주는게 연산이 빨라지고 성능도 좋아질수있음.
+#이미지데이터에서는 민맥스를 많이 사용.
+# 스케일링 2-1
+# x_train = x_train.reshape(-1, 28*28) #1.0 0.0
+# x_test = x_test.reshape(-1, 28*28)
+
+# scaler = MinMaxScaler()
+# x_train = scaler.fit_transform(x_train)
+# x_test = scaler.transform(x_test)
+
+
+
+
+# # 스케일링2-2
+# x_train = x_train.reshape(-1, 28*28) #1.0 0.0
+# x_test = x_test.reshape(-1, 28*28)
+
+# scaler = StandardScaler()
+# x_train = scaler.fit_transform(x_train)
+# x_test = scaler.transform(x_test)
+
+
+# 정규화 MinMaxScaler
+# 일반화 standardScaler
+
+
+print(x_train.shape, x_test.shape)
+
+
+
+# y_train = pd.get_dummies(y_train)
+# y_test = pd.get_dummies(y_test)
+
+print(np.max(x_train), np.min(x_test))
+
+# x_train = x_train.reshape(60000, 28, 28, 1)
+# x_test = x_test.reshape(10000, 28, 28, 1)
 
 #2.모델
 model = Sequential()
