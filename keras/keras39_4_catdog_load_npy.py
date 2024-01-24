@@ -16,15 +16,15 @@ start_time = time.time()
 #1 데이터
 np_path = "C:\\_data\\_save_npy\\"
 
-x_train = np.load(np_path + 'keras39_3_x_train.npy')
-y_train = np.load(np_path + 'keras39_3_y_train.npy')
+x = np.load(np_path + 'keras39_3_x_train.npy')
+y = np.load(np_path + 'keras39_3_y_train.npy')
 test = 'C:\_data\image\CatDog\Test'
 
 
 
 x_train , x_test, y_train , y_test = train_test_split(
-    x_train, y_train,random_state= 3702 , shuffle= True,
-    stratify=y_train)
+    x, y,random_state= 3702 , shuffle= True,
+    stratify=y)
 
 
 # train_datagen = ImageDataGenerator(rescale=1./255,)
@@ -146,7 +146,7 @@ hist = model.fit(x_train,y_train, epochs = 1000 , batch_size= 50 , validation_sp
 
 #4 평가, 예측
 result = model.evaluate(x_test,y_test)
-y_predict = model.predict(x_test)
+y_predict = model.predict(test)
 
 print('loss',result)
 end_time = time.time()
