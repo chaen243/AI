@@ -41,13 +41,13 @@ path_test = 'C:\\_data\\kaggle\\men_women\\test\\'
 
 start_time2 = time.time()
 xy_train = train_datagen.flow_from_directory(path_train, 
-                                             target_size = (600,600), #원본데이터보다 작아질수록 성능이많이 떨어짐. 최대한 원본과 사이즈를 맞춰주는게 좋음.
+                                             target_size = (200,200), #원본데이터보다 작아질수록 성능이많이 떨어짐. 최대한 원본과 사이즈를 맞춰주는게 좋음.
                                              batch_size = 20000,
                                              class_mode='binary', 
                                              shuffle=True)
 
 xy_test = test_datagen.flow_from_directory(path_test, 
-                                           target_size=(600, 600),
+                                           target_size=(200, 200),
                                            batch_size=20000,
                                            class_mode='binary',
                                            shuffle=False,)
@@ -76,7 +76,7 @@ x=[]
 y=[]
 failed_i = []
 
-for i in range(int(6618 / BATCH )):
+for i in range(int(4000 / BATCH )):
     try: 
         xy_data = xy_train.next()
         new_x = xy_data[0]
@@ -106,7 +106,7 @@ end_time2 = time.time()
 
 np_path = "C:\\_data\\_save_npy\\manwoman"
 np.save(np_path + 'keras39_5_x_train.npy', arr=xy_train[0][0])
-np.save(np_path + 'keras39_6_y_train.npy', arr=xy_train[0][1])
+np.save(np_path + 'keras39_5_y_train.npy', arr=xy_train[0][1])
 np.save(np_path + 'keras39_5_x_test.npy', arr=xy_test[0][0])
 np.save(np_path + 'keras39_5_y_test.npy', arr=xy_test[0][0])
 

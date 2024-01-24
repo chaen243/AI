@@ -36,14 +36,14 @@ path_test = 'c://_data//image//catdog//Test//'
 
 start_time2 = time.time()
 xy_train = train_datagen.flow_from_directory(path_train, 
-                                             target_size = (500,500), #원본데이터보다 작아질수록 성능이많이 떨어짐. 최대한 원본과 사이즈를 맞춰주는게 좋음.
+                                             target_size = (200,200), #원본데이터보다 작아질수록 성능이많이 떨어짐. 최대한 원본과 사이즈를 맞춰주는게 좋음.0
                                              batch_size = BATCH_SIZE,
                                              class_mode='binary', 
                                              shuffle=True)
 
 
 xy_test = test_datagen.flow_from_directory(
-      path_test, target_size=(500, 500),
+      path_test, target_size=(200, 200),
       batch_size=BATCH_SIZE,
       class_mode='binary',
       shuffle=False,)
@@ -86,7 +86,7 @@ for i in range(int(20000 / BATCH_SIZE)):
 end_time2 = time.time()
 
 
-save_path = "C:\\_data\\_save_npy\\" +f"data_{500}px"
+save_path = "C:\\_data\\_save_npy\\" +f"data_{200}px"
 np.save(save_path+"_x.npy",arr=x)
 np.save(save_path+"_y.npy",arr=y)
 np.save(save_path+"_test.npy",arr=xy_test[0][0])
