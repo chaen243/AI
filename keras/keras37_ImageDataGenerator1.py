@@ -25,6 +25,7 @@ path_test = 'C:\\_data\\image\\brain\\test\\'
 xy_train = train_datagen.flow_from_directory( #폴더 안에 있는 칭구들 수치화 해줌.
     path_train, target_size=(200, 200), #모든 타겟의 사이즈를 target size의 size로 맞춰준다.
     batch_size=10, #크게 잡으면(현 데이터에서는 160이상) 통데이터만큼 가져와줌.
+    color_mode='grayscale', #디폴트(칼라)는 'rpg'
     class_mode='binary',
     shuffle=True,
 )# Found 160 images belonging to 2 classes. 수치화된 160개의 이미지에 (160, )의 y가 생성됨/
