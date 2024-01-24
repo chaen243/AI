@@ -146,7 +146,7 @@ hist = model.fit(x_train,y_train, epochs = 1000 , batch_size= 50 , validation_sp
 
 #4 평가, 예측
 result = model.evaluate(x_test,y_test)
-y_predict = model.predict(test)
+y_predict = model.predict(x_test)
 
 print('loss',result)
 end_time = time.time()
