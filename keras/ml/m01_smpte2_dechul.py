@@ -12,6 +12,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import f1_score
 from sklearn.preprocessing import OneHotEncoder, LabelEncoder, MinMaxScaler
 from keras.callbacks import EarlyStopping
+from imblearn.over_sampling import BorderlineSMOTE, SMOTE
+import sklearn as sk
 import time
 import warnings
 warnings.filterwarnings(action='ignore')
@@ -113,18 +115,18 @@ for i in range(len(test_loan_perpose)):
         test_loan_perpose.iloc[i] = np.NaN
         
 
-# for i in range(len(test_loan_perpose)):
-#     data = test_loan_perpose.iloc[i]
-#     if data == '기타':
-#         test_loan_perpose.iloc[i] = np.NaN
+for i in range(len(test_loan_perpose)):
+    data = test_loan_perpose.iloc[i]
+    if data == '기타':
+        test_loan_perpose.iloc[i] = np.NaN
                
-# for i in range(len(train_loan_perpose)):
-#     data = train_loan_perpose.iloc[i]
-#     if data == '기타':
-#         train_loan_perpose.iloc[i] = np.NaN
+for i in range(len(train_loan_perpose)):
+    data = train_loan_perpose.iloc[i]
+    if data == '기타':
+        train_loan_perpose.iloc[i] = np.NaN
         
 
-test_loan_perpose = test_loan_perpose.fillna(method='bfill')
+test_loan_perpose = test_loan_perpose.fillna(method='ffill')
 train_loan_perpose = train_loan_perpose.fillna(method='ffill')
 
 
@@ -138,8 +140,8 @@ train_csv['대출목적'] = train_loan_perpose
 
 
 ######## 결측치확인
-print(test_csv.isnull().sum()) #없음.
-print(train_csv.isnull().sum()) #없음.
+# print(test_csv.isnull().sum()) #없음.
+# print(train_csv.isnull().sum()) #없음.
 
 
 
@@ -215,11 +217,12 @@ test_csv=mms.transform(test_csv)
 #print(np.unique(y, return_counts= True)) #Name: 근로기간, Length: 96294, dtype: float64
 
 
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.88,  shuffle= True, random_state= 89, stratify= y) #170 #279 
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.85,  shuffle= True, random_state= 279, stratify= y) #170 #279 
+# smote = SMOTE(random_state=270,sampling_strategy='auto',k_neighbors=10,)
+# x_train, y_train =smote.fit_resample(x_train, y_train)
 
-# print(x_test.shape) #(14445, 13, 1, 1)
-# print(x_train.shape) #(81849, 13, 1, 1)
+
 y_train = to_categorical(y_train, 7)
 y_test = to_categorical(y_test, 7) 
 #민맥스 - 스탠다드
@@ -227,13 +230,10 @@ from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
 from sklearn.preprocessing import StandardScaler, RobustScaler, Normalizer
 
 #mms = MinMaxScaler(feature_range=(1,5))
-#mms = StandardScaler()
+mms = StandardScaler()
 #mms = MaxAbsScaler()
-mms = RobustScaler()
+#mms = RobustScaler()
 
-x_train= x_train.reshape(-1,1)
-x_test= x_test.reshape(-1,1)
-test_csv= test_csv.reshape(-1,1)
 
 
 mms.fit(x_train)
@@ -241,15 +241,8 @@ x_train= mms.transform(x_train)
 x_test= mms.transform(x_test)
 test_csv= mms.transform(test_csv)
 
-# x_train= x_train.reshape(-1,1)
-# x_test= x_test.reshape(-1,1)
-# test_csv= test_csv.reshape(-1,1)
+        
 
-x_test = x_test.reshape(14445, 4, 3, 1)
-x_train = x_train.reshape(81849, 4, 3, 1)
-test_csv = test_csv.reshape(64197, 4, 3, 1)
-
-       
  
 #encoder.fit(y_train)
 #y_train = encoder.transform(y_train)
@@ -259,85 +252,45 @@ test_csv = test_csv.reshape(64197, 4, 3, 1)
 
 # #2. 모델구성
 
-model= Sequential()
-model.add(Conv2D(64, (3,3), input_shape= (4,3,1), padding= 'same', activation= 'relu'))
-model.add(Conv2D(64,(3,3), activation= 'relu', padding='same'))
-model.add(MaxPooling2D())
-model.add(Conv2D(128,(3,3), activation= 'relu', padding='same'))
-model.add(Conv2D(128,(3,3), activation= 'relu', padding='same'))
-model.add(MaxPooling2D())
-model.add(Conv2D(256,(3,3), activation= 'relu', padding='same'))
-model.add(Conv2D(256,(3,3), activation= 'relu', padding='same'))
-model.add(Conv2D(256,(3,3), activation= 'relu', padding='same'))
-model.add(MaxPooling2D())
-model.add(Conv2D(512,(3,3), activation= 'relu', padding='same'))
-model.add(Conv2D(512,(3,3), activation= 'relu', padding='same'))
-model.add(Conv2D(512,(3,3), activation= 'relu', padding='same'))
-model.add(MaxPooling2D())
-model.add(Conv2D(512,(3,3), activation= 'relu', padding='same'))
-model.add(Conv2D(512,(3,3), activation= 'relu', padding='same'))
-model.add(Conv2D(512,(3,3), activation= 'relu', padding='same'))
-model.add(MaxPooling2D())
-model.add(Flatten())
-model.add(Dense(4096, activation= 'relu'))
-model.add(Dense(4096, activation= 'relu'))
-model.add(Dense(7, activation= 'softmax'))
 
 
-
-
-
-
-
-
-
-# model = Sequential()
-# model.add(Dense(50, input_dim=13, activation='relu'))
-# model.add(Dense(10, activation='relu'))
-# model.add(Dense(80, activation='relu'))
-# model.add(Dense(10, activation='relu'))
-# model.add(Dense(70, activation='relu'))
-# model.add(Dense(10, activation='relu'))
-# model.add(Dense(60, activation='relu'))
-# model.add(Dense(10, activation='relu'))
-# model.add(Dense(50, activation='relu'))
-# model.add(Dense(10, activation='relu'))
-# model.add(Dense(40, activation='relu'))
-# model.add(Dense(10, activation='relu'))
-# model.add(Dense(50, activation='relu'))
-# model.add(Dense(7, activation='softmax'))
+model = Sequential()
+model.add(Dense(50, input_dim=13, activation='relu'))
+model.add(Dense(10, activation='relu'))
+model.add(Dense(80, activation='relu'))
+model.add(Dense(10, activation='relu'))
+model.add(Dense(70, activation='relu'))
+model.add(Dense(10, activation='relu'))
+model.add(Dense(60, activation='relu'))
+model.add(Dense(10, activation='relu'))
+model.add(Dense(50, activation='relu'))
+model.add(Dense(10, activation='relu'))
+model.add(Dense(40, activation='relu'))
+model.add(Dense(10, activation='relu'))
+model.add(Dense(50, activation='relu'))
+model.add(Dense(20, activation='relu'))
+model.add(Dense(7, activation='softmax'))
 
 '''
 model = Sequential()
 model.add(Dense(10, input_dim=13, activation='swish'))
 model.add(Dense(20, activation='swish'))
 model.add(Dense(80, activation='swish'))
-#model.add(Dropout(0.2))
-#model.add(Dense(10, activation='swish'))
-#model.add(Dense(70, activation='swish'))
-#model.add(Dense(10, activation='swish'))
-#model.add(Dense(60, activation='swish'))
-#model.add(Dense(10, activation='swish'))
-model.add(Dense(50, activation='swish'))
 model.add(Dense(10, activation='swish'))
+model.add(Dense(70, activation='swish'))
+model.add(Dense(10, activation='swish'))
+model.add(Dense(60, activation='swish'))
+model.add(Dense(10, activation='swish'))
+model.add(Dense(50, activation='swish'))
 model.add(Dense(40, activation='swish'))
-model.add(Dense(10, activation='swish'))
-model.add(Dense(50, activation='swish'))
-#model.add(Dropout(0.2))
+#model.add(Dense(40, activation='swish'))
+#model.add(Dense(10, activation='swish'))
+# model.add(Dense(50, activation='swish'))
+# model.add(Dense(30, activation='swish'))
+model.add(Dense(20, activation='swish'))
 model.add(Dense(7, activation='softmax'))
 
 
-model = Sequential()  
-model.add(Dense(3, input_shape= (13,), activation='swish'))
-model.add(Dense(512, activation='swish'))
-model.add(Dropout(0.05))
-model.add(Dense(7, activation='swish'))
-model.add(Dense(256, activation='swish'))
-model.add(Dense(5, activation='swish'))
-model.add(Dense(128, activation='swish'))
-model.add(Dense(6, activation='swish'))
-model.add(Dense(64, activation='swish'))
-model.add(Dense(7, activation = 'softmax'))
 
 model = Sequential()  
 model.add(Dense(7, input_shape= (13,), activation='relu'))
@@ -372,15 +325,13 @@ x_test = np.asarray(x_test).astype(np.float32)
 test_csv = np.asarray(test_csv).astype(np.float32)
 
 
-
-
 from keras.callbacks import EarlyStopping, ModelCheckpoint
-es = EarlyStopping(monitor = 'val_loss', mode = 'auto', patience = 2468, verbose = 0, restore_best_weights= True)
+es = EarlyStopping(monitor = 'val_loss', mode = 'auto', patience = 3468, verbose = 0, restore_best_weights= True)
 mcp = ModelCheckpoint(monitor='val_loss', mode = 'auto', verbose= 1, save_best_only=True, filepath= filepath)
 
 model.compile(loss= 'categorical_crossentropy', optimizer= 'adam', metrics= 'acc' ) #mae 2.64084 r2 0.8278   mse 12.8935 r2 0.82
 start_time = time.time()
-hist = model.fit(x_train, y_train, callbacks=[es, mcp], epochs= 98765, batch_size = 500, validation_split= 0.2, verbose=2)
+hist = model.fit(x_train, y_train, callbacks=[es, mcp], epochs= 98765, batch_size = 300, validation_split= 0.25, verbose=2)
 end_time = time.time()
 
 
@@ -447,9 +398,3 @@ plt.show()
 #cpu
 #걸린 시간 : 4938.4 초
 #gpu
-
-# cnn
-# 로스 : 0.4533825218677521
-# 정확도 : 0.8333679437637329
-# 걸린 시간 : 548.73 초
-# F1:  0.7890283816093876

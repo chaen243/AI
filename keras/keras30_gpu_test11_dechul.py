@@ -16,6 +16,11 @@ import time
 import warnings
 warnings.filterwarnings(action='ignore')
 from keras.utils import to_categorical
+from imblearn.over_sampling import SMOTE
+import sklearn as sk
+
+
+
 
 
 #1. 데이터
@@ -217,6 +222,9 @@ test_csv=mms.transform(test_csv)
 
 x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.85,  shuffle= True, random_state= 279, stratify= y) #170 #279 
 
+smote = SMOTE(random_state=123)
+x_train, y_train =smote.fit_resample(x_train, y_train)
+
 y_train = to_categorical(y_train, 7)
 y_test = to_categorical(y_test, 7) 
 #민맥스 - 스탠다드
@@ -246,20 +254,22 @@ test_csv= mms.transform(test_csv)
 
 # #2. 모델구성
 
+
 model = Sequential()
 model.add(Dense(40, input_dim=13, activation='relu'))
 model.add(Dense(7, activation='relu'))
 model.add(Dense(80, activation='relu'))
 model.add(Dense(7, activation='relu'))
 model.add(Dense(70, activation='relu'))
-model.add(Dense(7, activation='relu'))
-model.add(Dense(60, activation='relu'))
-model.add(Dense(7, activation='relu'))
-model.add(Dense(50, activation='relu'))
-model.add(Dense(7, activation='relu'))
-# model.add(Dense(40, activation='relu'))
-model.add(Dense(20, activation='relu'))
+# model.add(Dense(7, activation='relu'))
+# model.add(Dense(60, activation='relu'))
+# model.add(Dense(7, activation='relu'))
+# model.add(Dense(50, activation='relu'))
+# model.add(Dense(7, activation='relu'))
+# # model.add(Dense(40, activation='relu'))
+# model.add(Dense(20, activation='relu'))
 model.add(Dense(7, activation='softmax'))
+
 
 '''
 model = Sequential()

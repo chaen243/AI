@@ -48,6 +48,7 @@ x_augumented = x_augumented.reshape(-1, 32, 32, 3)
 x_augumented = train_datagen.flow(
     x_augumented, y_augumented,
     batch_size=augumet_size,
+    save_to_dir= 'c:\\_data\\temp\\',
     shuffle= False #섞이면 데이터가틀어짐.
 ).next()[0]
 

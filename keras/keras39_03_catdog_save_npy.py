@@ -48,18 +48,10 @@ xy_test = test_datagen.flow_from_directory(
       class_mode='binary',
       shuffle=False,)
 
-x = np.array(np.arange(0,27)).reshape(3,3,3,1)
-y = np.array(np.arange(0,27)).reshape(3,3,3,1)
 
-xy = np.vstack([x,y])
 
-x_train = xy_train[0][0]  
-y_train = xy_train[0][1]
-# x_test = xy_test[0][0]
-# y_test = xy_test[0][1]
-
-x=[]
-y=[]
+x = []
+y = []
 failed_i = []
 
 for i in range(int(20000 / BATCH_SIZE)):
@@ -79,9 +71,6 @@ for i in range(int(20000 / BATCH_SIZE)):
     except:
         print("failed i: ",i)
         failed_i.append(i)
-        
-
-
 
 end_time2 = time.time()
 

@@ -43,8 +43,9 @@ y_augumented = y_train[randidx].copy() #원데이터에 영향을 미치지 않�
 #print(x_augumented)
 #print(x_augumented.shape) #(40000, 28, 28)
 #print(y_augumented.shape) #(40000, )
-
 x_augumented = x_augumented.reshape(-1,28,28,1)
+
+
 
 x_augumented = train_datagen.flow(
     x_augumented, y_augumented,
