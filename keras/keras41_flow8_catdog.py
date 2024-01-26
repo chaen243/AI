@@ -16,16 +16,51 @@ start_time = time.time()
 #1 데이터
 path1 = 'C:\\_data\\image\\CatDog\\'
 train_path = path1 + "train\\"
-test_path = path1 + "test\\"
+test_path = path1 + "Test\\test"
 
 
 
 np_path = "C:\\_data\\_save_npy\\"
 
 x = np.load(np_path + 'data_200px_x.npy')
-y = np.load(np_path + 'data_200px_y.npy')
+y = np.load(np_path + 'data_200px_y.npy')   
 test = np.load(np_path+ "data_200px_test.npy")
 
+x = x/255.
+
+train_datagen = ImageDataGenerator(
+    #rescale=1./255,
+    horizontal_flip=True,
+    vertical_flip=True,
+    width_shift_range=0.2,
+    height_shift_range=0.2,
+    rotation_range=30,
+    zoom_range=0.2,
+    shear_range=0.2,
+    fill_mode='nearest', #nearest가 디폴트 #reflet 좌우반전,wrap 감싸줌, 
+
+)
+
+
+augumet_size = 10000
+
+randidx = np.random.randint(x.shape[0],size=augumet_size)
+
+x_augumented = x[randidx].copy()
+y_augumented = y[randidx].copy()
+
+x_augumented = x_augumented.reshape(-1,200,200,3)
+
+x_augumented = train_datagen.flow(
+    x_augumented, y_augumented,
+    batch_size=augumet_size,
+    shuffle= False #섞이면 데이터가틀어짐.
+).next()[0]
+
+x = x.reshape(-1, 200, 200, 3)
+
+x = np.concatenate((x,x_augumented))
+y = np.concatenate((y,y_augumented))
 
 x_train , x_test, y_train , y_test = train_test_split(
     x, y, train_size=0.7, random_state= 3702 , shuffle= True,
@@ -35,17 +70,6 @@ x_train , x_test, y_train , y_test = train_test_split(
 
 
 
-end_time2 = time.time()
-
-
-
-
-
-
-
-
-
-print(x_train.shape)
 
 
 
@@ -75,12 +99,12 @@ filepath = "C:\_data\_save\MCP\_k39\CatDog"
 from keras.callbacks import EarlyStopping,ModelCheckpoint
 import time
 
-es = EarlyStopping(monitor='val_acc' , mode = 'auto' , patience= 100 , restore_best_weights=True , verbose= 1  )
+es = EarlyStopping(monitor='val_acc' , mode = 'auto' , patience= 10 , restore_best_weights=True , verbose= 1  )
 mcp = ModelCheckpoint(monitor='val_acc', mode = 'auto', verbose= 1, save_best_only=True, filepath= filepath)
 
 
 model.compile(loss= 'binary_crossentropy' , optimizer='adam' , metrics=['acc'] )
-hist = model.fit(x_train,y_train, epochs = 15 , batch_size= 5 , validation_split= 0.2, verbose= 2 ,callbacks=[es, mcp])
+hist = model.fit(x_train,y_train, epochs = 100 , batch_size= 5 , validation_split= 0.2, verbose= 2 ,callbacks=[es, mcp])
 
 path = 'C:\\_data\\_save\\MCP\\_k39\\CatDog\\'
 
@@ -89,19 +113,15 @@ path = 'C:\\_data\\_save\\MCP\\_k39\\CatDog\\'
 import os
 
 
-loss = model.evaluate(x_test,y_test,verbose=0)
+loss = model.evaluate(x_test,y_test)
 y_prediect = model.predict(test)
 y_prediect = np.around(y_prediect.reshape(-1))
 print(y_prediect.shape)
 
-print(f"LOSS: {loss[0]:.6f}\nACC:  {loss[1]:.6f}")
-
-model.save(path+f"model_save\\acc_{loss[1]:.6f}.h5")
 
 
 
-forder_dir = path1+"test\\"
-id_list = os.listdir(forder_dir)
+id_list = os.listdir(test_path)
 for i, id in enumerate(id_list):
     id_list[i] = int(id.split('.')[0])
 
@@ -109,30 +129,19 @@ for id in id_list:
     print(id)
 
 y_submit = pd.DataFrame({'id':id_list,'Target':y_prediect})
-print(y_submit)
+#print(y_submit)
 y_submit.to_csv(path+f"submit\\acc_{loss[1]:.6f}.csv",index=False)
 
 
 
 end_time = time.time()
 print('걸린시간 : ' , round(end_time - start_time,2), "초" )
+print('loss:',loss)
 
-
-
-path = 'C:\\_data\\image\\CatDog\\'
-
-forder_dir = path1+"test\\test"
-id_list = os.listdir(forder_dir)
-for i, id in enumerate(id_list):
-    id_list[i] = int(id.split('.')[0])
-
-for id in id_list:
-    print(id)
-    
 
 
 y_submit = pd.DataFrame({'id': id_list,'Target':y_prediect})
-print(y_submit)
+#print(y_submit)
 y_submit.to_csv(path+f"submit\\acc_{loss[1]:.6f}.csv",index=False)
 
 
@@ -159,3 +168,6 @@ plt.show()
 # ACC :  0.7079663730984788
 # 걸린시간 :  241.63 초
 # 변환시간 :  111.52 초
+
+
+#증폭

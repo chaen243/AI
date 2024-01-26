@@ -19,7 +19,7 @@ start_time = time.time()
 
 
 #1. 데이터
-BATCH = int(1000)
+BATCH = int(20000)
 
 
 
@@ -53,13 +53,13 @@ xy_test = test_datagen.flow_from_directory(path_test,
                                            shuffle=False,)
 
 
-print(xy_train)
+#print(xy_train)
 
-print(xy_train[0][0].shape)  #(3309, 600, 600, 3)
-print(xy_train[0][1].shape)  #(3309,)
+#print(xy_train[0][0].shape)  #(3309, 600, 600, 3)
+#print(xy_train[0][1].shape)  #(3309,)
 
-print(xy_test[0][0].shape)  #(3309, 600, 600, 3)
-print(xy_test[0][1].shape)  #(3309,)
+#print(xy_test[0][0].shape)  #(3309, 600, 600, 3)
+#print(xy_test[0][1].shape)  #(3309,)
 
 
 x = np.array(np.arange(0,27)).reshape(3,3,3,1)
@@ -94,14 +94,7 @@ for i in range(int(4000 / BATCH )):
         print("failed i: ",i)
         failed_i.append(i)
         
-
-x_train , x_test, y_train , y_test = train_test_split(
-    xy_train[0][0], xy_train[0][1] ,random_state= 3702 , shuffle= True,
-    stratify=xy_train[0][1])
-
-
-
-end_time2 = time.time()
+        
 
 
 np_path = "C:\\_data\\_save_npy\\manwoman"
@@ -109,8 +102,21 @@ np.save(np_path + 'keras39_5_x_train.npy', arr=xy_train[0][0])
 np.save(np_path + 'keras39_5_y_train.npy', arr=xy_train[0][1])
 np.save(np_path + 'keras39_5_x_test.npy', arr=xy_test[0][0])
 np.save(np_path + 'keras39_5_y_test.npy', arr=xy_test[0][0])
+        
+        
 
 
+
+
+end_time2 = time.time()
+
+
+
+
+
+x_train , x_test, y_train , y_test = train_test_split(
+    xy_train[0][0], xy_train[0][1] ,random_state= 3702 , shuffle= True,
+    stratify=xy_train[0][1])
 
 '''
 

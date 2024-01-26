@@ -21,24 +21,66 @@ start_time = time.time()
 #1. 데이터
 
 
-np_path = "C:\\_data\\_save_npy\\manwoman\\"
+np_path = "C:\\_data\\_save_npy\\"
 
 x_train = np.load(np_path + 'keras39_5_x_train.npy')
 y_train = np.load(np_path + 'keras39_5_y_train.npy')
 x_test = np.load(np_path + 'keras39_5_x_test.npy')
 y_test = np.load(np_path + 'keras39_5_y_test.npy') 
+x_train = x_train/255.
+x_test = x_train/255.
+
+train_datagen = ImageDataGenerator(
+    horizontal_flip=True,
+    vertical_flip=True,
+    width_shift_range=0.2,
+    height_shift_range=0.2,
+    rotation_range=30,
+    zoom_range=0.2,
+    shear_range=0.2,
+    fill_mode='nearest'
+    
+)
 
 
+augumet_size = 20000
+
+randidx = np.random.randint(x_train.shape[0],size=augumet_size)
+
+x_augumented = x_train[randidx].copy()
+y_augumented = y_train[randidx].copy()
+
+x_augumented = x_augumented.reshape(-1,300,300,3)
+
+x_augumented = train_datagen.flow(
+    x_augumented, y_augumented,
+    batch_size=augumet_size,
+    shuffle=False
+).next()[0]
+
+
+x_train = x_train.reshape(-1, 200, 200, 3)
+x_test = x_test.reshape(-1, 200, 200, 3)
+
+
+x_train = np.concatenate((x_train, x_augumented))
+y_train = np.concatenate((y_train, y_augumented))
 
 
 
 #2 모델구성
 model = Sequential()
-model.add(Conv2D(64,(2,2),input_shape = (250,250,3) , strides=1 , activation='relu' ))
-model.add(Dropout(0.1))
-model.add(Conv2D(32,(2,2), activation='relu' , padding = 'same'))
+model.add(Conv2D(12,(2,2),input_shape = (200,200,3) , strides=1 , activation='relu' ))
+model.add(MaxPooling2D())
+model.add(Conv2D(12,(2,2), activation='relu' , padding = 'same'))
+model.add(MaxPooling2D())
 model.add(Conv2D(12,(2,2), activation='relu' ))
-model.add(Conv2D(12,(3,3), activation= 'relu' ))
+model.add(MaxPooling2D())
+model.add(Conv2D(64,(3,3), activation= 'relu' ))
+model.add(MaxPooling2D())
+model.add(Conv2D(64,(3,3), activation= 'relu' ))
+model.add(MaxPooling2D())
+model.add(Conv2D(64,(3,3), activation= 'relu' ))
 model.add(Flatten())
 model.add(Dense(80,activation='relu'))
 model.add(Dense(40, activation= 'relu'))
@@ -60,6 +102,7 @@ mcp = ModelCheckpoint(monitor='val_loss', mode = 'auto', verbose= 1, save_best_o
 model.compile(loss= 'binary_crossentropy' , optimizer='adam' , metrics=['acc'] )
 model.fit(x_train,y_train, epochs = 1000 , batch_size= 10 , validation_split= 0.2, verbose= 2 ,callbacks=[es, mcp])
 
+end_time = time.time()
 
 #4 평가, 예측
 result = model.evaluate(x_test,y_test)
@@ -74,7 +117,6 @@ y_predict = np.round(y_predict)
 
 print('ACC : ' , accuracy_score(y_test,y_predict))
 
-end_time = time.time()
 
 print('걸린시간 : ' , round(end_time - start_time,2), "초" )
 
@@ -84,3 +126,4 @@ print('걸린시간 : ' , round(end_time - start_time,2), "초" )
 # ACC :  0.7079663730984788
 # 걸린시간 :  241.63 초
 # 변환시간 :  111.52 초
+

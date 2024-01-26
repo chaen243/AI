@@ -260,10 +260,14 @@ test_csv = test_csv.reshape(64197, 13, 1, 1)
 # #2. 모델구성
 
 model= Sequential()
-model.add(Conv2D(10, (1,1), input_shape= (13,1,1), padding= 'same', activation= 'relu'))
-model.add(Conv2D(10,(2,1), activation= 'relu', padding='same'))
+model.add(Conv2D(12, (2,1), input_shape= (13,1,1), padding= 'same', activation= 'relu'))
+model.add(Conv2D(12,(2,1), activation= 'relu', padding='same'))
+model.add(Conv2D(64,(2,1), activation= 'relu', ))
+model.add(Conv2D(64,(2,1), activation= 'relu', ))
+model.add(Conv2D(64,(2,1), activation= 'relu', ))
 model.add(Flatten())
 model.add(Dense(200, activation= 'relu'))
+model.add(Dense(100, activation= 'relu'))
 model.add(Dense(20, activation='relu'))
 model.add(Dense(7, activation= 'softmax'))
 

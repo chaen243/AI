@@ -14,18 +14,18 @@ import time
 
 start_time = time.time()
 #1 데이터
-BATCH_SIZE = int(3000)
+BATCH_SIZE = int(5000)
 
-train_datagen = ImageDataGenerator(rescale=1./255,)
+train_datagen = ImageDataGenerator(rescale=1./255,
 
-                                #    horizontal_flip= True ,
-                                #    vertical_flip = True ,
-                                #    width_shift_range = 0.1,
-                                #    height_shift_range = 0.1,
-                                #    rotation_range = 5 ,
-                                #    zoom_range = 1.2,
-                                #    shear_range = 0.8 ,
-                                #    fill_mode = 'nearest')
+                                   horizontal_flip= True ,
+                                   vertical_flip = True ,
+                                   width_shift_range = 0.1,
+                                   height_shift_range = 0.1,
+                                   rotation_range = 5 ,
+                                   zoom_range = 1.2,
+                                   shear_range = 0.8 ,
+                                   fill_mode = 'nearest')
 
 
 test_datagen = ImageDataGenerator(rescale=1./255) #데이터 수치화 도구! #수치가 같아야 훈련이 가능하기에 testdata도 똑같이 수치화는 해줘야함.
