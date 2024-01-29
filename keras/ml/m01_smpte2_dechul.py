@@ -331,7 +331,7 @@ mcp = ModelCheckpoint(monitor='val_loss', mode = 'auto', verbose= 1, save_best_o
 
 model.compile(loss= 'categorical_crossentropy', optimizer= 'adam', metrics= 'acc' ) #mae 2.64084 r2 0.8278   mse 12.8935 r2 0.82
 start_time = time.time()
-hist = model.fit(x_train, y_train, callbacks=[es, mcp], epochs= 98765, batch_size = 300, validation_split= 0.25, verbose=2)
+hist = model.fit(x_train, y_train, callbacks=[es, mcp], epochs= 98765, batch_size = 400, validation_split= 0.25, verbose=2)
 end_time = time.time()
 
 
