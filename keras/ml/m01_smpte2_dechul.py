@@ -199,7 +199,7 @@ y = le.fit_transform(y)
 from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
 from sklearn.preprocessing import StandardScaler, RobustScaler
 
-mms = MinMaxScaler(feature_range=(1,2))
+mms = MinMaxScaler(feature_range=(1,3))
 #mms = StandardScaler()
 #mms = MaxAbsScaler()
 #mms = RobustScaler()
@@ -216,7 +216,7 @@ test_csv=mms.transform(test_csv)
 #print(np.unique(y, return_counts= True)) #Name: 근로기간, Length: 96294, dtype: float64
 
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.88,  shuffle= True, random_state= 89, stratify= y) #170 #279 
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.88,  shuffle= True, random_state= 279, stratify= y) #170 #279 
 
 # smote = SMOTE(random_state=270,sampling_strategy='auto',k_neighbors=10,)
 # x_train, y_train =smote.fit_resample(x_train, y_train)
@@ -224,14 +224,15 @@ x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.88,  shu
 
 y_train = to_categorical(y_train, 7)
 y_test = to_categorical(y_test, 7) 
-#민맥스 - 스탠다드
+
+
 from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
 from sklearn.preprocessing import StandardScaler, RobustScaler, Normalizer
 
 #mms = MinMaxScaler(feature_range=(1,5))
-mms = StandardScaler()
+#mms = StandardScaler()
 #mms = MaxAbsScaler()
-#mms = RobustScaler()
+mms = RobustScaler()
 
 
 
@@ -330,7 +331,7 @@ mcp = ModelCheckpoint(monitor='val_loss', mode = 'auto', verbose= 1, save_best_o
 
 model.compile(loss= 'categorical_crossentropy', optimizer= 'adam', metrics= 'acc' ) #mae 2.64084 r2 0.8278   mse 12.8935 r2 0.82
 start_time = time.time()
-hist = model.fit(x_train, y_train, callbacks=[es, mcp], epochs= 98765, batch_size = 700, validation_split= 0.25, verbose=2)
+hist = model.fit(x_train, y_train, callbacks=[es, mcp], epochs= 98765, batch_size = 700, validation_split= 0.2, verbose=2)
 end_time = time.time()
 
 
