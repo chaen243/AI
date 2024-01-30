@@ -80,6 +80,8 @@ start_time = time.time()
 model.compile(loss= 'mse' , optimizer='adam' , metrics=['acc'] )
 model.fit(x_train,y_train, epochs = 10 , batch_size= 800 , validation_split= 0.2, verbose= 2 ,callbacks=[es])
 
+model.save("c:\_data\_save\keras52_jena_save_model.h5")
+
 end_time = time.time()
 
 #4 평가, 예측
@@ -96,12 +98,11 @@ print('r2 :', r2)
 
 
 
-
+#y값도 scaler가 되서 inverse_transform 해주기
 predicted_degC = mms2.inverse_transform(np.array(y_predict).reshape(-1,1))
 y_true = mms2.inverse_transform(np.array(y_test).reshape(-1,1))
 print(x_test.shape,y_predict.shape) #(126165, 3, 14) (126165, 1)
 print(predicted_degC.shape) #(126165, 1)
-
 
 
 

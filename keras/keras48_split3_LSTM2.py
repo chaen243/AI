@@ -20,28 +20,23 @@ def split_x(dataset, size): #a, timesteps만큼 자름
 
 
 
+xy_splited = split_x(a, size)
+x = xy_splited[:, :-1].reshape(-1,2,2)
+y = xy_splited[:, -1]
+
+x_predict = split_x(x_pred,size-1).reshape(-1,2,2)
+print(x_predict.shape)
 
 
-bbb = split_x(a,size)
-
-print(bbb)
-# print(bbb.shape)
-
-
-x = bbb[:, :-1]
-y = bbb[:, -1]
-print(x.shape) #(96, 4)
-print(y.shape) #(96,)
+print(x.shape) #(96, 2, 2)
 
 print(x)
-print(y)
-
 
 
 #2. 모델구성
 model = Sequential()
 model.add(LSTM(256, return_sequences=False,
-               input_shape= (4,1), activation = 'relu'))
+               input_shape= (2,2), activation = 'relu'))
 #return_sequences로 2개이상의 LSTM을 사용 할 수 있다.
 model.add(Dense(256, activation= 'relu'))
 model.add(Dense(128, activation= 'relu'))
@@ -55,11 +50,19 @@ model.compile(loss= 'mse', optimizer= 'adam', metrics= 'acc')
 model.fit(x,y,epochs=20, callbacks= [es], batch_size= 1)
 
 #4. 평가, 훈련
-results = model.evaluate(x,y)
+results = model.evaluate(x)
 print ('loss:', results)
-x_pred = np.array(range(96,106))
-x_pred = model.predict(x_pred)
+x_pred = model.predict(x_predict)
 print('예측값 :', x_pred)
+
+
+# 예측값 : [[ 98.95157 ]
+#  [ 99.94138 ]
+#  [100.93533 ]
+#  [101.92128 ]
+#  [102.919014]
+#  [103.91304 ]
+#  [104.89963 ]]
 
     
 

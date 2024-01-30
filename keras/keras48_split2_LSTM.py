@@ -20,18 +20,11 @@ def split_x(dataset, size): #a, timesteps만큼 자름
 
 
 
+xy_splited = split_x(a, size)
+x = xy_splited[:, :-1].reshape(-1,4,1)
+y = xy_splited[:, -1]
+x_pred = split_x(x_pred, size-1)
 
-
-bbb = split_x(a,size)
-
-print(bbb)
-# print(bbb.shape)
-
-
-x = bbb[:, :-1]
-y = bbb[:, -1]
-print(x.shape) #(96, 4)
-print(y.shape) #(96,)
 
 print(x)
 print(y)
@@ -57,8 +50,13 @@ model.fit(x,y,epochs=20, callbacks= [es], batch_size= 1)
 #4. 평가, 훈련
 results = model.evaluate(x,y)
 print ('loss:', results)
-x_pred = np.array(range(96,106))
 x_pred = model.predict(x_pred)
 print('예측값 :', x_pred)
 
-    
+# 예측값 : [[100.11915 ]
+#  [101.13199 ]
+#  [102.13156 ]
+#  [103.12833 ]
+#  [104.1242  ]
+#  [105.136665]
+#  [106.14924 ]]    
