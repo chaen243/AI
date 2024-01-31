@@ -23,25 +23,33 @@ dataset = pd.read_csv(path + 'jena.csv', index_col= 0)
 
 #print(type(dataset)) #<class 'pandas.core.frame.DataFrame'>
 
-timestep = 3
+timestep = 720
+#720개 훈련시켜 하루 뒤 예측
 
 
 
-def split_xy(dataset, timestep, y_column):
+def split_xy(dataset, timestep, y_column, predict_step=0):
     x, y = list(), list()
     
-    for i in range(len(dataset)-timestep):
+    for i in range(len(dataset)-timestep+predict_step):
         x.append(dataset[i : i+ timestep])
-        y.append(dataset.iloc[i+ timestep][y_column])
+        y_row = dataset.iloc[i+timestep+predict_step]
+        y.append(y_row[y_column])
+        
         
     return np.array(x), np.array(y)
-x, y = split_xy(dataset, timestep, 'T (degC)')    
 
-print(x.shape) #(420548, 3, 14)
+    
+x,y = split_xy(dataset, 144, 'T (degC)')
+
+print(x.shape) #(420548, 729, 14)
 print(y.shape) #(420548,)
 
 
 
+# predict_step = 144
+# y = y[timestep+predict_step:,]
+# y = y.reshape(-1,)
 
 
 
@@ -64,7 +72,7 @@ dataset= mms.fit_transform(dataset)
 
 #2. 모델구성
 model = Sequential()
-model.add(LSTM(256, input_shape=(3,14)))
+model.add(LSTM(256, input_shape=x_train.shape[1:]))
 model.add(Dense(512, activation= 'relu'))
 model.add(Dense(128, activation= 'relu'))
 model.add(Dense(64, activation= 'relu'))
@@ -78,7 +86,7 @@ es = EarlyStopping(monitor='val_loss' , mode = 'auto' , patience= 100 , restore_
 start_time = time.time()
 
 model.compile(loss= 'mse' , optimizer='adam' , metrics=['acc'] )
-model.fit(x_train,y_train, epochs = 10 , batch_size= 800 , validation_split= 0.2, verbose= 2 ,callbacks=[es])
+model.fit(x_train,y_train, epochs = 10 , batch_size= 100 , validation_split= 0.2, verbose= 2 ,callbacks=[es])
 
 model.save("c:\_data\_save\keras52_jena_save_model.h5")
 
@@ -90,7 +98,7 @@ result = model.evaluate(x_test,y_test)
 y_predict = model.predict(x_test)
 r2 = r2_score(y_test,y_predict)
 
-
+print(y_predict)
 print('loss :',result[0])
 print('r2 :', r2)
 

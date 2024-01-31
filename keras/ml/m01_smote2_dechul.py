@@ -230,9 +230,9 @@ from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
 from sklearn.preprocessing import StandardScaler, RobustScaler, Normalizer
 
 #mms = MinMaxScaler(feature_range=(1,5))
-#mms = StandardScaler()
+mms = StandardScaler()
 #mms = MaxAbsScaler()
-mms = RobustScaler()
+#mms = RobustScaler()
 
 
 
@@ -255,7 +255,7 @@ test_csv= mms.transform(test_csv)
 
 
 model = Sequential()
-model.add(Dense(50, input_dim=13, activation='relu'))
+model.add(Dense(40, input_dim=13, activation='relu'))
 model.add(Dense(10, activation='relu'))
 model.add(Dense(80, activation='relu'))
 model.add(Dense(10, activation='relu'))
