@@ -5,20 +5,19 @@
 #값 자른거 수치화까지!
 
 from keras.models import Sequential
-from keras.layers import Dense,Dropout, BatchNormalization
+from keras.layers import Dense,Dropout, BatchNormalization,Conv2D,Flatten, MaxPooling2D, LSTM, Conv1D, Flatten
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import f1_score
 from sklearn.preprocessing import OneHotEncoder, LabelEncoder, MinMaxScaler
 from keras.callbacks import EarlyStopping
+from imblearn.over_sampling import SMOTE
+import sklearn as sk
 import time
 import warnings
 warnings.filterwarnings(action='ignore')
 from keras.utils import to_categorical
-from imblearn.over_sampling import SMOTE
-import sklearn as sk
-
 
 
 
@@ -33,6 +32,7 @@ test_csv = pd.read_csv(path + 'test.csv', index_col= 0)
 #print(test_csv)
 submission_csv = pd.read_csv(path + 'sample_submission.csv')
 #print(submission_csv)
+
 
 # print(train_csv.shape) #(96294, 14)
 # print(test_csv.shape)  #(64197, 13)
@@ -129,8 +129,8 @@ for i in range(len(train_loan_perpose)):
         train_loan_perpose.iloc[i] = np.NaN
         
 
-test_loan_perpose = test_loan_perpose.fillna(method='ffill')
-train_loan_perpose = train_loan_perpose.fillna(method='bfill')
+test_loan_perpose = test_loan_perpose.fillna(method='bfill')
+train_loan_perpose = train_loan_perpose.fillna(method='ffill')
 
 
 test_csv['대출목적'] = test_loan_perpose
@@ -143,8 +143,8 @@ train_csv['대출목적'] = train_loan_perpose
 
 
 ######## 결측치확인
-print(test_csv.isnull().sum()) #없음.
-print(train_csv.isnull().sum()) #없음.
+# print(test_csv.isnull().sum()) #없음.
+# print(train_csv.isnull().sum()) #없음.
 
 
 
@@ -203,14 +203,14 @@ y = le.fit_transform(y)
 from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
 from sklearn.preprocessing import StandardScaler, RobustScaler
 
-mms = MinMaxScaler(feature_range=(0,1))
+# mms = MinMaxScaler(feature_range=(1,3))
 #mms = StandardScaler()
 #mms = MaxAbsScaler()
 #mms = RobustScaler()
 
-mms.fit(x)
-x = mms.transform(x)
-test_csv=mms.transform(test_csv)
+# mms.fit(x)
+# x = mms.transform(x)
+# test_csv=mms.transform(test_csv)
 #print(x.shape, y.shape)  #(96294, 13) (96294, 7)
 #print(np.unique(y, return_counts= True)) #array(['A', 'B', 'C', 'D', 'E', 'F', 'G'], dtype=object), array([16772, 28817, 27623, 13354,  7354,  1954,   420],
 
@@ -220,10 +220,11 @@ test_csv=mms.transform(test_csv)
 #print(np.unique(y, return_counts= True)) #Name: 근로기간, Length: 96294, dtype: float64
 
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.85,  shuffle= True, random_state= 279, stratify= y) #170 #279 
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.83,  shuffle= True, random_state= 279, stratify= y) #170 #279 
 
-# smote = SMOTE(random_state=123)
-# x_train, y_train =smote.fit_resample(x_train, y_train)
+
+# smote = SMOTE(random_state=2970,k_neighbors=5)
+# x_train, y_train =smote.fit_resample(x_train, y_train)        
 
 y_train = to_categorical(y_train, 7)
 y_test = to_categorical(y_test, 7) 
@@ -243,7 +244,8 @@ x_train= mms.transform(x_train)
 x_test= mms.transform(x_test)
 test_csv= mms.transform(test_csv)
 
-        
+
+
 
  
 #encoder.fit(y_train)
@@ -255,53 +257,32 @@ test_csv= mms.transform(test_csv)
 # #2. 모델구성
 
 
+
 model = Sequential()
-model.add(Dense(40, input_dim=13, activation='relu'))
-model.add(Dense(7, activation='relu'))
-model.add(Dense(80, activation='relu'))
-model.add(Dense(7, activation='relu'))
-model.add(Dense(70, activation='relu'))
-# model.add(Dense(7, activation='relu'))
-# model.add(Dense(60, activation='relu'))
-# model.add(Dense(7, activation='relu'))
-# model.add(Dense(50, activation='relu'))
-# model.add(Dense(7, activation='relu'))
-# # model.add(Dense(40, activation='relu'))
-# model.add(Dense(20, activation='relu'))
-model.add(Dense(7, activation='softmax'))
 
 
-'''
 model = Sequential()
-model.add(Dense(10, input_dim=13, activation='swish'))
-model.add(Dense(20, activation='swish'))
+model.add(Conv1D(7, kernel_size=2, input_shape=(13,1), activation='swish'))
+model.add(Conv1D(7, kernel_size=2,activation='swish'))
+model.add(Flatten())
 model.add(Dense(80, activation='swish'))
-#model.add(Dropout(0.2))
-#model.add(Dense(10, activation='swish'))
-#model.add(Dense(70, activation='swish'))
-#model.add(Dense(10, activation='swish'))
-#model.add(Dense(60, activation='swish'))
-#model.add(Dense(10, activation='swish'))
+model.add(Dense(10, activation='swish'))
+model.add(Dense(70, activation='swish'))
+model.add(Dense(10, activation='swish'))
+model.add(Dense(60, activation='swish'))
+model.add(Dense(10, activation='swish'))
 model.add(Dense(50, activation='swish'))
 model.add(Dense(10, activation='swish'))
 model.add(Dense(40, activation='swish'))
 model.add(Dense(10, activation='swish'))
 model.add(Dense(50, activation='swish'))
-#model.add(Dropout(0.2))
+model.add(Dense(10, activation='swish'))
+model.add(Dense(30, activation='swish'))
+model.add(Dense(20, activation='swish'))
+model.add(Dense(10, activation='swish'))
 model.add(Dense(7, activation='softmax'))
 
-
-model = Sequential()  
-model.add(Dense(3, input_shape= (13,), activation='swish'))
-model.add(Dense(512, activation='swish'))
-model.add(Dropout(0.05))
-model.add(Dense(7, activation='swish'))
-model.add(Dense(256, activation='swish'))
-model.add(Dense(5, activation='swish'))
-model.add(Dense(128, activation='swish'))
-model.add(Dense(6, activation='swish'))
-model.add(Dense(64, activation='swish'))
-model.add(Dense(7, activation = 'softmax'))
+'''
 
 model = Sequential()  
 model.add(Dense(7, input_shape= (13,), activation='relu'))
@@ -337,12 +318,12 @@ test_csv = np.asarray(test_csv).astype(np.float32)
 
 
 from keras.callbacks import EarlyStopping, ModelCheckpoint
-es = EarlyStopping(monitor = 'val_loss', mode = 'auto', patience = 5000, verbose = 0, restore_best_weights= True)
-mcp = ModelCheckpoint(monitor='val_loss', mode = 'auto', verbose= 1, save_best_only=True, filepath= filepath)
+es = EarlyStopping(monitor = 'val_acc', mode = 'auto', patience = 5000, verbose = 0, restore_best_weights= True)
+mcp = ModelCheckpoint(monitor='val_acc', mode = 'auto', verbose= 1, save_best_only=True, filepath= filepath)
 
 model.compile(loss= 'categorical_crossentropy', optimizer= 'adam', metrics= 'acc' ) #mae 2.64084 r2 0.8278   mse 12.8935 r2 0.82
 start_time = time.time()
-hist = model.fit(x_train, y_train, callbacks=[es, mcp], epochs= 98765, batch_size = 250, validation_split= 0.2, verbose=2)
+hist = model.fit(x_train, y_train, callbacks=[es, mcp], epochs= 98765, batch_size = 2400, validation_split= 0.25, verbose=2)
 end_time = time.time()
 
 
@@ -409,3 +390,8 @@ plt.show()
 #cpu
 #걸린 시간 : 4938.4 초
 #gpu
+
+#Conv1D
+# 로스 : 0.23653829097747803
+# 정확도 : 0.9334147572517395
+# F1:  0.9120213013348553
