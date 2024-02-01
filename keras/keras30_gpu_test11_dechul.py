@@ -23,6 +23,8 @@ import sklearn as sk
 
 
 
+
+
 #1. 데이터
 le = LabelEncoder()
 path = "C:\\_data\\daicon\\bank\\"
@@ -33,6 +35,7 @@ test_csv = pd.read_csv(path + 'test.csv', index_col= 0)
 #print(test_csv)
 submission_csv = pd.read_csv(path + 'sample_submission.csv')
 #print(submission_csv)
+
 
 # print(train_csv.shape) #(96294, 14)
 # print(test_csv.shape)  #(64197, 13)
@@ -74,14 +77,14 @@ for i in range(len(train_working_time)):
     if data == 'Unknown':
         train_working_time.iloc[i] = np.NaN
     elif data == '10+ years' or data == '10+years':
-        train_working_time.iloc[i] = int(15)
+        train_working_time.iloc[i] = int(18)
     elif data == '< 1 year' or data == '<1 year':
         train_working_time.iloc[i] = int(0.6)
     else:
         train_working_time.iloc[i] = int(data.split()[0])
         
     
-train_working_time = train_working_time.fillna(train_working_time.mean())
+train_working_time = train_working_time.fillna(train_working_time.max())
 
 #print(train_working_time)
 
@@ -90,13 +93,13 @@ for i in range(len(test_working_time)):
     if data == 'Unknown':
         test_working_time.iloc[i] = np.NaN
     elif data == '10+ years' or data == '10+years':
-        test_working_time.iloc[i] = int(15)
+        test_working_time.iloc[i] = int(18)
     elif data == '< 1 year' or data == '<1 year':
         test_working_time.iloc[i] = int(0.6)
     else:
         test_working_time.iloc[i] = int(data.split()[0])
     
-test_working_time = test_working_time.fillna(test_working_time.mean())
+test_working_time = test_working_time.fillna(test_working_time.max())
 
 train_csv['근로기간'] = train_working_time
 test_csv['근로기간'] = test_working_time 
@@ -129,8 +132,8 @@ for i in range(len(train_loan_perpose)):
         train_loan_perpose.iloc[i] = np.NaN
         
 
-test_loan_perpose = test_loan_perpose.fillna(method='ffill')
-train_loan_perpose = train_loan_perpose.fillna(method='ffill')
+test_loan_perpose = test_loan_perpose.fillna(method='bfill')
+train_loan_perpose = train_loan_perpose.fillna(method='bfill')
 
 
 test_csv['대출목적'] = test_loan_perpose
@@ -143,8 +146,8 @@ train_csv['대출목적'] = train_loan_perpose
 
 
 ######## 결측치확인
-print(test_csv.isnull().sum()) #없음.
-print(train_csv.isnull().sum()) #없음.
+# print(test_csv.isnull().sum()) #없음.
+# print(train_csv.isnull().sum()) #없음.
 
 
 
@@ -203,14 +206,14 @@ y = le.fit_transform(y)
 from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
 from sklearn.preprocessing import StandardScaler, RobustScaler
 
-mms = MinMaxScaler(feature_range=(0,1))
-#mms = StandardScaler()
-#mms = MaxAbsScaler()
-#mms = RobustScaler()
+# mms = MinMaxScaler(feature_range=(5,10))
+# #mms = StandardScaler()
+# #mms = MaxAbsScaler()
+# #mms = RobustScaler()
 
-mms.fit(x)
-x = mms.transform(x)
-test_csv=mms.transform(test_csv)
+# mms.fit(x)
+# x = mms.transform(x)
+# test_csv=mms.transform(test_csv)
 #print(x.shape, y.shape)  #(96294, 13) (96294, 7)
 #print(np.unique(y, return_counts= True)) #array(['A', 'B', 'C', 'D', 'E', 'F', 'G'], dtype=object), array([16772, 28817, 27623, 13354,  7354,  1954,   420],
 
@@ -220,7 +223,7 @@ test_csv=mms.transform(test_csv)
 #print(np.unique(y, return_counts= True)) #Name: 근로기간, Length: 96294, dtype: float64
 
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.85,  shuffle= True, random_state= 279, stratify= y) #170 #279 
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.8,  shuffle= True, random_state= 1117, stratify= y) #170 #279 
 
 # smote = SMOTE(random_state=123)
 # x_train, y_train =smote.fit_resample(x_train, y_train)
@@ -231,10 +234,10 @@ y_test = to_categorical(y_test, 7)
 from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
 from sklearn.preprocessing import StandardScaler, RobustScaler, Normalizer
 
-#mms = MinMaxScaler(feature_range=(1,5))
+mms = MinMaxScaler() #(feature_range=(1,5))
 #mms = StandardScaler()
 #mms = MaxAbsScaler()
-mms = RobustScaler()
+#mms = RobustScaler()
 
 
 
@@ -255,44 +258,45 @@ test_csv= mms.transform(test_csv)
 # #2. 모델구성
 
 
-model = Sequential()
-model.add(Dense(40, input_dim=13, activation='relu'))
-model.add(Dense(7, activation='relu'))
-model.add(Dense(80, activation='relu'))
-model.add(Dense(7, activation='relu'))
-model.add(Dense(70, activation='relu'))
-model.add(Dense(7, activation='relu'))
-model.add(Dense(60, activation='relu'))
+# model = Sequential()
+# model.add(Dense(40, input_dim=13, activation='relu'))
+# model.add(Dense(7, activation='relu'))
+# model.add(Dense(80, activation='relu'))
+# model.add(Dense(7, activation='relu'))
+# model.add(Dense(70, activation='relu'))
+# model.add(Dense(7, activation='relu'))
+# model.add(Dense(60, activation='relu'))
 # model.add(Dense(7, activation='relu'))
 # model.add(Dense(50, activation='relu'))
 # model.add(Dense(7, activation='relu'))
-# # model.add(Dense(40, activation='relu'))
+# model.add(Dense(40, activation='relu'))
+# model.add(Dense(7, activation='relu'))
 # model.add(Dense(20, activation='relu'))
-model.add(Dense(7, activation='softmax'))
+# model.add(Dense(7, activation='softmax'))
 
 
-'''
-model = Sequential()
-model.add(Dense(10, input_dim=13, activation='swish'))
-model.add(Dense(20, activation='swish'))
-model.add(Dense(80, activation='swish'))
-#model.add(Dropout(0.2))
-#model.add(Dense(10, activation='swish'))
-#model.add(Dense(70, activation='swish'))
-#model.add(Dense(10, activation='swish'))
-#model.add(Dense(60, activation='swish'))
-#model.add(Dense(10, activation='swish'))
-model.add(Dense(50, activation='swish'))
-model.add(Dense(10, activation='swish'))
-model.add(Dense(40, activation='swish'))
-model.add(Dense(10, activation='swish'))
-model.add(Dense(50, activation='swish'))
-#model.add(Dropout(0.2))
-model.add(Dense(7, activation='softmax'))
+
+# model = Sequential()
+# model.add(Dense(10, input_dim=13, activation='swish'))
+# model.add(Dense(20, activation='swish'))
+# model.add(Dense(80, activation='swish'))
+# model.add(Dropout(0.2))
+# model.add(Dense(10, activation='swish'))
+# model.add(Dense(70, activation='swish'))
+# model.add(Dense(10, activation='swish'))
+# model.add(Dense(60, activation='swish'))
+# model.add(Dense(10, activation='swish'))
+# model.add(Dense(50, activation='swish'))
+# model.add(Dense(10, activation='swish'))
+# model.add(Dense(40, activation='swish'))
+# model.add(Dense(10, activation='swish'))
+# model.add(Dense(50, activation='swish'))
+# #model.add(Dropout(0.2))
+# model.add(Dense(7, activation='softmax'))
 
 
 model = Sequential()  
-model.add(Dense(3, input_shape= (13,), activation='swish'))
+model.add(Dense(1024, input_shape= (13,), activation='swish'))
 model.add(Dense(512, activation='swish'))
 model.add(Dropout(0.05))
 model.add(Dense(7, activation='swish'))
@@ -303,19 +307,19 @@ model.add(Dense(6, activation='swish'))
 model.add(Dense(64, activation='swish'))
 model.add(Dense(7, activation = 'softmax'))
 
-model = Sequential()  
-model.add(Dense(7, input_shape= (13,), activation='relu'))
-model.add(Dense(512, activation='relu'))
-#model.add(Dropout(0.05))
-model.add(Dense(7, activation='relu'))
-model.add(Dense(128, activation='relu'))
-model.add(Dense(7, activation='relu'))
-model.add(Dense(64, activation='relu'))
-model.add(Dense(32, activation='relu'))
-#model.add(Dense(7, activation='relu'))
-#model.add(Dense(128, activation='relu'))
-model.add(Dense(7, activation = 'softmax'))
-'''
+# model = Sequential()  
+# model.add(Dense(7, input_shape= (13,), activation='relu'))
+# model.add(Dense(512, activation='relu'))
+# #model.add(Dropout(0.05))
+# model.add(Dense(7, activation='relu'))
+# model.add(Dense(128, activation='relu'))
+# model.add(Dense(7, activation='relu'))
+# model.add(Dense(64, activation='relu'))
+# model.add(Dense(32, activation='relu'))
+# #model.add(Dense(7, activation='relu'))
+# #model.add(Dense(128, activation='relu'))
+#model.add(Dense(7, activation = 'softmax'))
+
 #3. 컴파일, 훈련
 
 import datetime
@@ -342,7 +346,7 @@ mcp = ModelCheckpoint(monitor='val_loss', mode = 'auto', verbose= 1, save_best_o
 
 model.compile(loss= 'categorical_crossentropy', optimizer= 'adam', metrics= 'acc' ) #mae 2.64084 r2 0.8278   mse 12.8935 r2 0.82
 start_time = time.time()
-hist = model.fit(x_train, y_train, callbacks=[es, mcp], epochs= 98765, batch_size = 300, validation_split= 0.3, verbose=2)
+hist = model.fit(x_train, y_train, callbacks=[es, mcp], epochs= 98765, batch_size = 500, validation_split= 0.28, verbose=2)
 end_time = time.time()
 
 

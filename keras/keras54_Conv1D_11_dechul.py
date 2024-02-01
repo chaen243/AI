@@ -232,10 +232,10 @@ y_test = to_categorical(y_test, 7)
 from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
 from sklearn.preprocessing import StandardScaler, RobustScaler, Normalizer
 
-#mms = MinMaxScaler(feature_range=(1,5))
+mms = MinMaxScaler()   #(feature_range=(1,5))
 #mms = StandardScaler()
 #mms = MaxAbsScaler()
-mms = RobustScaler()
+#mms = RobustScaler()
 
 
 
@@ -262,25 +262,12 @@ model = Sequential()
 
 
 model = Sequential()
-model.add(Conv1D(7, kernel_size=2, input_shape=(13,1), activation='swish'))
-model.add(Conv1D(7, kernel_size=2,activation='swish'))
+model.add(Conv1D(512, kernel_size=3, input_shape=(13,1), activation='swish'))
 model.add(Flatten())
-model.add(Dense(80, activation='swish'))
-model.add(Dense(10, activation='swish'))
-model.add(Dense(70, activation='swish'))
-model.add(Dense(10, activation='swish'))
-model.add(Dense(60, activation='swish'))
-model.add(Dense(10, activation='swish'))
-model.add(Dense(50, activation='swish'))
-model.add(Dense(10, activation='swish'))
-model.add(Dense(40, activation='swish'))
-model.add(Dense(10, activation='swish'))
-model.add(Dense(50, activation='swish'))
-model.add(Dense(10, activation='swish'))
-model.add(Dense(30, activation='swish'))
-model.add(Dense(20, activation='swish'))
-model.add(Dense(10, activation='swish'))
-model.add(Dense(7, activation='softmax'))
+model.add(Dense(512, activation='swish'))
+model.add(Dense(128, activation='swish'))
+model.add(Dense(64, activation='swish'))
+model.add(Dense(7, activation = 'softmax'))
 
 '''
 
@@ -318,13 +305,16 @@ test_csv = np.asarray(test_csv).astype(np.float32)
 
 
 from keras.callbacks import EarlyStopping, ModelCheckpoint
-es = EarlyStopping(monitor = 'val_acc', mode = 'auto', patience = 5000, verbose = 0, restore_best_weights= True)
-mcp = ModelCheckpoint(monitor='val_acc', mode = 'auto', verbose= 1, save_best_only=True, filepath= filepath)
+es = EarlyStopping(monitor = 'val_loss', mode = 'auto', patience = 5000, verbose = 0, restore_best_weights= True)
+mcp = ModelCheckpoint(monitor='val_loss', mode = 'auto', verbose= 1, save_best_only=True, filepath= filepath)
 
 model.compile(loss= 'categorical_crossentropy', optimizer= 'adam', metrics= 'acc' ) #mae 2.64084 r2 0.8278   mse 12.8935 r2 0.82
 start_time = time.time()
-hist = model.fit(x_train, y_train, callbacks=[es, mcp], epochs= 98765, batch_size = 2400, validation_split= 0.25, verbose=2)
+hist = model.fit(x_train, y_train, callbacks=[es, mcp], epochs= 98765, batch_size = 1024, validation_split= 0.25, verbose=2)
 end_time = time.time()
+
+
+model.save('C:\\_data\\_save\\MCP\\dacon_dechul\\file_1.hdf5')
 
 
 #4. 평가, 예측

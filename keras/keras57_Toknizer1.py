@@ -18,31 +18,42 @@ print(x) #([('나는', 1), ('진짜', 2), ('매우', 2), ('맛있는', 1), ('밥
 
 from keras.utils import to_categorical
 
-x1 = to_categorical(x)
-print(x1)
-print(x1.shape) #(1, 12, 9)
+# x1 = to_categorical(x)
+# print(x1)
+# print(x1.shape) #(1, 12, 9)
 
-#1. to_categorical에서 첫번째 0 빼기
-x1= x1[:, :, 1:]
-print(x1.shape)
-print(x1)
+# #1. to_categorical에서 첫번째 0 빼기
+# x1= x1[:, :, 1:]
+# print(x1.shape)
+# print(x1)
 
 
-# #2. 사이킷런 원핫인코더
-# from sklearn.preprocessing import OneHotEncoder
-
-# ohe = OneHotEncoder(sparse=False)
-# x2 = ohe.fit_transform(x)
+#2. 사이킷런 원핫인코더
+from sklearn.preprocessing import OneHotEncoder
+import numpy as np
+x = np.array(x).reshape(-1,1)
+ohe = OneHotEncoder(sparse=False)
+x2 = ohe.fit_transform(x)
 # print(x2)
+# [[0. 0. 0. 1. 0. 0. 0. 0.]
+#  [0. 1. 0. 0. 0. 0. 0. 0.]
+#  [0. 1. 0. 0. 0. 0. 0. 0.]
+#  [0. 0. 1. 0. 0. 0. 0. 0.]
+#  [0. 0. 1. 0. 0. 0. 0. 0.]
+#  [0. 0. 0. 0. 1. 0. 0. 0.]
+#  [0. 0. 0. 0. 0. 1. 0. 0.]
+#  [0. 0. 0. 0. 0. 0. 1. 0.]
+#  [1. 0. 0. 0. 0. 0. 0. 0.]
+#  [1. 0. 0. 0. 0. 0. 0. 0.]
+#  [1. 0. 0. 0. 0. 0. 0. 0.]
+#  [0. 0. 0. 0. 0. 0. 0. 1.]]
+#print(x2.shape) #(12, 8)
+
 
 # #3. 판다스 겟더미
-import pandas as pd
-import numpy as np
+import pandas as pd #벡터만 받음~ reshape 해줘야함
 
-x3 = np.array(x)
+x = np.array(x).reshape(-1,)
+x3 = pd.get_dummies(x)
 print(x3)
-x3 = x3.reshape(-1)
-x3 = pd.get_dummies(x3)
-print(x3.shape)
-x3 = x3.values.reshape(1, 12, 8)
-print(x3.shape)
+print(x3.shape) #(12, 8)
