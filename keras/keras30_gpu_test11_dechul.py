@@ -130,7 +130,7 @@ for i in range(len(train_loan_perpose)):
         
 
 test_loan_perpose = test_loan_perpose.fillna(method='ffill')
-train_loan_perpose = train_loan_perpose.fillna(method='bfill')
+train_loan_perpose = train_loan_perpose.fillna(method='ffill')
 
 
 test_csv['대출목적'] = test_loan_perpose
@@ -261,8 +261,8 @@ model.add(Dense(7, activation='relu'))
 model.add(Dense(80, activation='relu'))
 model.add(Dense(7, activation='relu'))
 model.add(Dense(70, activation='relu'))
-# model.add(Dense(7, activation='relu'))
-# model.add(Dense(60, activation='relu'))
+model.add(Dense(7, activation='relu'))
+model.add(Dense(60, activation='relu'))
 # model.add(Dense(7, activation='relu'))
 # model.add(Dense(50, activation='relu'))
 # model.add(Dense(7, activation='relu'))
@@ -342,7 +342,7 @@ mcp = ModelCheckpoint(monitor='val_loss', mode = 'auto', verbose= 1, save_best_o
 
 model.compile(loss= 'categorical_crossentropy', optimizer= 'adam', metrics= 'acc' ) #mae 2.64084 r2 0.8278   mse 12.8935 r2 0.82
 start_time = time.time()
-hist = model.fit(x_train, y_train, callbacks=[es, mcp], epochs= 98765, batch_size = 250, validation_split= 0.2, verbose=2)
+hist = model.fit(x_train, y_train, callbacks=[es, mcp], epochs= 98765, batch_size = 300, validation_split= 0.3, verbose=2)
 end_time = time.time()
 
 
@@ -372,6 +372,7 @@ submission_csv['대출등급'] = y_submit
 
 submission_csv.to_csv(path+f"submit_{dt.day}day{dt.hour:2}{dt.minute:2}_F1_{f1:4}.csv",index=False)
 
+model.save('C:\\_data\\_save\\MCP\\dacon_dechul\\file_1.hdf5')
 
 import matplotlib.pyplot as plt
 plt.rcParams['font.family'] = 'Malgun Gothic'

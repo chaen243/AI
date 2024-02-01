@@ -3,6 +3,10 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from keras.models import Sequential, Model
 from keras.layers import Dense, Input, concatenate, Concatenate
+#concatenate = 함수
+#Concatenate = 클래스!
+
+
 
 #1. 데이터
 x1_datasets = np.array([range(100), range(301,401)]).T  #ex) 삼성 종가, 하이닉스 종가
@@ -43,9 +47,13 @@ output11 = Dense(5, activation= 'relu', name='bit14')(dense13)
 #name은 성능에 영향을 주지 않는다. 라벨링 해준것.
 
 #2-3. concatenate
-merge1 = concatenate([output1,output11], name= 'mg1') #두개이상은 리스트!/얘도 레이어!
+
 #concatenate로 두개의 모델을 엮어준것!
 #행(총데이터)의 갯수는 다 맞춰줘야함
+
+
+merge1 = Concatenate(name= 'mg1')([output1,output11]) #사용법이 다름!
+#merge1 = concatenate([output1,output11], name= 'mg1') #두개이상은 리스트!/얘도 레이어!
 merge2 = Dense(512, name= 'mg2')(merge1)
 merge3 = Dense(256, name= 'mg3')(merge2)
 merge4 = Dense(128, name= 'mg4')(merge3)
