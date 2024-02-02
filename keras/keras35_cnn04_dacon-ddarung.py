@@ -54,7 +54,7 @@ x = x.values.reshape(1459,3,3,1)
 y = train_csv['count']
 #print(y)
 
-test_csv= test_csv.reshape(715,3,3,1)
+test_csv= test_csv.values.reshape(715,3,3,1)
 print(train_csv.index)
 
 

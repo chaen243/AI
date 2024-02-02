@@ -42,7 +42,7 @@ print(y_train.shape, y_test.shape) #(7620, ) (3266, )
 
 #2. 모델구성
 model = Sequential()
-model.add(Dense(512, input_dim = 8,)) #활성화함수!
+model.add(Dense(512, input_dim = 8,activation= 'relu')) #(activation= 활성화함수!)
 model.add(Dense(256,))
 model.add(Dense(64, activation='relu'))
 model.add(Dense(16, activation='relu'))

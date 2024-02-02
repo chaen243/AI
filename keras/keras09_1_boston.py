@@ -1,13 +1,11 @@
 from sklearn.datasets import load_boston
 
-# 현재 사이킷런 버전 1.3.0 보스턴 안됨. 그래서 삭제
+# 현재 사이킷런 버전 1.3.0 보스턴 안됨. 삭제 후 재설치
 #pip uninstall scikit-learn
 #pip uninstall scikit-image                  
 #pip uninstall scikit-learn-intelex
 #pip install scikit-learn==1.1.3
 
-
-#pip install scikit-learn==0.23.2 사이킷런 0.23.2버전을 새로 깐다.
 
 datasets = load_boston()
 print(datasets)
@@ -32,7 +30,7 @@ from keras.layers import Dense
 import numpy as np
 from sklearn.model_selection import train_test_split
 import warnings
-warnings.filterwarnings('ignore')
+warnings.filterwarnings('ignore') #warning 무시. 나타내지않음.
 import time
 
 #1. 데이터

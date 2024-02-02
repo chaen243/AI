@@ -29,7 +29,7 @@ print(pd.value_counts(y)) #다 똑가틈
 #print(df_y.value_counts()) 0 =  212, 1 = 357 #pandas
 #print(, unique)
 # print("1", counts)
-#sigmoid함수- 모든 예측 값을 0~1로 한정시킴.
+#sigmoid함수- 모든 예측 값을 0~1로 한정시킴. (이진분류의 output에 많이 씀.)
 x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.68, shuffle= False, random_state= 334)
 
 #2. 모델구성
@@ -45,8 +45,8 @@ model.add(Dense (1,  activation= 'sigmoid')) #이진분류에서는 최종레이
 
 #3. 컴파일, 훈련
 
-model.compile(loss= 'binary_crossentropy', optimizer= 'adam',metrics=['acc',]) #2진분류에서는 binary_crossentropy 하나!
-                                                            #가중치에 반영은 안됨!, acc/accuracy 둘다 사용가능!
+model.compile(loss= 'binary_crossentropy', optimizer= 'adam',metrics=['acc',]) #이진분류에서는 binary_crossentropy 하나!
+                                                            # metrics는 가중치에 반영은 안됨!, acc/accuracy 둘다 사용가능!
 from keras.callbacks import EarlyStopping
 es = EarlyStopping(monitor= 'val_loss', mode= 'min',
                    patience=40, verbose=0, restore_best_weights= True)

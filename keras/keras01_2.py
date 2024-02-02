@@ -21,7 +21,7 @@ model.fit(x, y, epochs=10000)
 loss= model.evaluate(x, y)
 print("로스 : ", loss)
 result = model.predict([7])
-print("7의 예측값 : ", result) #loss 핑퐁 직전 구간 찾아내기!
+print("7의 예측값 : ", result) #loss 핑퐁 직전 구간 찾아내기! (과적합직전구간)
 
 # 로스 :  0.32380953431129456
 # 1/1 [==============================] - 0s 40ms/step

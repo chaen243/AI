@@ -6,7 +6,6 @@ from keras.models import Sequential
 from keras.layers import Dense 
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import r2_score, mean_squared_error
-from keras.utils import custom_object_scope
 import time
 
 

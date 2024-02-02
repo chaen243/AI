@@ -69,11 +69,11 @@ model.add(Dense(1))
 
 #3. 컴파일, 훈련
 model.compile(loss= 'mse', optimizer= 'adam' ) #mae 2.64084 r2 0.8278   mse 12.8935 r2 0.82
-#local minimum(현재 최소값)/ global minimum(실제 최소값)
+#local minimum(현재 최소값)/ global minimum(실제 최소값) 알수 없음...
 
 from keras.callbacks import EarlyStopping
 es = EarlyStopping(monitor= 'val_loss', mode= 'min', #min-최소치(loss, val_loss등), max-최대치(정확도.r2 등), auto(자동으로 맞춰줌)
-                   patience=20,verbose=1, restore_best_weights= False)
+                   patience=20,verbose=1, restore_best_weights= False) #restore false로 하면 patience 20 후의 값이 나옴.
 start_time = time.time() #현재시간이 들어감
 hist = model.fit(x_train, y_train, epochs = 1500, batch_size= 30, validation_split= 0.3, callbacks=[es]) #hist.history안엔 loss, val_loss가 들어있음.
 end_time = time.time()
@@ -102,7 +102,7 @@ print("R2 스코어 :", r2)
 print("=============hist=================")
 print(hist)
 print("=============hist.history=========")
-print(hist.history)             # 오늘과제 - 리스트, 딕셔너리, 튜플 공부하기
+print(hist.history)           
 print("=============loss=================")
 print(hist.history['loss']) 
 print("=============val_loss=============")

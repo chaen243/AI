@@ -65,7 +65,7 @@ print("정확도 :", results[1])
 y_predict = model.predict(x_test)
 print(y_predict.shape, y_test.shape)
 
-y_test = np.argmax(y_test, axis=1) #아그맥스는 위치값을 빼주는 함수
+y_test = np.argmax(y_test, axis=1) #제일 가까운 정수로 바꿔주는 함수.
 y_predict = np.argmax(y_predict, axis=1)
 result = accuracy_score(y_test, y_predict)
 

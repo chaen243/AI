@@ -11,14 +11,15 @@ y = np.array([1,2,3,4,6,5,7,8,9,10])
 
 #[검색] train과 test를 섞어서 7:3으로 찾을 수 있는 방법을 찾기
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, test_size= 0.3, random_state= 1207 ) #1207
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=0.7, test_size= 0.3, random_state= 1207 ) #1207
                                     #^기본적으로 x, y를 제외한 값이 들어가 있지만 훈련할때마다 랜덤으로 돌아가게됨
                                     #random_state 랜덤난수가 존재. 랜덤난수의 규칙대로 나감.
                                     #shuffle = True 디폴트. false로 바꾸면 데이터를 순서대로 자름.
                                     #train_size = 75%(0.75) 디폴트.
                                     #train_size, test_size는 1.0 이하로 맞춰야함 1.0초과로 올라가면 에러. 1.0 미만이면 데이터 손실은 있지만 훈련 가능.
                                     #R'값은 1에 가까울수록 좋다.
-                                    #x_train, x_test, y_train, y_test 순서대로 적어야 데이터가 고이지 않음.
+                                    #train_size, test_size중 하나만 적어도 자동으로 사이즈를 1.0까지 맞춰줌.
+                                    #x_train, x_test, y_train, y_test 순서대로 적어야 데이터가 꼬이지 않음.
 
 print(x_train) #()안에 들어가는거 ==파라미터(매개변수)
 print(y_train)

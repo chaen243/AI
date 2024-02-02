@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 #1. 데이터
 
 x = np.array([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20])
-y = np.array([1,2,4,3,5,7,9,3,8,12,13,8, 14,15,9,6,17,23,21,20])
+y = np.array([1,2,4,3,5,7,9,3,8,12,13,8, 14,15,9, 6, 17,23,21,20])
 
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size= 0.3, random_state= 1 ) #358
 
@@ -42,4 +42,4 @@ plt.scatter(x, y)
 #plt.plot(x, result, color = 'red') plot 선
 plt.scatter(x, result, color = 'red') #그래프로 나타내는것 = 시각화한다.
 
-plt.show()
+plt.show() # 꼭 써줘야 그래프르 나타내준다!

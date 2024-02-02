@@ -19,12 +19,6 @@ from keras.utils import to_categorical
 from imblearn.over_sampling import SMOTE
 import sklearn as sk
 
-
-
-
-
-
-
 #1. 데이터
 le = LabelEncoder()
 path = "C:\\_data\\daicon\\bank\\"
@@ -63,53 +57,6 @@ for i in range(len(test_loan_time)):
 train_csv['대출기간'] = train_loan_time
 test_csv['대출기간'] = test_loan_time
 
-
-
-
-
-
-#print(test_csv)
-
-
-#근로기간 처리
-# train_working_time = train_csv['근로기간']
-# test_working_time = test_csv['근로기간']
-
-# for i in range(len(train_working_time)):
-#     data = train_working_time.iloc[i]
-#     if data == 'Unknown':
-#         train_working_time.iloc[i] = np.NaN
-#     elif data == '10+ years' or data == '10+years':
-#         train_working_time.iloc[i] = int(18)
-#     elif data == '< 1 year' or data == '<1 year':
-#         train_working_time.iloc[i] = int(0.6)
-#     else:
-#         train_working_time.iloc[i] = int(data.split()[0])
-        
-    
-# train_working_time = train_working_time.fillna(train_working_time.max())
-
-# #print(train_working_time)
-
-# for i in range(len(test_working_time)):
-#     data = test_working_time.iloc[i]
-#     if data == 'Unknown':
-#         test_working_time.iloc[i] = np.NaN
-#     elif data == '10+ years' or data == '10+years':
-#         test_working_time.iloc[i] = int(18)
-#     elif data == '< 1 year' or data == '<1 year':
-#         test_working_time.iloc[i] = int(0.6)
-#     else:
-#         test_working_time.iloc[i] = int(data.split()[0])
-    
-# test_working_time = test_working_time.fillna(test_working_time.max())
-
-# train_csv['근로기간'] = train_working_time
-# test_csv['근로기간'] = test_working_time 
-#print(test_csv['근로기간'])
-#print(train_csv['근로기간'])
-
-
 le.fit(train_csv['근로기간'])
 train_csv['근로기간'] = le.transform(train_csv['근로기간'])
 le.fit(test_csv['근로기간'])
@@ -121,7 +68,7 @@ test_csv['근로기간'] = le.transform(test_csv['근로기간'])
 test_loan_perpose = test_csv['대출목적']
 train_loan_perpose = train_csv['대출목적']
 
-
+'''
 
 for i in range(len(test_loan_perpose)):
     data = test_loan_perpose.iloc[i]
@@ -143,20 +90,9 @@ for i in range(len(train_loan_perpose)):
 test_loan_perpose = test_loan_perpose.fillna(method='bfill')
 train_loan_perpose = train_loan_perpose.fillna(method='bfill')
 
-
+'''
 test_csv['대출목적'] = test_loan_perpose
 train_csv['대출목적'] = train_loan_perpose
-
-
-
-
-
-
-
-######## 결측치확인
-# print(test_csv.isnull().sum()) #없음.
-# print(train_csv.isnull().sum()) #없음.
-
 
 
 
@@ -164,12 +100,6 @@ train_csv['대출목적'] = train_loan_perpose
 #print(np.unique(test_loan_perpose))  #'기타' '부채 통합' '소규모 사업' '신용 카드' '의료' '이사' '자동차' '재생 에너 
 #지' '주요 구매' '주택'
 # '주택 개선' '휴가'
-
-
-
-
-
-
 
 le.fit(train_csv['주택소유상태'])
 train_csv['주택소유상태'] = le.transform(train_csv['주택소유상태'])
@@ -190,7 +120,9 @@ le.fit(test_csv['대출기간'])
 test_csv['대출기간'] = le.transform(test_csv['대출기간'])
 
 
-
+######## 결측치확인
+# print(test_csv.isnull().sum()) #없음.
+# print(train_csv.isnull().sum()) #없음.
 
 
 x = train_csv.drop(['대출등급'], axis = 1)
@@ -214,14 +146,14 @@ y = le.fit_transform(y)
 from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
 from sklearn.preprocessing import StandardScaler, RobustScaler
 
-# mms = MinMaxScaler(feature_range=(5,10))
-# #mms = StandardScaler()
-# #mms = MaxAbsScaler()
-# #mms = RobustScaler()
+mms = MinMaxScaler(feature_range=(1,4))
+#mms = StandardScaler()
+#mms = MaxAbsScaler()
+#mms = RobustScaler()
 
-# mms.fit(x)
-# x = mms.transform(x)
-# test_csv=mms.transform(test_csv)
+mms.fit(x)
+x = mms.transform(x)
+test_csv=mms.transform(test_csv)
 #print(x.shape, y.shape)  #(96294, 13) (96294, 7)
 #print(np.unique(y, return_counts= True)) #array(['A', 'B', 'C', 'D', 'E', 'F', 'G'], dtype=object), array([16772, 28817, 27623, 13354,  7354,  1954,   420],
 
@@ -243,9 +175,9 @@ from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
 from sklearn.preprocessing import StandardScaler, RobustScaler, Normalizer
 
 #mms = MinMaxScaler() #(feature_range=(1,5))
-#mms = StandardScaler()
+mms = StandardScaler()
 #mms = MaxAbsScaler()
-mms = RobustScaler()
+#mms = RobustScaler()
 
 
 
@@ -288,7 +220,7 @@ model = Sequential()
 model.add(Dense(10, input_dim=13, activation='swish'))
 model.add(Dense(20, activation='swish'))
 model.add(Dense(80, activation='swish'))
-model.add(Dropout(0.2))
+#model.add(Dropout(0.2))
 model.add(Dense(10, activation='swish'))
 model.add(Dense(70, activation='swish'))
 model.add(Dense(10, activation='swish'))
@@ -354,7 +286,7 @@ mcp = ModelCheckpoint(monitor='val_loss', mode = 'auto', verbose= 1, save_best_o
 
 model.compile(loss= 'categorical_crossentropy', optimizer= 'adam', metrics= 'acc' ) #mae 2.64084 r2 0.8278   mse 12.8935 r2 0.82
 start_time = time.time()
-hist = model.fit(x_train, y_train, callbacks=[es, mcp], epochs= 98765, batch_size = 500, validation_split= 0.28, verbose=2)
+hist = model.fit(x_train, y_train, callbacks=[es, mcp], epochs= 98765, batch_size = 1050, validation_split= 0.2, verbose=2)
 end_time = time.time()
 
 
@@ -384,7 +316,7 @@ submission_csv['대출등급'] = y_submit
 
 submission_csv.to_csv(path+f"submit_{dt.day}day{dt.hour:2}{dt.minute:2}_F1_{f1:4}.csv",index=False)
 
-model.save('C:\\_data\\_save\\MCP\\dacon_dechul\\file_1.hdf5')
+model.save('C:\\_data\\_save\\MCP\\dacon_dechul\\best.hdf5')
 
 import matplotlib.pyplot as plt
 plt.rcParams['font.family'] = 'Malgun Gothic'

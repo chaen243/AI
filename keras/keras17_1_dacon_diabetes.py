@@ -81,7 +81,7 @@ y_submit = model.predict(test_csv)
 print("로스 :", loss)
 
 
-submission_csv['Outcome'] =  np.around(y_submit) 
+submission_csv['Outcome'] =  np.around(y_submit) #(2진분류는 소수점값으로 나옴. 답지에는 0,1로 입력해야하기때문에 반올림 해줘야함)
 
 
 

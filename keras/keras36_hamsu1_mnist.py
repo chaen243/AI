@@ -52,7 +52,7 @@ model.add(Conv2D(50, (2,2),
 # shape = (batch_size, rows, columns, channels)
 # shape = (batch_size, heights, widths, channels)
 model.add(Conv2D(filters=20, kernel_size=(2,2), strides=2))
-#model.add(MaxPooling2D())
+model.add(MaxPooling2D())
 model.add(Conv2D(10, (2,2))) 
 model.add(Conv2D(10, (1,1))) 
 model.add(Flatten()) #(n,22*22*15)의 모양을 펴져있는 모양으로 변형.
@@ -66,7 +66,7 @@ model.summary()
 
 input = Input(shape=x_train.shape[1:])
 c1 = Conv2D(50, (2,2), padding= 'same')(input)
-c2 = Conv2D(10, (2,2), )(c1)
+c2 = Conv2D(20, (2,2), strides=2 )(c1)
 m1 = MaxPooling2D()(c2)
 c3 = Conv2D(10, (2,2))(m1)
 c4 = Conv2D(10, (1,1))(c3)
@@ -75,7 +75,7 @@ d1 = Dense(500)(f1)
 dr1 = Dropout(0.05)(d1)
 d2 = Dense(20, activation= 'swish')(dr1)
 op1 = Dense(10, activation= 'softmax')(d2)
-model = Model(inputs= ip1, outputs= op1)
+model = Model(inputs= input, outputs= op1)
 
 model.summary()
 

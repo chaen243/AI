@@ -9,10 +9,10 @@ y = np.array([1,2,3])
 #2. 모델구성
 model = Sequential()
 model.add(Dense(200, input_dim=1)) #dense 레이어 한층을 추가한다는 뜻.
-model.add(Dense(1024)) #위 레이어의 인풋과 밑 레이어 아웃풋이 똑같을때는 
-model.add(Dense(512)) #노드 갯수, 레이어 깊이 조절 가능 훈련 취소 Ctrl C
-model.add(Dense(206))
-model.add(Dense(103))
+model.add(Dense(1024)) #위 레이어의 아웃풋과 밑 레이어 인풋이 똑같기 때문에 인풋은 생략가능. 
+model.add(Dense(512)) #노드 갯수, 레이어 깊이 조절 가능 훈련 취소 =  Ctrl C
+model.add(Dense(256))
+model.add(Dense(128))
 model.add(Dense(1))
 
 #3. 컴파일, 훈련 
