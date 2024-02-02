@@ -82,19 +82,26 @@ for i in range (len(train_loan_interest)):
     if data == 0.0:
         train_loan_interest.iloc[i] = np.NaN
 
-
-test_loan_interest = test_loan_interest.dropna(axis=0)
-train_loan_interest = train_loan_interest.dropna(axis=0)
-       
+train_csv['총상환이자'] = train_loan_interest
 test_csv['총상환이자'] = test_loan_interest
-train_csv['총상환이자'] = train_loan_interest       
+
+train_csv = train_csv.dropna(axis=0)
+test_csv = test_csv.dropna(axis=0)
+
+print(train_loan_interest.dropna(axis=0))      
+print(test_loan_interest.dropna(axis=0))      
+
+       
+# test_csv['총상환이자'] = test_loan_interest
+# train_csv['총상환이자'] = train_loan_interest       
        
         
 print(test_csv.isnull().sum()) #없음.
 print(train_csv.isnull().sum()) #없음.      
     
-    
-'''
+print(type(test_csv))
+
+
 
 #대출목적 전처리
 test_loan_perpose = test_csv['대출목적']
@@ -385,4 +392,3 @@ plt.show()
 #걸린 시간 : 4938.4 초
 #gpu
 
-'''
