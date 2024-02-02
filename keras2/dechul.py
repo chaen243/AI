@@ -147,8 +147,7 @@ test_csv['대출기간'] = le.transform(test_csv['대출기간'])
 # print(train_csv.isnull().sum()) #없음.
 
 
-x = train_csv.drop(['대출등급','최근_2년간_연체_횟수'], axis = 1)
-test_csv = test_csv.drop(['최근_2년간_연체_횟수'], axis = 1)
+x = train_csv.drop(['대출등급'], axis = 1)
 
 #print(x)
 y = train_csv['대출등급']
@@ -239,7 +238,7 @@ test_csv= mms.transform(test_csv)
 
 
 model = Sequential()
-model.add(Dense(10, input_dim=12, activation='swish'))
+model.add(Dense(10, input_dim=13, activation='swish'))
 model.add(Dense(20, activation='swish'))
 model.add(Dense(80, activation='swish'))
 #model.add(Dropout(0.2))
