@@ -31,6 +31,15 @@ submission_csv = pd.read_csv(path + 'sample_submission.csv')
 #print(submission_csv)
 
 
+
+#============================================================
+train_csv = train_csv[train_csv['총상환이자'] != 0.0]
+#============================================================
+
+
+
+       
+
 # print(train_csv.shape) #(96294, 14)
 # print(test_csv.shape)  #(64197, 13)
 # print(submission_csv.shape) #(64197, 2)
@@ -64,33 +73,9 @@ test_csv['근로기간'] = le.transform(test_csv['근로기간'])
 
 
 
-#====================================================#
 
-test_loan_interest = test_csv['총상환이자']
-train_loan_interest = train_csv['총상환이자']
-
-
-
-for i in range (len(test_loan_interest)):
-    data = test_loan_interest.iloc[i]
-    if data == 0.0:
-        test_loan_interest.iloc[i] = np.NaN
-        
-
-for i in range (len(train_loan_interest)):
-    data = train_loan_interest.iloc[i]
-    if data == 0.0:
-        train_loan_interest.iloc[i] = np.NaN
-
-train_csv['총상환이자'] = train_loan_interest
-test_csv['총상환이자'] = test_loan_interest
-
-train_csv = train_csv.dropna(axis=0)
-test_csv = test_csv.dropna(axis=0)
-
-print(train_loan_interest.dropna(axis=0))      
-print(test_loan_interest.dropna(axis=0))      
-
+# train_csv = train_csv[train_csv['총상환이자'] != 0.0]
+# test_csv = test_csv[test_csv['총상환이자'] != 0.0]
        
 # test_csv['총상환이자'] = test_loan_interest
 # train_csv['총상환이자'] = train_loan_interest       
