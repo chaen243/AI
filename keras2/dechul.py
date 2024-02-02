@@ -64,33 +64,63 @@ test_csv['근로기간'] = le.transform(test_csv['근로기간'])
 
 
 
+#====================================================#
+
+test_loan_interest = test_csv['총상환이자']
+train_loan_interest = train_csv['총상환이자']
+
+
+
+for i in range (len(test_loan_interest)):
+    data = test_loan_interest.iloc[i]
+    if data == 0.0:
+        test_loan_interest.iloc[i] = np.NaN
+        
+
+for i in range (len(train_loan_interest)):
+    data = train_loan_interest.iloc[i]
+    if data == 0.0:
+        train_loan_interest.iloc[i] = np.NaN
+
+
+test_loan_interest = test_loan_interest.dropna(axis=0)
+train_loan_interest = train_loan_interest.dropna(axis=0)
+       
+test_csv['총상환이자'] = test_loan_interest
+train_csv['총상환이자'] = train_loan_interest       
+       
+        
+print(test_csv.isnull().sum()) #없음.
+print(train_csv.isnull().sum()) #없음.      
+    
+    
+'''
+
 #대출목적 전처리
 test_loan_perpose = test_csv['대출목적']
 train_loan_perpose = train_csv['대출목적']
 
-'''
-
-for i in range(len(test_loan_perpose)):
-    data = test_loan_perpose.iloc[i]
-    if data == '결혼':
-        test_loan_perpose.iloc[i] = np.NaN
+# for i in range(len(test_loan_perpose)):
+#     data = test_loan_perpose.iloc[i]
+#     if data == '결혼':
+#         test_loan_perpose.iloc[i] = np.NaN
         
 
-for i in range(len(test_loan_perpose)):
-    data = test_loan_perpose.iloc[i]
-    if data == '기타':
-        test_loan_perpose.iloc[i] = np.NaN
+# for i in range(len(test_loan_perpose)):
+#     data = test_loan_perpose.iloc[i]
+#     if data == '기타':
+#         test_loan_perpose.iloc[i] = np.NaN
                
-for i in range(len(train_loan_perpose)):
-    data = train_loan_perpose.iloc[i]
-    if data == '기타':
-        train_loan_perpose.iloc[i] = np.NaN
+# for i in range(len(train_loan_perpose)):
+#     data = train_loan_perpose.iloc[i]
+#     if data == '기타':
+#         train_loan_perpose.iloc[i] = np.NaN
         
 
-test_loan_perpose = test_loan_perpose.fillna(method='bfill')
-train_loan_perpose = train_loan_perpose.fillna(method='bfill')
+# test_loan_perpose = test_loan_perpose.fillna(method='bfill')
+# train_loan_perpose = train_loan_perpose.fillna(method='bfill')
 
-'''
+
 test_csv['대출목적'] = test_loan_perpose
 train_csv['대출목적'] = train_loan_perpose
 
@@ -125,8 +155,8 @@ test_csv['대출기간'] = le.transform(test_csv['대출기간'])
 # print(train_csv.isnull().sum()) #없음.
 
 
-x = train_csv.drop(['대출등급'], axis = 1)
-
+x = train_csv.drop(['대출등급','최근_2년간_연체_횟수'], axis = 1)
+test_csv = test_csv.drop(['최근_2년간_연체_횟수'], axis = 1)
 
 #print(x)
 y = train_csv['대출등급']
@@ -217,7 +247,7 @@ test_csv= mms.transform(test_csv)
 
 
 model = Sequential()
-model.add(Dense(10, input_dim=13, activation='swish'))
+model.add(Dense(10, input_dim=12, activation='swish'))
 model.add(Dense(20, activation='swish'))
 model.add(Dense(80, activation='swish'))
 #model.add(Dropout(0.2))
@@ -354,3 +384,5 @@ plt.show()
 #cpu
 #걸린 시간 : 4938.4 초
 #gpu
+
+'''
