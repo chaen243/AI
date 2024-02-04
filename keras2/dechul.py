@@ -5,12 +5,12 @@
 #값 자른거 수치화까지!
 
 from keras.models import Sequential
-from keras.layers import Dense,Dropout, BatchNormalization
+from keras.layers import Dense,Dropout, BatchNormalization, Conv1D, Flatten
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import f1_score
-from sklearn.preprocessing import OneHotEncoder, LabelEncoder, MinMaxScaler
+from sklearn.preprocessing import OneHotEncoder, LabelEncoder, MinMaxScaler, Normalizer
 from keras.callbacks import EarlyStopping
 import time
 import warnings
@@ -33,7 +33,7 @@ submission_csv = pd.read_csv(path + 'sample_submission.csv')
 
 
 #============================================================
-train_csv = train_csv[train_csv['총상환이자'] != 0.0]
+#train_csv = train_csv[train_csv['총상환이자'] != 0.0]
 #============================================================
 
 
@@ -48,23 +48,23 @@ train_csv = train_csv[train_csv['총상환이자'] != 0.0]
 #print(train_csv.columns) #'대출금액', '대출기간', '근로기간', '주택소유상태', '연간소득', '부채_대비_소득_비율', '총계좌수', '대출목적',
 #       '최근_2년간_연체_횟수', '총상환원금', '총상환이자', '총연체금액', '연체계좌수', '대출등급'
 
-#대출기간 처리
-train_loan_time = train_csv['대출기간']
-train_loan_time = train_loan_time.str.split()
-for i in range(len(train_loan_time)):
-    train_loan_time.iloc[i] = int((train_loan_time)[i][0])
+# #대출기간 처리
+# train_loan_time = train_csv['대출기간']
+# train_loan_time = train_loan_time.str.split()
+# for i in range(len(train_loan_time)):
+#     train_loan_time.iloc[i] = int((train_loan_time)[i][0])
     
-#print(train_loan_time)   
+# #print(train_loan_time)   
 
-test_loan_time = test_csv['대출기간']
-test_loan_time = test_loan_time.str.split()
-for i in range(len(test_loan_time)):
-    test_loan_time.iloc[i] = int((test_loan_time)[i][0])
+# test_loan_time = test_csv['대출기간']
+# test_loan_time = test_loan_time.str.split()
+# for i in range(len(test_loan_time)):
+#     test_loan_time.iloc[i] = int((test_loan_time)[i][0])
 
-#print(test_loan_time)   
+# #print(test_loan_time)   
 
-train_csv['대출기간'] = train_loan_time
-test_csv['대출기간'] = test_loan_time
+# train_csv['대출기간'] = train_loan_time
+# test_csv['대출기간'] = test_loan_time
 
 le.fit(train_csv['근로기간'])
 train_csv['근로기간'] = le.transform(train_csv['근로기간'])
@@ -74,23 +74,18 @@ test_csv['근로기간'] = le.transform(test_csv['근로기간'])
 
 
 
-# train_csv = train_csv[train_csv['총상환이자'] != 0.0]
-# test_csv = test_csv[test_csv['총상환이자'] != 0.0]
-       
-# test_csv['총상환이자'] = test_loan_interest
-# train_csv['총상환이자'] = train_loan_interest       
+  
        
         
 print(test_csv.isnull().sum()) #없음.
 print(train_csv.isnull().sum()) #없음.      
     
-print(type(test_csv))
 
 
 
-#대출목적 전처리
-test_loan_perpose = test_csv['대출목적']
-train_loan_perpose = train_csv['대출목적']
+# #대출목적 전처리
+# test_loan_perpose = test_csv['대출목적']
+# train_loan_perpose = train_csv['대출목적']
 
 # for i in range(len(test_loan_perpose)):
 #     data = test_loan_perpose.iloc[i]
@@ -113,8 +108,8 @@ train_loan_perpose = train_csv['대출목적']
 # train_loan_perpose = train_loan_perpose.fillna(method='bfill')
 
 
-test_csv['대출목적'] = test_loan_perpose
-train_csv['대출목적'] = train_loan_perpose
+# test_csv['대출목적'] = test_loan_perpose
+# train_csv['대출목적'] = train_loan_perpose
 
 
 
@@ -147,7 +142,17 @@ test_csv['대출기간'] = le.transform(test_csv['대출기간'])
 # print(train_csv.isnull().sum()) #없음.
 
 
-x = train_csv.drop(['대출등급'], axis = 1)
+
+################best/best3############
+x = train_csv.drop(['대출등급','주택소유상태'], axis = 1)
+test_csv = test_csv.drop(['주택소유상태'], axis= 1)
+
+
+#####################best2
+# x = train_csv.drop(['대출등급','총계좌수'], axis = 1)
+# test_csv = test_csv.drop(['총계좌수'], axis= 1)
+
+
 
 #print(x)
 y = train_csv['대출등급']
@@ -167,9 +172,10 @@ y = le.fit_transform(y)
 from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
 from sklearn.preprocessing import StandardScaler, RobustScaler
 
-mms = MinMaxScaler(feature_range=(1,4))
-#mms = StandardScaler()
-#mms = MaxAbsScaler()
+#mms = MinMaxScaler()
+mms = MinMaxScaler(feature_range=(1,2))
+# mms = StandardScaler()
+# mms = MaxAbsScaler()
 #mms = RobustScaler()
 
 mms.fit(x)
@@ -184,7 +190,7 @@ test_csv=mms.transform(test_csv)
 #print(np.unique(y, return_counts= True)) #Name: 근로기간, Length: 96294, dtype: float64
 
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.8,  shuffle= True, random_state= 1117, stratify= y) #170 #279 
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.8,  shuffle= True, random_state= 279, stratify= y) #170 #279 
 
 # smote = SMOTE(random_state=123)
 # x_train, y_train =smote.fit_resample(x_train, y_train)
@@ -196,10 +202,10 @@ from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
 from sklearn.preprocessing import StandardScaler, RobustScaler, Normalizer
 
 #mms = MinMaxScaler() #(feature_range=(1,5))
-mms = StandardScaler()
+# mms = StandardScaler()
 #mms = MaxAbsScaler()
-#mms = RobustScaler()
-
+mms = RobustScaler()
+#mms = Normalizer()
 
 
 mms.fit(x_train)
@@ -218,42 +224,52 @@ test_csv= mms.transform(test_csv)
 
 # #2. 모델구성
 
+# model = Sequential()
+# model.add(Conv1D(32, 3, input_shape= (12,1), activation= 'swish'))
+# model.add(Conv1D(64, 3, activation= 'swish'))
+# model.add(Flatten())
+# model.add(Dense(2048, activation= 'swish'))
+# model.add(Dense(1024, activation= 'swish'))
+# model.add(Dense(128, activation= 'swish'))
+# model.add(Dense(7, activation= 'softmax'))
+
+
+#############best1,2,3###########
+model = Sequential()
+model.add(Dense(40, input_dim=12, activation='relu'))
+model.add(Dense(7, activation='relu'))
+model.add(Dense(80, activation='relu'))
+model.add(Dense(7, activation='relu'))
+model.add(Dense(70, activation='relu'))
+model.add(Dense(7, activation='relu'))
+model.add(Dense(60, activation='relu'))
+model.add(Dense(7, activation='relu'))
+model.add(Dense(50, activation='relu'))
+model.add(Dense(7, activation='relu'))
+model.add(Dense(40, activation='relu'))
+model.add(Dense(7, activation='relu'))
+model.add(Dense(20, activation='relu'))
+model.add(Dense(7, activation='softmax'))
+
+
 
 # model = Sequential()
-# model.add(Dense(40, input_dim=13, activation='relu'))
-# model.add(Dense(7, activation='relu'))
-# model.add(Dense(80, activation='relu'))
-# model.add(Dense(7, activation='relu'))
-# model.add(Dense(70, activation='relu'))
-# model.add(Dense(7, activation='relu'))
-# model.add(Dense(60, activation='relu'))
-# model.add(Dense(7, activation='relu'))
-# model.add(Dense(50, activation='relu'))
-# model.add(Dense(7, activation='relu'))
-# model.add(Dense(40, activation='relu'))
-# model.add(Dense(7, activation='relu'))
-# model.add(Dense(20, activation='relu'))
+# model.add(Dense(10, input_dim=12, activation='swish'))
+# model.add(Dense(20, activation='swish'))
+# model.add(Dense(80, activation='swish'))
+# #model.add(Dropout(0.2))
+# model.add(Dense(10, activation='swish'))
+# model.add(Dense(70, activation='swish'))
+# model.add(Dense(10, activation='swish'))
+# model.add(Dense(60, activation='swish'))
+# model.add(Dense(10, activation='swish'))
+# model.add(Dense(50, activation='swish'))
+# model.add(Dense(10, activation='swish'))
+# model.add(Dense(40, activation='swish'))
+# model.add(Dense(10, activation='swish'))
+# model.add(Dense(50, activation='swish'))
+# #model.add(Dropout(0.2))
 # model.add(Dense(7, activation='softmax'))
-
-
-
-model = Sequential()
-model.add(Dense(10, input_dim=13, activation='swish'))
-model.add(Dense(20, activation='swish'))
-model.add(Dense(80, activation='swish'))
-#model.add(Dropout(0.2))
-model.add(Dense(10, activation='swish'))
-model.add(Dense(70, activation='swish'))
-model.add(Dense(10, activation='swish'))
-model.add(Dense(60, activation='swish'))
-model.add(Dense(10, activation='swish'))
-model.add(Dense(50, activation='swish'))
-model.add(Dense(10, activation='swish'))
-model.add(Dense(40, activation='swish'))
-model.add(Dense(10, activation='swish'))
-model.add(Dense(50, activation='swish'))
-#model.add(Dropout(0.2))
-model.add(Dense(7, activation='softmax'))
 
 
 # model = Sequential()  
@@ -302,12 +318,12 @@ test_csv = np.asarray(test_csv).astype(np.float32)
 
 
 from keras.callbacks import EarlyStopping, ModelCheckpoint
-es = EarlyStopping(monitor = 'val_loss', mode = 'auto', patience = 5000, verbose = 0, restore_best_weights= True)
+es = EarlyStopping(monitor = 'val_loss', mode = 'auto', patience = 1000, verbose = 0, restore_best_weights= True)
 mcp = ModelCheckpoint(monitor='val_loss', mode = 'auto', verbose= 1, save_best_only=True, filepath= filepath)
 
 model.compile(loss= 'categorical_crossentropy', optimizer= 'adam', metrics= 'acc' ) #mae 2.64084 r2 0.8278   mse 12.8935 r2 0.82
 start_time = time.time()
-hist = model.fit(x_train, y_train, callbacks=[es, mcp], epochs= 98765, batch_size = 1050, validation_split= 0.2, verbose=2)
+hist = model.fit(x_train, y_train, callbacks=[es, mcp], epochs= 98765, batch_size = 777, validation_split= 0.2, verbose=2)
 end_time = time.time()
 
 
@@ -335,9 +351,9 @@ import datetime
 dt = datetime.datetime.now()
 submission_csv['대출등급'] = y_submit
 
-submission_csv.to_csv(path+f"submit_{dt.day}day{dt.hour:2}{dt.minute:2}_F1_{f1:4}.csv",index=False)
+submission_csv.to_csv(path+f"146_submit_{dt.day}day{dt.hour:2}{dt.minute:2}_F1_{f1:4}.csv",index=False)
 
-model.save('C:\\_data\\_save\\MCP\\dacon_dechul\\best.hdf5')
+model.save('C:\\_data\\_save\\MCP\\dacon_dechul\\best1.hdf5')
 
 import matplotlib.pyplot as plt
 plt.rcParams['font.family'] = 'Malgun Gothic'
