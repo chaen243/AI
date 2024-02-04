@@ -190,7 +190,7 @@ test_csv=mms.transform(test_csv)
 #print(np.unique(y, return_counts= True)) #Name: 근로기간, Length: 96294, dtype: float64
 
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.8,  shuffle= True, random_state= 279, stratify= y) #170 #279 
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.8,  shuffle= True, random_state= 1117, stratify= y) #170 #279 
 
 # smote = SMOTE(random_state=123)
 # x_train, y_train =smote.fit_resample(x_train, y_train)
@@ -318,12 +318,12 @@ test_csv = np.asarray(test_csv).astype(np.float32)
 
 
 from keras.callbacks import EarlyStopping, ModelCheckpoint
-es = EarlyStopping(monitor = 'val_loss', mode = 'auto', patience = 1000, verbose = 0, restore_best_weights= True)
+es = EarlyStopping(monitor = 'val_loss', mode = 'auto', patience = 20000, verbose = 0, restore_best_weights= True)
 mcp = ModelCheckpoint(monitor='val_loss', mode = 'auto', verbose= 1, save_best_only=True, filepath= filepath)
 
 model.compile(loss= 'categorical_crossentropy', optimizer= 'adam', metrics= 'acc' ) #mae 2.64084 r2 0.8278   mse 12.8935 r2 0.82
 start_time = time.time()
-hist = model.fit(x_train, y_train, callbacks=[es, mcp], epochs= 98765, batch_size = 777, validation_split= 0.2, verbose=2)
+hist = model.fit(x_train, y_train, callbacks=[es, mcp], epochs= 9, batch_size = 500, validation_split= 0.19, verbose=2)
 end_time = time.time()
 
 
@@ -353,7 +353,8 @@ submission_csv['대출등급'] = y_submit
 
 submission_csv.to_csv(path+f"146_submit_{dt.day}day{dt.hour:2}{dt.minute:2}_F1_{f1:4}.csv",index=False)
 
-model.save('C:\\_data\\_save\\MCP\\dacon_dechul\\best1.hdf5')
+save_path = 'C:\\_data\\_save\\MCP\\dacon_dechul\\'
+model.save(save_path + f'146_submit_{dt.day}day{dt.hour:2}{dt.minute:2}_F1_{f1:4}.hdf5')
 
 import matplotlib.pyplot as plt
 plt.rcParams['font.family'] = 'Malgun Gothic'
