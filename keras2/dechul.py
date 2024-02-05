@@ -190,7 +190,7 @@ test_csv=mms.transform(test_csv)
 #print(np.unique(y, return_counts= True)) #Name: 근로기간, Length: 96294, dtype: float64
 
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.8,  shuffle= True, random_state= 1117, stratify= y) #170 #279 
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.9,  shuffle= True, random_state= 1117, stratify= y) #170 #279 
 
 # smote = SMOTE(random_state=123)
 # x_train, y_train =smote.fit_resample(x_train, y_train)
@@ -323,7 +323,7 @@ mcp = ModelCheckpoint(monitor='val_loss', mode = 'auto', verbose= 1, save_best_o
 
 model.compile(loss= 'categorical_crossentropy', optimizer= 'adam', metrics= 'acc' ) #mae 2.64084 r2 0.8278   mse 12.8935 r2 0.82
 start_time = time.time()
-hist = model.fit(x_train, y_train, callbacks=[es, mcp], epochs= 9, batch_size = 500, validation_split= 0.19, verbose=2)
+hist = model.fit(x_train, y_train, callbacks=[es, mcp], epochs= 987654, batch_size = 5000, validation_split= 0.19, verbose=2)
 end_time = time.time()
 
 

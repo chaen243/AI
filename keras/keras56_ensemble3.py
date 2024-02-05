@@ -69,6 +69,7 @@ merge4 = Dense(128, name= 'mg4')(merge3)
 merge5 = Dense(64, name= 'mg5')(merge4)
 last_output1 = Dense(1, name= 'last')(merge5)
 
+
 merge11 = Dense(512, name= 'mg2')(merge1)
 merge12 = Dense(256, name= 'mg3')(merge2)
 merge13 = Dense(128, name= 'mg4')(merge3)

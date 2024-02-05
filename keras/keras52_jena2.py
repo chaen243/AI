@@ -92,7 +92,7 @@ es = EarlyStopping(monitor='val_loss' , mode = 'auto' , patience= 100 , restore_
 start_time = time.time()
 
 model.compile(loss= 'mse' , optimizer='adam' , metrics=['acc'] )
-model.fit(x_train,y_train, epochs = 10 , batch_size= 1 , validation_split= 0.2, verbose= 2 ,callbacks=[es])
+model.fit(x_train,y_train, epochs = 10 , batch_size= 5000 , validation_split= 0.2, verbose= 2 ,callbacks=[es])
 
 model.save("c:\_data\_save\keras52_jena_save_model.h5")
 
