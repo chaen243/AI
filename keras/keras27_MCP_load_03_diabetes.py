@@ -48,7 +48,7 @@ x_test= mms.transform(x_test)
 # model.compile(loss= 'mse', optimizer= 'adam', metrics= 'acc' ) #mae 2.64084 r2 0.8278   mse 12.8935 r2 0.82
 # hist = model.fit(x_train, y_train, callbacks=[es,mcp], epochs= 500, batch_size = 5, validation_split= 0.3)
 
-model = load_model('../_data/_save/MCP/_k26/k26_30117-1310_0144-3349.0901.hdf5')
+model = load_model('c:/_data/_save/MCP/_k26/k26_30117-1310_0144-3349.0901.hdf5')
 
 
 #4. 평가, 예측

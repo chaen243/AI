@@ -84,8 +84,8 @@ last_output2 = Dense(1, name= 'last2')(merge5)
 
 model = Model(inputs= [input1, input11, input111], outputs= [last_output1,last_output2])
 
-#model.summary()
-
+model.summary()
+'''
 #3. 모델, 컴파일
 
 model.compile(loss= 'mse',optimizer= 'adam')
@@ -107,3 +107,5 @@ print ('r2-2:', r2_2 )
 #로스: [3.688035249710083, 0.2930279076099396, 3.395007371902466]
 #r2-1: 0.9996222871896694
 #r2-2: 0.9956238377846455
+
+'''

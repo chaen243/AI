@@ -280,6 +280,9 @@ model.add(Dense(20, activation='swish'))
 model.add(Dense(10, activation='swish'))
 model.add(Dense(7, activation='softmax'))
 
+model.summary()
+
+print(x_test.shape,y_test.shape)
 '''
 
 model = Sequential()  
@@ -294,6 +297,7 @@ model.add(Dense(32, activation='relu'))
 #model.add(Dense(7, activation='relu'))
 #model.add(Dense(128, activation='relu'))
 model.add(Dense(7, activation = 'softmax'))
+'''
 '''
 #3. 컴파일, 훈련
 
@@ -365,7 +369,7 @@ plt.title("대출등급 LOSS")
 plt.xlabel('epoch')
 plt.grid()
 plt.show()
-
+'''
 #minmax
 #로스 : 0.45476970076560974
 #정확도 : 0.8460853695869446
