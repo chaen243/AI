@@ -149,28 +149,28 @@ test_csv['MTRANS']= test_csv['MTRANS'].str.replace("Motorbike","2")
 test_csv['MTRANS']= test_csv['MTRANS'].str.replace("Public_Transportation","3")
 test_csv['MTRANS']= test_csv['MTRANS'].str.replace("Walking","4")
 
-print(np.unique(train_csv['MTRANS'], return_counts= True))
-print(np.unique(test_csv['MTRANS'], return_counts= True))
+#print(np.unique(train_csv['MTRANS'], return_counts= True))
+#print(np.unique(test_csv['MTRANS'], return_counts= True))
 
 
 
-print(test_csv.isnull().sum()) #없음.
-print(train_csv.isnull().sum()) #없음.
+#print(test_csv.isnull().sum()) #없음.
+#print(train_csv.isnull().sum()) #없음.
 
 
 x = train_csv.drop(['NObeyesdad'], axis = 1)
 y = train_csv['NObeyesdad']
 
-y = le.fit_transform(y)
+#y = le.fit_transform(y)
 
 from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
 from sklearn.preprocessing import StandardScaler, RobustScaler
 
 #mms = MinMaxScaler()
-mms = MinMaxScaler(feature_range=(0,1))
-# mms = StandardScaler()
-# mms = MaxAbsScaler()
-#mms = RobustScaler()
+#mms = MinMaxScaler(feature_range=(0,1))
+#mms = StandardScaler()
+#mms = MaxAbsScaler()
+mms = RobustScaler()
 
 mms.fit(x)
 x = mms.transform(x)
@@ -180,18 +180,19 @@ test_csv=mms.transform(test_csv)
 #(array([0, 1, 2, 3, 4, 5, 6]), array([2523, 3082, 2910, 3248, 4046, 2427, 2522], dtype=int64))
 
 x_train, x_test, y_train, y_test = train_test_split(x, y, train_size = 0.9, shuffle=True, random_state=123, stratify= y)
-
+print('Data types \n========================================= \n' +str(x.dtypes))
+columns_id = np.arange(0, x.shape[1])
+categorical_features_id = columns_id[x.dtypes == object]
+'''
 from imblearn.over_sampling import SMOTE
-smote = SMOTE
+smote = SMOTE(random_state=123)
 x_train, y_train = smote.fit_resample(x_train, y_train)
-
-y_train = to_categorical(y_train, 7)
-y_test = to_categorical(y_test, 7) 
+'''
 
 #mms = MinMaxScaler() #(feature_range=(0,1))
-# mms = StandardScaler()
+mms = StandardScaler()
 #mms = MaxAbsScaler()
-mms = RobustScaler()
+#mms = RobustScaler()
 #mms = Normalizer()
 
 
@@ -201,4 +202,38 @@ x_test= mms.transform(x_test)
 test_csv= mms.transform(test_csv)
 
 #==================================
+#2. 모델
+from sklearn.ensemble import RandomForestClassifier
+from lightgbm import LGBMClassifier
+from catboost import CatBoostClassifier
+
+#model = RandomForestClassifier(max_depth=100, random_state=1117)#1001 #1117
+#model = LGBMClassifier()
+
+#3. 컴파일 , 훈련
+
+
+
+model = CatBoostClassifier(auto_class_weights = 'Balanced', iterations=1000, early_stopping_rounds=50, verbose=50)
+model.fit(x_train, y_train, eval_set=(x_validation, y_validation), cat_features=categorical_features_id)
+
+#4. 평가, 예측
+
+results = model.score(x_test, y_test)
+print("acc :", results)
+
+
+y_predict = model.predict(x_test)
+
+y_submit = model.predict(test_csv)
+
+acc = model.score(x_test, y_test)
+print(acc)
+import datetime
+dt = datetime.datetime.now()
+submission_csv['NObeyesdad'] = y_submit
+
+#print(np.unique(y_submit, return_counts= True))
+submission_csv.to_csv(path+f"submit_{dt.day}day{dt.hour:2}{dt.minute:2}_acc_{acc:4}.csv",index=False)
+
 
