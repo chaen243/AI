@@ -8,12 +8,15 @@ from keras.models import Sequential, Model, load_model
 from keras.layers import Dense, Conv1D, LSTM, Flatten, Embedding, Input, Concatenate, concatenate, Reshape
 from sklearn.metrics import r2_score
 from keras.callbacks import EarlyStopping, ModelCheckpoint
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split,  GridSearchCV, StratifiedKFold, cross_val_predict, GridSearchCV
 from sklearn.preprocessing import OneHotEncoder, LabelEncoder, MinMaxScaler, Normalizer, RobustScaler, StandardScaler, MaxAbsScaler
 from keras.utils import to_categorical
 le = LabelEncoder()
 import datetime
 import keras
+from sklearn.ensemble import RandomForestClassifier
+from lightgbm import LGBMClassifier
+from catboost import CatBoostClassifier
 '''
 SEED1 = 1117
 SEED2 = 1117
@@ -158,48 +161,59 @@ test_csv['MTRANS']= test_csv['MTRANS'].str.replace("Walking","4")
 #print(train_csv.isnull().sum()) #없음.
 
 
-x = train_csv.drop(['NObeyesdad'], axis = 1)
+x = train_csv.drop('NObeyesdad', axis = 1)
 y = train_csv['NObeyesdad']
 
 #y = le.fit_transform(y)
 
 from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
 from sklearn.preprocessing import StandardScaler, RobustScaler
+import time
+
 
 #mms = MinMaxScaler()
-#mms = MinMaxScaler(feature_range=(0,1))
+# mms = MinMaxScaler(feature_range=(0,1))
 #mms = StandardScaler()
 #mms = MaxAbsScaler()
-mms = RobustScaler()
+#mms = RobustScaler()
 
-mms.fit(x)
-x = mms.transform(x)
-test_csv=mms.transform(test_csv)
+# mms.fit(x)
+# x = mms.transform(x)
+# test_csv=mms.transform(test_csv)
 #print(x.shape, y.shape)  #(20758, 16) (20758,)
 #print(np.unique(y, return_counts= True))
 #(array([0, 1, 2, 3, 4, 5, 6]), array([2523, 3082, 2910, 3248, 4046, 2427, 2522], dtype=int64))
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, train_size = 0.9, shuffle=True, random_state=123, stratify= y)
+
+
+
+
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size = 0.9, shuffle=True, random_state=5, stratify= y)
+#5 9158 19 9145
+n_splits=5
+kfold = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=123)
+parameters = [
+    {"auto_class_weights": ['Balanced'], "iterations":[500, 1000, 3000], "early_stopping_rounds":[50, 70, 130]}]    # 12
+
+#model = CatBoostClassifier(auto_class_weights = 'Balanced', iterations=1000, early_stopping_rounds=70,
+
 print('Data types \n========================================= \n' +str(x.dtypes))
+
 columns_id = np.arange(0, x.shape[1])
 categorical_features_id = columns_id[x.dtypes == object]
-'''
-from imblearn.over_sampling import SMOTE
-smote = SMOTE(random_state=123)
-x_train, y_train = smote.fit_resample(x_train, y_train)
-'''
 
-#mms = MinMaxScaler() #(feature_range=(0,1))
-mms = StandardScaler()
-#mms = MaxAbsScaler()
-#mms = RobustScaler()
-#mms = Normalizer()
+# #mms = MinMaxScaler() #(feature_range=(0,1))
+# mms = StandardScaler()
+# #mms = MaxAbsScaler()
+# #mms = RobustScaler()
+# #mms = Normalizer()
 
 
-mms.fit(x_train)
-x_train= mms.transform(x_train)
-x_test= mms.transform(x_test)
-test_csv= mms.transform(test_csv)
+# mms.fit(x_train)
+# x_train= mms.transform(x_train)
+# x_test= mms.transform(x_test)
+# test_csv= mms.transform(test_csv)
+
 
 #==================================
 #2. 모델
@@ -214,10 +228,25 @@ from catboost import CatBoostClassifier
 
 
 
-model = CatBoostClassifier(auto_class_weights = 'Balanced', iterations=1000, early_stopping_rounds=50, verbose=50)
-model.fit(x_train, y_train, eval_set=(x_validation, y_validation), cat_features=categorical_features_id)
+#model = CatBoostClassifier(auto_class_weights = 'Balanced', iterations=1000, early_stopping_rounds=70, verbose=50)
+
+model = GridSearchCV(CatBoostClassifier(), 
+                     parameters, 
+                     cv=kfold, 
+                     verbose=1, 
+                     refit= True, #디폴트 트루~
+                     n_jobs=-1) #CPU 다 쓴다!
+
+start_time = time.time()
+model.fit(x_train, y_train, eval_set=(x_test, y_test), cat_features=categorical_features_id)
+end_time = time.time()
 
 #4. 평가, 예측
+print("최적의 매개변수 : ", model.best_estimator_)
+print("최적의 파라미터 : ", model.best_params_)
+print('best_score :', model.best_score_)
+print('score :', model.score(x_test, y_test))
+
 
 results = model.score(x_test, y_test)
 print("acc :", results)
@@ -225,7 +254,12 @@ print("acc :", results)
 
 y_predict = model.predict(x_test)
 
-y_submit = model.predict(test_csv)
+#y_submit = model.predict(test_csv)
+
+
+#########catboost###########
+y_submit = model.predict(test_csv)[:,0]
+
 
 acc = model.score(x_test, y_test)
 print(acc)

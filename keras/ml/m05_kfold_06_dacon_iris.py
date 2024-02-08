@@ -10,10 +10,12 @@ from sklearn.preprocessing import OneHotEncoder
 from keras.callbacks import EarlyStopping
 import time
 from sklearn.svm import LinearSVC #softvector machine
-from sklearn.linear_model import Perceptron, LogisticRegression , LinearRegression
+from sklearn.linear_model import Perceptron, LogisticRegression , LinearRegression#분류!
 from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor, RadiusNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from sklearn.model_selection import train_test_split,StratifiedKFold,cross_val_score
+
 
 #1. 데이터
 path = "C:\\_data\\daicon\\iris\\"
@@ -42,10 +44,12 @@ x = train_csv.drop(['species'], axis = 1)
 y = train_csv['species']
 
 #print(y)
-from sklearn.model_selection import train_test_split,KFold,cross_val_score
+
+print(x.shape, y.shape) #(120, 4) (120,)
+print(np.unique(y, return_counts= True)) #array([0, 1, 2] array([40, 41, 39]
 
 n_splits=5
-kfold = KFold(n_splits=n_splits, shuffle=True, random_state=123)
+kfold = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=123)
 #n_split = 섞어서 분할하는 갯수
 
 #2. 모델구성
@@ -63,5 +67,9 @@ print("acc :", scores, "\n 평균 acc :", round(np.mean(scores),4))
 #Linear
 #acc : 0.9722222222222222
 
-#acc : [0.91666667 0.875      0.95833333 0.95833333 1.        ] 
-# 평균 acc : 0.9417
+# acc : [0.91666667 0.875      0.95833333 0.95833333 1.        ] 
+#  평균 acc : 0.9417
+
+#Stratified
+# acc : [1.         0.95833333 0.91666667 0.79166667 0.95833333] 
+#  평균 acc : 0.925
