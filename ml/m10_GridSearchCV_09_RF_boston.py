@@ -37,7 +37,7 @@ from sklearn.linear_model import LinearRegression, Perceptron
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.model_selection import train_test_split,KFold,cross_val_score, StratifiedKFold, cross_val_predict
+from sklearn.model_selection import train_test_split,KFold,cross_val_score, StratifiedKFold, cross_val_predict, GridSearchCV
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.metrics import accuracy_score
 
@@ -59,29 +59,42 @@ kfold = KFold(n_splits=n_splits, shuffle=True, random_state=123)
 
 
 #2. 모델구성
-model = RandomForestRegressor()
 
-#3. 훈련
-scores = cross_val_score(model, x_train, y_train, cv=kfold)
-print("acc :", scores, "\n 평균 acc :", round(np.mean(scores),4))
+parameters = [
+    {"n_estimators": [100, 200], "max_depth": [6, 10, 12], "min_samples_leaf": [3, 10]},
+    {"max_depth": [6, 8, 10, 12], "min_samples_leaf": [3, 5, 7, 10]},
+    {"min_samples_leaf": [3, 5, 7, 10], "min_samples_split": [2, 3, 5, 10]},
+    {"min_samples_split": [2, 3, 5, 10]},
+    {"n_jobs": [-1, 2, 4], "min_samples_split": [2, 3, 5, 10]},
+]    
+     
+RF = RandomForestRegressor()
+model = GridSearchCV(RF, param_grid=parameters, cv=kfold , n_jobs=-1, refit=True, verbose=1)
+start_time = time.time()
+model.fit(x_train, y_train)
+end_time = time.time()
 
-#4. 예측
-y_predict = cross_val_predict(model, x_test, y_test, cv= kfold)
+from sklearn.metrics import accuracy_score
+best_predict = model.best_estimator_.predict(x_test)
+best_acc_score = accuracy_score(y_test, best_predict)
+
+print("최적의 매개변수 : ", model.best_estimator_)
+print("최적의 파라미터 : ", model.best_params_)
+print('best_score :', model.best_score_)
+print('score :', model.score(x_test, y_test))
+
+y_predict = model.predict(x_test)
+print("accuracy_score :", accuracy_score(y_test, y_predict))
+
+y_pred_best = model.best_estimator_.predict(x_test)
+print("최적튠 ACC :", accuracy_score(y_test, y_predict))
+
+print("걸린시간 :", round(end_time - start_time, 2), "초")
 
 
-
-
-
-#로스 : 11.972917556762695
-#R2 스코어 : 0.8349828030281251
-#test_size= 0.20, random_state= 4041
-#epochs = 5000, batch_size= 20
-# 노드 - 1, 9, 13, 9, 3, 1
-
-#LinearSVR
-# model.score : 0.5005368994698873
-# R2 스코어 : 0.5005368994698873
-# 걸린 시간 : 0.01 초
-
-# acc : [0.77614725 0.86608144 0.90423786 0.92548572 0.87881444] 
-#  평균 acc : 0.8702
+# 최적의 매개변수 :  RandomForestClassifier(max_depth=6, min_samples_leaf=3)
+# 최적의 파라미터 :  {'max_depth': 6, 'min_samples_leaf': 3, 'n_estimators': 100}
+# best_score : 0.993103448275862
+# score : 0.9444444444444444
+# accuracy_score : 0.9444444444444444
+# 최적튠 ACC : 0.9444444444444444

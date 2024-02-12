@@ -10,7 +10,7 @@ from sklearn.linear_model import LinearRegression, Perceptron
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor, ExtraTreesRegressor
-from sklearn.model_selection import train_test_split,KFold,cross_val_score, StratifiedKFold, cross_val_predict
+from sklearn.model_selection import train_test_split,KFold,cross_val_score, StratifiedKFold, cross_val_predict,GridSearchCV
 from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
@@ -34,24 +34,39 @@ kfold = KFold(n_splits=n_splits, shuffle=True, random_state=123)
 
 
 #2. 모델구성
-model = ExtraTreesRegressor()
+parameters = [
+    {"n_estimators": [100, 200], "max_depth": [6, 10, 12], "min_samples_leaf": [3, 10]},
+    {"max_depth": [6, 8, 10, 12], "min_samples_leaf": [3, 5, 7, 10]},
+    {"min_samples_leaf": [3, 5, 7, 10], "min_samples_split": [2, 3, 5, 10]},
+    {"min_samples_split": [2, 3, 5, 10]},
+    {"n_jobs": [-1, 2, 4], "min_samples_split": [2, 3, 5, 10]},
+]    
+     
+RF = RandomForestRegressor()
+model = GridSearchCV(RF, param_grid=parameters, cv=kfold , n_jobs=-1, refit=True, verbose=1)
+start_time = time.time()
+model.fit(x_train, y_train)
+end_time = time.time()
 
-#3. 훈련
-scores = cross_val_score(model, x, y, cv=kfold)
-print("acc :", scores, "\n 평균 acc :", round(np.mean(scores),4))
+from sklearn.metrics import accuracy_score
+best_predict = model.best_estimator_.predict(x_test)
+#best_acc_score = accuracy_score(y_test, best_predict)
 
-#4. 예측
-y_predict = cross_val_predict(model, x_test, y_test, cv= kfold)
-print(y_predict)
-print(y_test)
+print("최적의 매개변수 : ", model.best_estimator_)
+print("최적의 파라미터 : ", model.best_params_)
+print('best_score :', model.best_score_)
+print('score :', model.score(x_test, y_test))
 
+y_predict = model.predict(x_test)
+#print("accuracy_score :", accuracy_score(y_test, y_predict))
 
+y_pred_best = model.best_estimator_.predict(x_test)
+#print("최적튠 ACC :", accuracy_score(y_test, y_predict))
 
+print("걸린시간 :", round(end_time - start_time, 2), "초")
 
-#LinearSVR
-# model.score : 0.4207089223795233
-# r2 : 0.4207089223795233
-# 걸린 시간 : 0.39 초
-
-# acc : [0.82173339 0.8310562  0.81078681 0.79881124 0.80591868] 
-#  평균 acc : 0.8137
+# 최적의 매개변수 :  RandomForestRegressor()
+# 최적의 파라미터 :  {'min_samples_split': 2}
+# best_score : 0.8047142764400448
+# score : 0.6369370382370403
+# 걸린시간 : 66.89 초

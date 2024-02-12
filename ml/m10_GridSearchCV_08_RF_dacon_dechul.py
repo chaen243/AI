@@ -202,7 +202,7 @@ y = le.fit_transform(y)
 
      
 
-from sklearn.model_selection import train_test_split,KFold,cross_val_score, StratifiedKFold, cross_val_predict
+from sklearn.model_selection import train_test_split,KFold,cross_val_score, StratifiedKFold, cross_val_predict, GridSearchCV
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 
@@ -217,32 +217,44 @@ kfold = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=123)
 #n_split = 섞어서 분할하는 갯수
 
 #2. 모델구성
-model = RandomForestRegressor()
+parameters = [
+    {"n_estimators": [100, 200], "max_depth": [6, 10, 12], "min_samples_leaf": [3, 10]},
+    {"max_depth": [6, 8, 10, 12], "min_samples_leaf": [3, 5, 7, 10]},
+    {"min_samples_leaf": [3, 5, 7, 10], "min_samples_split": [2, 3, 5, 10]},
+    {"min_samples_split": [2, 3, 5, 10]},
+    {"n_jobs": [-1, 2, 4], "min_samples_split": [2, 3, 5, 10]},
+]    
+     
+RF = RandomForestClassifier()
+model = GridSearchCV(RF, param_grid=parameters, cv=kfold , n_jobs=-1, refit=True, verbose=1)
+start_time = time.time()
+model.fit(x_train, y_train)
+end_time = time.time()
 
-#3. 훈련
-scores = cross_val_score(model, x_train, y_train, cv=kfold)
-print("acc :", scores, "\n 평균 acc :", round(np.mean(scores),4))
+from sklearn.metrics import accuracy_score
+best_predict = model.best_estimator_.predict(x_test)
+best_acc_score = accuracy_score(y_test, best_predict)
 
-#4. 예측
-y_predict = cross_val_predict(model, x_test, y_test, cv= kfold)
-print(y_predict)
-print(y_test)
+print("최적의 매개변수 : ", model.best_estimator_)
+print("최적의 파라미터 : ", model.best_params_)
+print('best_score :', model.best_score_)
+print('score :', model.score(x_test, y_test))
 
-acc= accuracy_score(y_test, y_predict)
-print('cross_val_predict ACC :', acc)
+y_predict = model.predict(x_test)
+print("accuracy_score :", accuracy_score(y_test, y_predict))
+
+y_pred_best = model.best_estimator_.predict(x_test)
+print("최적튠 ACC :", accuracy_score(y_test, y_predict))
+
+print("걸린시간 :", round(end_time - start_time, 2), "초")
 
 
 
+# 최적의 매개변수 :  RandomForestClassifier(min_samples_split=3)
+# 최적의 파라미터 :  {'min_samples_split': 3}
+# best_score : 0.7953527617316805
+# score : 0.6062100835972792
+# accuracy_score : 0.6062100835972792
+# 최적튠 ACC : 0.6062100835972792
+# 걸린시간 : 122.99 초
 
-
-#LinearSVC
-# 로스 : 0.3806680512287989
-# 걸린 시간 : 47.78 초
-# F1:  0.1864885248672083
-
-# acc : [0.90422634 0.90512052 0.90310408 0.90638029 0.90972678] 
-#  평균 acc : 0.9057
-
-#Stratified
-# acc : [0.90729277 0.9034393  0.90523962 0.90587992 0.90588864] 
-#  평균 acc : 0.9055

@@ -13,7 +13,7 @@ from sklearn.linear_model import LinearRegression, Perceptron
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.model_selection import train_test_split,KFold,cross_val_score, StratifiedKFold, cross_val_predict
+from sklearn.model_selection import train_test_split,KFold,cross_val_score, StratifiedKFold, cross_val_predict, GridSearchCV
 from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
@@ -59,48 +59,61 @@ kfold = KFold(n_splits=n_splits, shuffle=True, random_state=123)
 #n_split = 섞어서 분할하는 갯수
 
 #2. 모델구성
-model =  RandomForestRegressor()
+parameters = [
+    {"n_estimators": [100, 200], "max_depth": [6, 10, 12], "min_samples_leaf": [3, 10]},
+    {"max_depth": [6, 8, 10, 12], "min_samples_leaf": [3, 5, 7, 10]},
+    {"min_samples_leaf": [3, 5, 7, 10], "min_samples_split": [2, 3, 5, 10]},
+    {"min_samples_split": [2, 3, 5, 10]},
+    {"n_jobs": [-1, 2, 4], "min_samples_split": [2, 3, 5, 10]},
+]    
+     
+RF = RandomForestRegressor()
+model = GridSearchCV(RF, param_grid=parameters, cv=kfold , n_jobs=-1, refit=True, verbose=1)
+start_time = time.time()
+model.fit(x_train, y_train)
+end_time = time.time()
 
-#3. 훈련
-scores = cross_val_score(model, x, y, cv=kfold)
-print("acc :", scores, "\n 평균 acc :", round(np.mean(scores),4))
-       
+from sklearn.metrics import accuracy_score
+best_predict = model.best_estimator_.predict(x_test)
 
-#4. 예측
-y_predict = cross_val_predict(model, x_test, y_test, cv= kfold)
-print(y_predict)
-print(y_test)
+print("최적의 매개변수 : ", model.best_estimator_)
+print("최적의 파라미터 : ", model.best_params_)
+print('best_score :', model.best_score_)
+print('score :', model.score(x_test, y_test))
 
+y_predict = model.predict(x_test)
+y_pred_best = model.best_estimator_.predict(x_test)
+y_submit = model.predict(test_csv)
 
+print("걸린시간 :", round(end_time - start_time, 2), "초")
 
-    
+def RMSE(y_test, y_predict):
+    return np.sqrt(mean_squared_error(y_test, y_predict))
+rmse = RMSE(y_test, y_predict)
+print("RMSE : ", rmse)
 
-
-
-#로스 : 3175.002197265625
-#R2 스코어 : 0.5593716340440571
-#RMSE :  56.347159447801296
-
-# import matplotlib.pyplot as plt
-# plt.rcParams['font.family'] = 'Malgun Gothic'
-# plt.rcParams['axes.unicode_minus']= False
-# plt.figure(figsize= (9,6))
-# plt.plot(hist.history['loss'], c = 'red', label = 'loss', marker = '.')
-# plt.plot(hist.history['val_loss'], c = 'blue', label = 'val_loss', marker = '.')
-# plt.legend(loc = 'upper right')
-# plt.title("따릉이 LOSS")
-# plt.xlabel('epoch')
-# plt.grid()
-# plt.show()
+y_submit = (y_submit.round(0).astype(int)) #실수를 반올림한 정수로 나타내줌.
 
 
+####### submission.csv 만들기 (count컬럼에 값만 넣어주면 됨) #####
+submission_csv['count'] = y_submit
+print(submission_csv)
 
 
-#linear
-# model.score : 0.41578303426180474
-# R2 스코어 : 0.41578303426180474
-# 걸린 시간 : 0.02 초
-# RMSE :  60.497446733195545
+path = "c:\\_data\\daicon\\ddarung\\"
+import time as tm
+ltm = tm.localtime(tm.time())
+save_time = f"{ltm.tm_year}{ltm.tm_mon}{ltm.tm_mday}{ltm.tm_hour}{ltm.tm_min}{ltm.tm_sec}" 
+submission_csv.to_csv(path + f"submission_{save_time}{rmse:.3f}.csv", index=False)
 
-# acc : [0.79077487 0.76781563 0.73679958 0.78573522 0.78743544] 
-#  평균 acc : 0.7737
+
+
+
+# 최적의 매개변수 :  RandomForestRegressor(min_samples_split=5, n_jobs=2)
+# 최적의 파라미터 :  {'min_samples_split': 5, 'n_jobs': 2}
+# best_score : 0.7599923698982753
+# score : 0.7917345479499412
+# C:\Users\user\anaconda3\Lib\site-packages\sklearn\base.py:443: UserWarning: X has feature names, but RandomForestRegressor was fitted without feature names
+#   warnings.warn(
+# 걸린시간 : 11.54 초
+# RMSE :  35.24842620930074

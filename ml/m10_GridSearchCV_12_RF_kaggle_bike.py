@@ -42,7 +42,7 @@ y = train_csv['count']
 print(y)
 
 print(train_csv.index)
-from sklearn.model_selection import train_test_split,KFold,cross_val_score
+from sklearn.model_selection import train_test_split,KFold,cross_val_score, GridSearchCV
 x_train, x_test, y_train, y_test = train_test_split(x, y, shuffle= True, random_state= 123, train_size=0.8)
 scaler = MinMaxScaler()
 
@@ -56,25 +56,35 @@ kfold = KFold(n_splits=n_splits, shuffle=True, random_state=123)
 #n_split = 섞어서 분할하는 갯수
 
 #2. 모델구성
-model = DummyClassifier()
+parameters = [
+    {"n_estimators": [100, 200], "max_depth": [6, 10, 12], "min_samples_leaf": [3, 10]},
+    {"max_depth": [6, 8, 10, 12], "min_samples_leaf": [3, 5, 7, 10]},
+    {"min_samples_leaf": [3, 5, 7, 10], "min_samples_split": [2, 3, 5, 10]},
+    {"min_samples_split": [2, 3, 5, 10]},
+    {"n_jobs": [-1, 2, 4], "min_samples_split": [2, 3, 5, 10]},
+]    
+     
+RF = RandomForestRegressor()
+model = GridSearchCV(RF, param_grid=parameters, cv=kfold , n_jobs=-1, refit=True, verbose=1)
+start_time = time.time()
+model.fit(x_train, y_train)
+end_time = time.time()
 
-#3. 훈련
-scores = cross_val_score(model, x, y, cv=kfold)
-print("acc :", scores, "\n 평균 acc :", round(np.mean(scores),4))
+best_predict = model.best_estimator_.predict(x_test)
 
-#4. 예측
-y_predict = cross_val_predict(model, x_test, y_test, cv= kfold)
-print(y_predict)
-print(y_test)
+print("최적의 매개변수 : ", model.best_estimator_)
+print("최적의 파라미터 : ", model.best_params_)
+print('best_score :', model.best_score_)
+print('score :', model.score(x_test, y_test))
 
+y_predict = model.predict(x_test)
 
+y_pred_best = model.best_estimator_.predict(x_test)
 
+print("걸린시간 :", round(end_time - start_time, 2), "초")
 
-
-
-# LinearSVR
-# model.score : -0.5530860077357014
-# R2 스코어 : -0.5530860077357014
-
-# acc : [0.01652893 0.01286174 0.01561782 0.01607717 0.01653652]
-#  평균 acc : 0.0155
+# 최적의 매개변수 :  RandomForestRegressor(max_depth=10, min_samples_leaf=3, n_estimators=200)
+# 최적의 파라미터 :  {'max_depth': 10, 'min_samples_leaf': 3, 'n_estimators': 200}
+# best_score : 0.3551549732336853
+# score : 0.3376106650596302
+# 걸린시간 : 28.32 초

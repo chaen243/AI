@@ -193,51 +193,7 @@ import time
 #(array([0, 1, 2, 3, 4, 5, 6]), array([2523, 3082, 2910, 3248, 4046, 2427, 2522], dtype=int64))
 
 
-x_train, x_test, y_train , y_test = train_test_split(x, y, shuffle= True, random_state=123, train_size=0.8,stratify= y)
-scaler = MinMaxScaler()
-x_train = scaler.fit_transform(x_train)
-x_test = scaler.transform(x_test)
 
-n_splits = 5
-kfold = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=123)
-
-lgb_params = {
-    'learning_rate': [0.030962211546832760, 0.1, 0.001], 
-    'n_estimators': [10000],              
-    'lambda_l1': [0.009667446568254372,0.097784, 0.93321], 
-    'lambda_l2': [0.04018641437301800,0.43215],   
-    'max_depth': [50,30,10],                 
-    'colsample_bytree': [0.40977129346872643], 
-    'subsample': [0.9535797422450176],  
-    'min_child_samples': [15,30,50]} 
-     
-lgbm = LGBMClassifier(objective='multiclass',
-                      boosting_type= 'gbdt',
-                      random_state= 42)
-
-model = GridSearchCV(lgbm, param_grid=lgb_params, cv=kfold , n_jobs=-1, refit=True, verbose=1)
-start_time = time.time()
-model.fit(x_train, y_train)
-end_time = time.time()
-
-from sklearn.metrics import accuracy_score
-best_predict = model.best_estimator_.predict(x_test)
-best_acc_score = accuracy_score(y_test, best_predict)
-
-print("최적의 매개변수 : ", model.best_estimator_)
-print("최적의 파라미터 : ", model.best_params_)
-print('best_score :', model.best_score_)
-print('score :', model.score(x_test, y_test))
-
-y_predict = model.predict(x_test)
-print("accuracy_score :", accuracy_score(y_test, y_predict))
-
-y_pred_best = model.best_estimator_.predict(x_test)
-print("최적튠 ACC :", accuracy_score(y_test, y_predict))
-
-print("걸린시간 :", round(end_time - start_time, 2), "초")
-
-'''
 
 x_train, x_test, y_train, y_test = train_test_split(x, y, train_size = 0.9, shuffle=True, random_state=5, stratify= y)
 #5 9158 19 9145
@@ -277,24 +233,28 @@ from catboost import CatBoostClassifier
 #model = RandomForestClassifier(max_depth=100, random_state=1117)#1001 #1117
 
 ################lgbm########################
-# lgb_params = {
-#     "objective": "multiclass",          # Objective function for the model
-#     "metric": "multi_logloss",          # Evaluation metric
-#     "verbosity": -1,                    # Verbosity level (-1 for silent)
-#     "boosting_type": "gbdt",            # Gradient boosting type
-#     "random_state": 42,       #42      # Random state for reproducibility
-#     "num_class": 7,                     # Number of classes in the dataset
-#     'learning_rate': 0.030962211546832760,  # Learning rate for gradient boosting
-#     'n_estimators': 10000,                # Number of boosting iterations
-#     'lambda_l1': 0.009667446568254372,  # L1 regularization term
-#     'lambda_l2': 0.04018641437301800,   # L2 regularization term
-#     'max_depth': 50,                    # Maximum depth of the trees
-#     'colsample_bytree': 0.40977129346872643,  # Fraction of features to consider for each tree
-#     'subsample': 0.9535797422450176,    # Fraction of samples to consider for each boosting iteration
-#     'min_child_samples': 15             # Minimum number of data needed in a leaf
-# }
+lgb_params = {
+    "objective": "multiclass",          # Objective function for the model
+    "metric": "multi_logloss",          # Evaluation metric
+    "verbosity": 1,                    # Verbosity level (-1 for silent)
+    "boosting_type": "gbdt",            # Gradient boosting type
+    "random_state": 42,       #42      # Random state for reproducibility
+    "num_class": 7,                     # Number of classes in the dataset
+    'learning_rate': 0.030962211546832760,  # Learning rate for gradient boosting
+    'n_estimators': 20000,                # Number of boosting iterations
+    'reg_alpha' : 0.9269816785,
+    #'lambda_l1': 0.9967446568254372,  # L1 regularization term
+    #'max_leaves' : 300,
+    #'num_leaves' : 180,
+    #'lambda_l2': 0.09018641437301800,   # L2 regularization term
+    'max_depth': 100,                    # Maximum depth of the trees
+    'colsample_bytree': 0.40977129346872643,  # Fraction of features to consider for each tree
+    'subsample': 0.535797422450176,    # Fraction of samples to consider for each boosting iteration
+    'n_jobs' : -1,
+    'min_child_samples': 10             # Minimum number of data needed in a leaf
+}
 
-# model = LGBMClassifier(**lgb_params)
+model = LGBMClassifier(**lgb_params)
 ################lgbm########################
 
 
@@ -316,14 +276,14 @@ from catboost import CatBoostClassifier
 ################xgb########################
 
 ################catboost########################
-model = CatBoostClassifier(auto_class_weights = 'Balanced', 
-                           iterations=50000,
-                           learning_rate=0.002162645,
-                           max_depth=10,
-                           l2_leaf_reg=18,
-                           max_bin=8,
-                           early_stopping_rounds=70, 
-                          random_state=9876)
+# model = CatBoostClassifier(auto_class_weights = 'Balanced', 
+#                            iterations=50000,
+#                            learning_rate=0.002162645,
+#                            max_depth=16,
+#                            l2_leaf_reg=18,
+#                            max_bin=15,
+#                            early_stopping_rounds=70, 
+#                            random_state=98765)
 
 
 # param = {'auto_class_weights':'Balanced','iterations':10000,'early_stopping_rounds':100,'l2_leaf_reg':18,'learning_rate':0.0021626,
@@ -343,7 +303,7 @@ test_csv = np.asarray(test_csv).astype(np.float32)
 start_time = time.time()
 model.fit(x_train, y_train)#, eval_set=(x_test, y_test))#, cat_features=categorical_features_id)
 end_time = time.time()
-'''
+
 #4. 평가, 예측
 # print("최적의 매개변수 : ", model.best_estimator_)
 # print("최적의 파라미터 : ", model.best_params_)
