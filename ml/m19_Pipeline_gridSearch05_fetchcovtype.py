@@ -68,8 +68,8 @@ parameters = [
 pipe = Pipeline([('mm',MinMaxScaler()),('RF',RandomForestClassifier())])
  
 #model = GridSearchCV(pipe, parameters, cv=5, verbose=1)
-#model = RandomizedSearchCV(pipe, parameters, cv=5, verbose=1)
-model = HalvingGridSearchCV(pipe, parameters, cv=5, verbose=1)
+model = RandomizedSearchCV(pipe, parameters, cv=5, verbose=1)
+#model = HalvingGridSearchCV(pipe, parameters, cv=5, verbose=1)
 
 
 #3. 컴파일, 훈련
