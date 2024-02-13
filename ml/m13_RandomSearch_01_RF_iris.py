@@ -1,6 +1,6 @@
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.datasets import load_iris
-from sklearn.model_selection import train_test_split, cross_val_score, cross_val_predict, StratifiedKFold, GridSearchCV
+from sklearn.model_selection import train_test_split, cross_val_score, cross_val_predict, StratifiedKFold, GridSearchCV, RandomizedSearchCV
 from sklearn.preprocessing import MinMaxScaler
 import time
 
@@ -26,7 +26,14 @@ parameters = [
 ]    
      
 RF = RandomForestClassifier()
-model = GridSearchCV(RF, param_grid=parameters, cv=kfold , n_jobs=-1, refit=True, verbose=1)
+model = RandomizedSearchCV(RandomForestClassifier(), 
+                     parameters, 
+                     cv=kfold, 
+                     verbose=1, 
+                     n_iter=10,
+                     refit= True, #디폴트 트루~
+                     n_jobs=-1) #CPU 다 쓴다!
+
 start_time = time.time()
 model.fit(x_train, y_train)
 end_time = time.time()
@@ -55,4 +62,14 @@ print("걸린시간 :", round(end_time - start_time, 2), "초")
 # accuracy_score : 0.9333333333333333
 # 최적튠 ACC : 0.9333333333333333
 # 걸린시간 : 2.19 초
+
+
+#randomizer
+# 최적의 매개변수 :  RandomForestClassifier(min_samples_leaf=10, min_samples_split=3, n_jobs=-1)
+# 최적의 파라미터 :  {'n_jobs': -1, 'min_samples_split': 3, 'min_samples_leaf': 10}
+# best_score : 0.9583333333333334
+# score : 0.9666666666666667
+# accuracy_score : 0.9666666666666667
+# 최적튠 ACC : 0.9666666666666667
+# 걸린시간 : 1.44 초
 

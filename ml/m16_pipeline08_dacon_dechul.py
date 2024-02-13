@@ -16,12 +16,10 @@ import sklearn as sk
 import time
 import warnings
 warnings.filterwarnings(action='ignore')
-from keras.utils import to_categorical
-from sklearn.svm import LinearSVC #softvector machine
-from sklearn.linear_model import Perceptron, LogisticRegression , LinearRegression#분류!
-from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
-from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from sklearn.pipeline import make_pipeline
+from sklearn.ensemble import RandomForestClassifier
+
+
 
 
 #1. 데이터
@@ -201,59 +199,126 @@ y = le.fit_transform(y)
 
 
      
+from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
+from sklearn.preprocessing import StandardScaler, RobustScaler
 
-from sklearn.model_selection import train_test_split,KFold,cross_val_score, StratifiedKFold, cross_val_predict, GridSearchCV
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
+mms = MinMaxScaler(feature_range=(1,3))
+#mms = StandardScaler()
+#mms = MaxAbsScaler()
+#mms = RobustScaler()
+
+mms.fit(x)
+x = mms.transform(x)
+test_csv=mms.transform(test_csv)
+#print(x.shape, y.shape)  #(96294, 13) (96294, 7)
+#print(np.unique(y, return_counts= True)) #array(['A', 'B', 'C', 'D', 'E', 'F', 'G'], dtype=object), array([16772, 28817, 27623, 13354,  7354,  1954,   420],
+
+#print(train_csv)
+
+#print(y.shape) #(96294,)
+#print(np.unique(y, return_counts= True)) #Name: 근로기간, Length: 96294, dtype: float64
 
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, shuffle= True, random_state= 123, train_size=0.8, stratify=y)
-scaler = MinMaxScaler()
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.88,  shuffle= True, random_state= 279, stratify= y) #170 #279 
 
-x_train = scaler.fit_transform(x_train)
-x_test = scaler.fit_transform(x_test)
+# smote = SMOTE(random_state=270,sampling_strategy='auto',k_neighbors=10,)
+# x_train, y_train =smote.fit_resample(x_train, y_train)
 
-n_splits=5
-kfold = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=123)
-#n_split = 섞어서 분할하는 갯수
 
-#2. 모델구성
-parameters = [
-    {"n_jobs": [-1],"n_estimators": [100, 200], "max_depth": [6, 10, 12], "min_samples_leaf": [3, 10]},
-    {"n_jobs": [-1],"max_depth": [6, 8, 10, 12], "min_samples_leaf": [3, 5, 7, 10]},
-    {"n_jobs": [-1],"min_samples_leaf": [3, 5, 7, 10], "min_samples_split": [2, 3, 5, 10]},
-    {"n_jobs": [-1],"min_samples_split": [2, 3, 5, 10]},
-    {"n_jobs": [-1], "min_samples_split": [2, 3, 5, 10]},
-]    
-    
-     
-RF = RandomForestClassifier()
-model = GridSearchCV(RF, param_grid=parameters, cv=kfold , n_jobs=-1, refit=True, verbose=1)
+
+
+# from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
+# from sklearn.preprocessing import StandardScaler, RobustScaler, Normalizer
+
+# #mms = MinMaxScaler(feature_range=(1,5))
+# mms = StandardScaler()
+# #mms = MaxAbsScaler()
+# #mms = RobustScaler()
+
+
+
+
+
+# #2. 모델구성
+
+
+# model = LinearSVC(C=2200)
+model = make_pipeline(MinMaxScaler(), RandomForestClassifier())
+
+
+#3. 컴파일, 훈련
+
+import datetime
+date= datetime.datetime.now()
+date = date.strftime("%m%d-%H%M") #m=month, M=minutes
+
+path1= 'C:/_data/_save/MCP/_k28/' #경로(스트링data (문자))
+filename = '{epoch:04d}-{val_loss:.4f}.hdf5' #filename= 에포4자리수-발로스는 소숫점4자리까지 표시. 예)1000-0.3333.hdf5
+filepath = "".join([path1, 'k28_11_', date, "_", filename]) #""공간에 ([])를 합쳐라.
+
+
+x_train = np.asarray(x_train).astype(np.float32)
+x_test = np.asarray(x_test).astype(np.float32)
+test_csv = np.asarray(test_csv).astype(np.float32)
+
+
+
 start_time = time.time()
 model.fit(x_train, y_train)
 end_time = time.time()
 
-from sklearn.metrics import accuracy_score
-best_predict = model.best_estimator_.predict(x_test)
-best_acc_score = accuracy_score(y_test, best_predict)
 
-print("최적의 매개변수 : ", model.best_estimator_)
-print("최적의 파라미터 : ", model.best_params_)
-print('best_score :', model.best_score_)
-print('score :', model.score(x_test, y_test))
+#4. 평가, 예측
 
-y_predict = model.predict(x_test)
-print("accuracy_score :", accuracy_score(y_test, y_predict))
-
-y_pred_best = model.best_estimator_.predict(x_test)
-print("최적튠 ACC :", accuracy_score(y_test, y_predict))
-
-print("걸린시간 :", round(end_time - start_time, 2), "초")
+results = model.score(x_test, y_test)
+print("로스 :", results)
+print("걸린 시간 :", round(end_time - start_time, 2), "초")
 
 
-# 최적의 매개변수 :  RandomForestClassifier(n_jobs=-1)
-# 최적의 파라미터 :  {'min_samples_split': 2, 'n_jobs': -1}
-# best_score : 0.7951969883819043
-# score : 0.6024196479567994
-# accuracy_score : 0.6024196479567994
-# 최적튠 ACC : 0.6024196479567994
-# 걸린시간 : 58.05 초
+y_predict = model.predict(x_test )
+
+y_submit = model.predict(test_csv)
+
+
+f1 = f1_score(y_test,y_predict,average='macro')
+print("F1: ",f1)
+
+
+
+import datetime
+dt = datetime.datetime.now()
+submission_csv['대출등급'] = y_submit
+
+submission_csv.to_csv(path+f"submit_{dt.day}day{dt.hour:2}{dt.minute:2}_F1_{f1:4}.csv",index=False)
+
+
+
+#minmax
+#로스 : 0.45476970076560974
+#정확도 : 0.8460853695869446
+
+#mms = StandardScaler()
+
+#로스 : 0.46329641342163086
+#정확도 : 0.8380373120307922
+
+#mms = MaxAbsScaler()
+#로스 : 0.44124674797058105
+#F1:  0.8497932009729917
+
+
+#mms = RobustScaler()
+#로스 : 0.3884388208389282
+#F1:  0.865791228309671
+
+
+
+#LinearSVC
+# 로스 : 0.3806680512287989
+# 걸린 시간 : 47.78 초
+# F1:  0.1864885248672083
+
+#pipeline
+# 로스 : 0.8142090688819661
+# 걸린 시간 : 7.1 초
+# F1:  0.6915816805313789

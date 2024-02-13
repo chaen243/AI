@@ -202,7 +202,7 @@ y = le.fit_transform(y)
 
      
 
-from sklearn.model_selection import train_test_split,KFold,cross_val_score, StratifiedKFold, cross_val_predict, GridSearchCV
+from sklearn.model_selection import train_test_split,KFold,cross_val_score, StratifiedKFold, cross_val_predict, GridSearchCV, RandomizedSearchCV
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 
@@ -227,7 +227,13 @@ parameters = [
     
      
 RF = RandomForestClassifier()
-model = GridSearchCV(RF, param_grid=parameters, cv=kfold , n_jobs=-1, refit=True, verbose=1)
+model = RandomizedSearchCV(RandomForestClassifier(), 
+                     parameters, 
+                     cv=kfold, 
+                     verbose=1, 
+                     n_iter=10, #디폴트 10
+                     refit= True, #디폴트 트루~
+                     n_jobs=-1) #CPU 다 쓴다!
 start_time = time.time()
 model.fit(x_train, y_train)
 end_time = time.time()
@@ -257,3 +263,12 @@ print("걸린시간 :", round(end_time - start_time, 2), "초")
 # accuracy_score : 0.6024196479567994
 # 최적튠 ACC : 0.6024196479567994
 # 걸린시간 : 58.05 초
+
+#randomsearch
+# 최적의 매개변수 :  RandomForestClassifier(n_jobs=-1)
+# 최적의 파라미터 :  {'n_jobs': -1, 'min_samples_split': 2}
+# best_score : 0.7945738949828001
+# score : 0.6049639129757516
+# accuracy_score : 0.6049639129757516
+# 최적튠 ACC : 0.6049639129757516
+# 걸린시간 : 13.91 초
