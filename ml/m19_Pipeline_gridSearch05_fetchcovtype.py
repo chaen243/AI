@@ -116,3 +116,7 @@ print("걸린시간 :", end_time - start_time, '초')
 
 #pipeline
 # acc : 0.9518484945841748
+
+#pipe2
+# model.score: : 0.9722222222222222
+# acc : 0.9722222222222222
