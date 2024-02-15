@@ -2,7 +2,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
 from sklearn.datasets import load_digits
 from sklearn.experimental import enable_halving_search_cv #정식버전이 아님!
-from sklearn.model_selection import train_test_split, cross_val_score, cross_val_predict, StratifiedKFold, GridSearchCV, RandomizedSearchCV, HalvingRandomSearchCV
+from sklearn.model_selection import train_test_split, cross_val_score, cross_val_predict, StratifiedKFold, GridSearchCV, RandomizedSearchCV, HalvingGridSearchCV
 from sklearn.preprocessing import MinMaxScaler
 import time
 
@@ -42,7 +42,7 @@ model = GridSearchCV(SVC(),
                      )#n_jobs=-1) #CPU 다 쓴다!     
 # RF = RandomForestClassifier()
 print("==========하빙그리드서치========")
-model = HalvingRandomSearchCV(SVC(), 
+model = HalvingGridSearchCV(SVC(), 
                      parameters, 
                      cv=5, 
                      verbose=1, 
