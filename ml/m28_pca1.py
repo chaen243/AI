@@ -2,8 +2,11 @@
 #성능향상은 많이 기대할 수 없음. (0이 많은 데이터 같은 경우, 이상치가 많은 경우에는 득이 될 수 있음. )
 #지도학습 (y가 있을때)/ 비지도학습 (y가 없음)
 
+<<<<<<< HEAD
 #스케일링, PCA후 train_test_split
 import pandas as pd
+=======
+>>>>>>> b3f00020f6b97894eed447d29a313f532fa379f1
 from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
 from sklearn.decomposition import PCA
@@ -27,9 +30,12 @@ x = pca.fit_transform(x)
 #print(x)
 print(x.shape)
 
+<<<<<<< HEAD
 
 
 
+=======
+>>>>>>> b3f00020f6b97894eed447d29a313f532fa379f1
 x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=0.8, random_state=777, shuffle= True, stratify=y)
 
 #2. 모델
@@ -43,4 +49,7 @@ results = model.score(x_test, y_test)
 print('===============')
 print(x.shape)
 print('model.score :',results)
+<<<<<<< HEAD
 
+=======
+>>>>>>> b3f00020f6b97894eed447d29a313f532fa379f1

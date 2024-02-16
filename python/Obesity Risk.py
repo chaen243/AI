@@ -228,6 +228,7 @@ y = le.fit_transform(y)
 #             annot=True,
 #             cbar=True)
 # plt.show()
+<<<<<<< HEAD
 
 #columns = train_csv.feature_names
 columns = x.columns
@@ -290,6 +291,16 @@ x = pd.DataFrame(x,columns=columns)
 
 
 
+=======
+
+
+print(x.shape)
+pca = PCA(n_components=11)   # 컬럼을 몇개로 줄일것인가(숫자가 작을수록 데이터 손실이 많아짐) 
+                            #사용전에 스케일링(주로 standard)을 해서 모양을 어느정도 맞춰준 뒤 사용
+x = pca.fit_transform(x)
+test_csv = pca.transform(test_csv)
+print(x.shape)
+>>>>>>> b3f00020f6b97894eed447d29a313f532fa379f1
 
 
 x_train, x_test, y_train, y_test = train_test_split(x, y, train_size = 0.9, shuffle=True, random_state=SEED1, stratify= y)
@@ -306,17 +317,17 @@ kfold = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=SEED1)
 
 
 
-#mms = MinMaxScaler() #(feature_range=(0,1))
-mms = StandardScaler()
-#mms = MaxAbsScaler()
-#mms = RobustScaler()
-#mms = Normalizer()
+# #mms = MinMaxScaler() #(feature_range=(0,1))
+# mms = StandardScaler()
+# #mms = MaxAbsScaler()
+# #mms = RobustScaler()
+# #mms = Normalizer()
 
 
-mms.fit(x_train)
-x_train= mms.transform(x_train)
-x_test= mms.transform(x_test)
-test_csv= mms.transform(test_csv)
+# mms.fit(x_train)
+# x_train= mms.transform(x_train)
+# x_test= mms.transform(x_test)
+# test_csv= mms.transform(test_csv)
 
 
 #==================================
@@ -336,6 +347,7 @@ from sklearn.decomposition import PCA #차원축소
 #                             random_state=42)#1001 #1117
 
 ################lgbm########################
+<<<<<<< HEAD
 # lgb_params = {
 #     "metric": ["multi_logloss"],   
 #     #"deterministic": "true",    
@@ -411,6 +423,83 @@ model = GridSearchCV(XGBClassifier(tree_method= 'hist',device= 'cuda'),
                      #n_iter=10,
                      refit= True, #디폴트 트루~
                      n_jobs=-3) #CPU 다 쓴다!
+=======
+lgb_params = {
+    "metric": "multi_logloss",   
+    #"deterministic": "true",    
+
+#    "device_type":"GPU",
+#    "boost_from_average": "False", 
+    "verbosity": 1,            
+    "boosting_type": "gbdt",           
+    "random_state": SEED1,       #42    
+    "num_class": 17,                
+    'learning_rate': 0.090962211546832760,  
+    'n_estimators': 20000,                
+    'reg_alpha' : 0.9269816785,
+    #'lambda_l1': 0.9967446568254372,
+    'num_leaves' : 128,
+    #'lambda_l2': 0.09018641437301800,   
+    'max_depth': 60,                  
+    'colsample_bytree': 0.40977129346872643,
+    'subsample': 0.835797422450176,   
+    'n_jobs' : -1,
+    'min_child_samples': 1          
+}
+
+model = LGBMClassifier(**lgb_params)
+################lgbm########################
+
+# params = {
+#     'n_estimators': 4000,
+#     'learning_rate': 0.1,
+#     'gamma': 0.9024196354156454324,
+#     'reg_alpha': 0.7,
+#     "verbosity": 1,  
+#     'reg_lambda': 0.9935667255875388,
+#     'max_depth': 12,
+#     'min_child_weight': 1, #4
+#     'subsample': 0.393274050086088,
+#     'colsample_bytree': 0.4579828557036317,
+#     'n_jobs' : -1
+# }
+
+
+
+################xgb########################
+
+# parameters = [{
+#     'n_estimators': [4000, 3000],
+#     'learning_rate': [0.92, 0.62],
+#     'gamma': [0.8024196, 0.785872],
+#     'reg_alpha': [0.99025931173755949, 0.9469289],
+#     'reg_lambda': [0.8835667255875388],
+#     'max_depth': [40, 43],
+#     'min_child_weight': [1,4],
+#     'subsample': [0.393274050086088],
+#     'colsample_bytree': [0.4579828557036317]
+# }]
+
+# model = XGBClassifier(**params, random_state = 189)
+# model = make_pipeline(#MinMaxScaler(),
+#                       #RobustScaler(),
+#                       StandardScaler(),
+#                       #PCA(),
+#                       #XGBClassifier(**params, random_state = 189)
+#                       LGBMClassifier(**params, random_state = 189)
+                      
+#                       )
+################xgb########################
+
+# model = HalvingGridSearchCV(LGBMClassifier(), 
+#                      lgb_params, 
+#                      cv=kfold, 
+#                      verbose=1, 
+#                      min_resources=20,
+#                      #n_iter=10,
+#                      refit= True, #디폴트 트루~
+#                      n_jobs=-1) #CPU 다 쓴다!
+>>>>>>> b3f00020f6b97894eed447d29a313f532fa379f1
 
 ################catboost########################
 # model = CatBoostClassifier(auto_class_weights = 'Balanced', 
