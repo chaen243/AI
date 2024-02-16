@@ -441,7 +441,7 @@ params = {
     'reg_alpha': 0.7,
     "verbosity": 1,  
     'reg_lambda': 0.9935667255875388,
-    'max_depth': 12,
+    'max_depth': 16,
     'min_child_weight': 1, #4
     'subsample': 0.393274050086088,
     'colsample_bytree': 0.4579828557036317,
