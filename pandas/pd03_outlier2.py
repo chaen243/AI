@@ -19,7 +19,7 @@ def outliers(data_out):
     upper_bound = quartile_3 + (iqr * 1.5)
     return np.where((data_out>upper_bound) |
                     (data_out<lower_bound))
-    #두가지 조건 중 하나라도 만족하는게 있으면 리턴해내라!
+    #두가지 조건 중 하나라도 만족하는게 있으면 리턴해내는것!
     
     
     
