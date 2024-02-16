@@ -5,7 +5,7 @@ import os
 import random as rn
 import keras
 import numpy as np
-SEED = 1112
+SEED = 111
 
 os.environ['PYTHONHASHSEED'] = str(SEED)
 os.environ['TF_DETERMINISTIC_OPS'] = '1'
