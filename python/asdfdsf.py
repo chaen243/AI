@@ -17,6 +17,7 @@ from sklearn.pipeline import make_pipeline,Pipeline
 from lightgbm import LGBMClassifier
 from xgboost import XGBClassifier
 from catboost import CatBoostClassifier, Pool
+from keras.models import save_model, load_model 
 
 SEED1 = 42
 SEED2 = 42
@@ -190,20 +191,20 @@ y = le.fit_transform(y)
 # y = ohe.transform(y)
 # print(y.shape)  
 
-# from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
-# from sklearn.preprocessing import StandardScaler, RobustScaler
-# import time
+from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
+from sklearn.preprocessing import StandardScaler, RobustScaler
+import time
 
 
-# mms = MinMaxScaler()
-# # mms = MinMaxScaler(feature_range=(0,1))
-# # mms = StandardScaler()
-# # mms = MaxAbsScaler()
-# # mms = RobustScaler()
+#mms = MinMaxScaler()
+# mms = MinMaxScaler(feature_range=(0,1))
+mms = StandardScaler()
+# mms = MaxAbsScaler()
+# mms = RobustScaler()
 
-# mms.fit(x)
-# x = mms.transform(x)
-# test_csv=mms.transform(test_csv)
+mms.fit(x)
+x = mms.transform(x)
+test_csv=mms.transform(test_csv)
 #print(x.shape, y.shape)  #(20758, 16) (20758,)
 #print(np.unique(y, return_counts= True))
 #(array([0, 1, 2, 3, 4, 5, 6]), array([2523, 3082, 2910, 3248, 4046, 2427, 2522], dtype=int64))
@@ -229,9 +230,9 @@ y = le.fit_transform(y)
 #             cbar=True)
 # plt.show()
 
-#columns = train_csv.feature_names
-columns = x.columns
-x = pd.DataFrame(x,columns=columns)
+# columns = x.feature_names
+# #columns = x.columns
+# x = pd.DataFrame(x,columns=columns)
 
 # for i in range(len(x.columns)):
 #     scaler = StandardScaler()
@@ -284,12 +285,83 @@ x = pd.DataFrame(x,columns=columns)
 #     #evr_cunsum = np.cumsum(evr)
 #     #print(evr_cunsum)   
 
+# ran = np.array(range(1000,2000))
+# print(len(ran))
+# best_score = 0
+# best_random_state = 0
+# for i in range(len(ran)):
+#     x_train, x_test, y_train, y_test = train_test_split(x, y, train_size = 0.9, shuffle=True, random_state=i+1, stratify= y)
+#     paramet = {
+#     "device_type":"GPU",
+#     "boost_from_average": "False", 
+#     "verbosity": 1,            
+#     "boosting_type": "gbdt",           
+#     "num_class": 17,                
+#     'learning_rate': 0.090962211546832760,  
+#     'n_estimators': 4000,                
+#     'reg_alpha' : 0.9902593117375595,
+#     #'lambda_l1': 0.9967446568254372,
+#     'num_leaves' : 128,
+#     #'lambda_l2': 0.09018641437301800,   
+#     'max_depth': 60,                  
+#     'colsample_bytree': 0.40977129346872643,
+#     'subsample': 0.835797422450176,   
+#     'n_jobs' : -1,
+#     'min_child_samples': 1          
+# }
+
+#     model = LGBMClassifier(**paramet)
+
+#     #3. 컴파일 , 훈련
+
+#     x_train = np.asarray(x_train).astype(np.float32)
+#     x_test = np.asarray(x_test).astype(np.float32)
+#     test_csv = np.asarray(test_csv).astype(np.float32)
+
+
+
+#     start_time = time.time()
+#     model.fit(x_train, y_train)#, eval_set=(x_test, y_test))#, cat_features=categorical_features_id)
+#     end_time = time.time()
+
+
+
+
+#     #4. 평가, 예측
+#     score = model.score(x_test, y_test)
+#     import datetime
+#     dt = datetime.datetime.now()
+#     y_predict = model.predict(x_test)
+#     y_submit = model.predict(test_csv)
+#     y_submit = le.inverse_transform(y_submit)
+#     submission_csv['NObeyesdad'] = y_submit
+
+#     print('random_state :', i+1)
+#     print('score :', model.score(x_test, y_test))
+    
+#     if score > best_score:
+#         best_score = score
+#         best_random_state = {'random_state' : i+1}
+#         submission_csv.to_csv(path+f"_acc_{score:4}_best_random_state_{best_random_state}.csv",index=False)
+        
+    
+    
+
+
+import datetime
+dt = datetime.datetime.now()
+
 
     #print(np.unique(y_submit, return_counts= True))
 #submission_csv.to_csv(path+f"submit_{dt.day}day{dt.hour:2}{dt.minute:2}_acc_{score:4}.csv",index=False)
 
 
 
+# print("최고점수 : {:.10f}".format(best_score))        
+# print("best_random_state :{}".format(best_random_state))    
+# submission_csv.to_csv(path+f"_acc_{score:4}_best_random_state_{best_random_state}.csv",index=False)
+
+# model.save("C:\\_data\\kaggle\\Obesity_Risk\\model\\f_acc_{score:4}_best_random_state_{best_random_state}.h5")
 
 
 x_train, x_test, y_train, y_test = train_test_split(x, y, train_size = 0.9, shuffle=True, random_state=SEED1, stratify= y)
@@ -306,17 +378,17 @@ kfold = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=SEED1)
 
 
 
-#mms = MinMaxScaler() #(feature_range=(0,1))
-mms = StandardScaler()
-#mms = MaxAbsScaler()
-#mms = RobustScaler()
-#mms = Normalizer()
+# #mms = MinMaxScaler() #(feature_range=(0,1))
+# mms = StandardScaler()
+# #mms = MaxAbsScaler()
+# #mms = RobustScaler()
+# #mms = Normalizer()
 
 
-mms.fit(x_train)
-x_train= mms.transform(x_train)
-x_test= mms.transform(x_test)
-test_csv= mms.transform(test_csv)
+# mms.fit(x_train)
+# x_train= mms.transform(x_train)
+# x_test= mms.transform(x_test)
+# test_csv= mms.transform(test_csv)
 
 
 #==================================
@@ -337,61 +409,62 @@ from sklearn.decomposition import PCA #차원축소
 
 ################lgbm########################
 # lgb_params = {
-#     "metric": ["multi_logloss"],   
+#     "metric": "multi_logloss",   
 #     #"deterministic": "true",    
 
 # #    "device_type":"GPU",
 # #    "boost_from_average": "False", 
-#     "verbosity": [-1],            
-#     "boosting_type": ["gbdt"],           
-#     "num_class": [17],                
-#     'learning_rate': [0.090962211546832760,0.21873571283690],  
-#     'n_estimators': [1000],                
-#     'reg_alpha' : [0.9269816785],
+#     "verbosity": 1,            
+#     "boosting_type": "gbdt",           
+#     "random_state": SEED1,       #42    
+#     "num_class": 17,                
+#     'learning_rate': 0.090962211546832760,  
+#     'n_estimators': 20000,                
+#     'reg_alpha' : 0.9269816785,
 #     #'lambda_l1': 0.9967446568254372,
-#     'num_leaves' : [128],
+#     'num_leaves' : 128,
 #     #'lambda_l2': 0.09018641437301800,   
-#     'max_depth': [60,20,10],                  
-#     'colsample_bytree': [0.40977129346872643],
-#     'subsample': [0.835797422450176],   
-#     'n_jobs' : [-1],
-#     'min_child_samples': [1,2,4]          
+#     'max_depth': 60,                  
+#     'colsample_bytree': 0.40977129346872643,
+#     'subsample': 0.835797422450176,   
+#     'n_jobs' : -1,
+#     'min_child_samples': 1          
 # }
 
 # model = LGBMClassifier(**lgb_params)
 ################lgbm########################
 
-# params = {
-#     'n_estimators': 4000,
-#     'learning_rate': 0.1,
-#     'gamma': 0.9024196354156454324,
-#     'reg_alpha': 0.7,
-#     "verbosity": 1,  
-#     'reg_lambda': 0.9935667255875388,
-#     'max_depth': 12,
-#     'min_child_weight': 1, #4
-#     'subsample': 0.393274050086088,
-#     'colsample_bytree': 0.4579828557036317,
-#     'n_jobs' : -1
-# }
+params = {
+    'n_estimators': 4000,
+    'learning_rate': 0.1,
+    'gamma': 0.9024196354156454324,
+    'reg_alpha': 0.7,
+    "verbosity": 1,  
+    'reg_lambda': 0.9935667255875388,
+    'max_depth': 12,
+    'min_child_weight': 1, #4
+    'subsample': 0.393274050086088,
+    'colsample_bytree': 0.4579828557036317,
+    'n_jobs' : -1
+}
 
 
 
 ################xgb########################
 
-parameters = [{
-    'n_estimators': [2000,3000],
-    'learning_rate': [ 0.7, 0.75, 0.8],
-    'gamma': [0.7724196, 0.774],
-    'reg_alpha': [0.99025931173755949],
-    'reg_lambda': [0.92, 0.9 ],
-    'max_depth': [20, 15],
-    'min_child_weight': [1],
-    'subsample': [0.393274050086088],
-    'colsample_bytree': [0.4579828557036317]
-}]
+# parameters = [{
+#     'n_estimators': [4000, 3000],
+#     'learning_rate': [0.92, 0.72],
+#     'gamma': [0.8024196, 0.785872],
+#     'reg_alpha': [0.99025931173755949, 0.9369289],
+#     'reg_lambda': [0.8835667255875388],
+#     'max_depth': [40, 43],
+#     'min_child_weight': [1,4],
+#     'subsample': [0.393274050086088],
+#     'colsample_bytree': [0.4579828557036317]
+# }]
 
-# model = XGBClassifier(**params, random_state = 189)
+model = XGBClassifier(**params, random_state = 189)
 # model = make_pipeline(#MinMaxScaler(),
 #                       #RobustScaler(),
 #                       StandardScaler(),
@@ -402,15 +475,15 @@ parameters = [{
 #                       )
 ################xgb########################
 
-model = GridSearchCV(XGBClassifier(tree_method= 'hist',device= 'cuda'), 
-                     parameters, 
-                     #random_state=SEED1,
-                     cv=kfold, 
-                     verbose=1, 
-                     #min_resources=20,
-                     #n_iter=10,
-                     refit= True, #디폴트 트루~
-                     n_jobs=-3) #CPU 다 쓴다!
+# model = HalvingGridSearchCV(XGBClassifier(), 
+#                      parameters, 
+#                      random_state=SEED1,
+#                      cv=kfold, 
+#                      verbose=1, 
+#                      min_resources=20,
+#                      #n_iter=10,
+#                      refit= True, #디폴트 트루~
+#                      n_jobs=-1) #CPU 다 쓴다!
 
 ################catboost########################
 # model = CatBoostClassifier(auto_class_weights = 'Balanced', 
@@ -449,9 +522,9 @@ end_time = time.time()
 
 
 #4. 평가, 예측
-print("최적의 매개변수 : ", model.best_estimator_)
-print("최적의 파라미터 : ", model.best_params_)
-print('best_score :', model.best_score_)
+# print("최적의 매개변수 : ", model.best_estimator_)
+# print("최적의 파라미터 : ", model.best_params_)
+# print('best_score :', model.best_score_)
 # print(rf.oob_score)
 print('score :', model.score(x_test, y_test))
 
@@ -484,3 +557,11 @@ submission_csv['NObeyesdad'] = y_submit
 
 #print(np.unique(y_submit, return_counts= True))
 submission_csv.to_csv(path+f"submit_{dt.day}day{dt.hour:2}{dt.minute:2}_acc_{acc:4}.csv",index=False)
+
+
+filename = 'f"submit_{dt.day}day{dt.hour:2}{dt.minute:2}_acc_{acc:4}.model.h5'
+
+
+import pickle
+with open('C:\_data\kaggle\Obesity_Risk\modelsave\model.h5 ','wb') as fw:
+    pickle.dump(model, fw)
