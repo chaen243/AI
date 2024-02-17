@@ -73,13 +73,11 @@ def outliers(x):
 outliers_loc = outliers(x)
 print("이상치의 위치 :", outliers_loc)
 print((outliers_loc[0]))    #1513
-
-
-
 print(x.shape) #(1459, 9)
+x = x[x - ]
 
 
-print(x.shape)
+
 # import matplotlib.pyplot as plt
 # plt.boxplot(x)
 # plt.show()
