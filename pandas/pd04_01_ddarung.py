@@ -59,7 +59,7 @@ def outliers(x):
     print('1사분위 :', quartile_1)
     print('q2 :', q2)
     print('3사분위 :', quartile_3)
-    iqr = quartile_3 - quartile_1
+    iqrs = quartile_3 - quartile_1
     print("iqr :", iqr)
     lower_bound = quartile_1 - (iqr)   #범위 지정 가능
     upper_bound = quartile_3 + (iqr * 1.5)
