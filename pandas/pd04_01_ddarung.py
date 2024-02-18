@@ -15,7 +15,7 @@ path = "c:\\_data\\daicon\\ddarung\\"
 # print(path + "aaa.csv") 문자그대로 보여줌 c:\_data\daicon\ddarung\aaa.csv
 # pandas에서 1차원- Series, 2차원이상은 DataFrame이라고 함.
 
-train_csv = pd.read_csv(path + "train.csv", index_col=0) # \ \\ / // 다 가능( 예약어 사용할때 두개씩 사용) 인덱스컬럼은 0번째 컬럼이다라는뜻.
+train_csv = pd.read_csv(path + "train.csv", index_col=['id']) # \ \\ / // 다 가능( 예약어 사용할때 두개씩 사용) 인덱스컬럼은 0번째 컬럼이다라는뜻.
 #print(train_csv)
 test_csv = pd.read_csv(path +"test.csv", index_col=0)
 #print(test_csv)
@@ -26,20 +26,43 @@ submission_csv = pd.read_csv(path + "submission.csv")
 ###########################결측치처리########################
 
 
-train_csv = train_csv.fillna(train_csv.bfill())  #앞 데이터로 채움
+train_csv = train_csv.fillna(train_csv.ffill())  #뒤 데이터로 채움
 print(train_csv.isnull().sum())
-test_csv = test_csv.fillna(test_csv.bfill())  #앞 데이터로 채움
+test_csv = test_csv.fillna(test_csv.ffill())  #앞 데이터로 채움
 print(test_csv.isnull().sum())
 
-#print(train_csv.isnull().sum())
-#print(train_csv.info())
-#print(train_csv.shape)      #(1328, 10)
-#print(test_csv.info()) # 717 non-null
+print(train_csv.isnull().sum())
+print(train_csv.info())
+print(train_csv.shape)      #(1328, 10)
+print(test_csv.info()) # 717 non-null
 
 ###########################결측치처리########################
 
 
+###########################이상치처리########################
 
+
+def fit_outlier(data):  
+    data = pd.DataFrame(data)
+    for label in data:
+        series = data[label]
+        q1 = series.quantile(0.25)      
+        q3 = series.quantile(0.75)
+        iqr = q3 - q1
+        upper_bound = q3 + iqr
+        lower_bound = q1 - iqr
+        
+        series[series > upper_bound] = np.nan
+        series[series < lower_bound] = np.nan
+        print(series.isna().sum())
+        series = series.interpolate()
+        data[label] = series
+        
+    data = data.fillna(data.bfill())
+    data = data.fillna(data.bfill())
+    return data
+
+###########################이상치처리########################
 
 
 
@@ -53,36 +76,7 @@ y = train_csv['count']
 
 
 
-def outliers(x):
-    quartile_1, q2, quartile_3 = np.percentile(x,[25,50,75])
-    
-    print('1사분위 :', quartile_1)
-    print('q2 :', q2)
-    print('3사분위 :', quartile_3)
-    iqrs = quartile_3 - quartile_1
-    print("iqr :", iqr)
-    lower_bound = quartile_1 - (iqr)   #범위 지정 가능
-    upper_bound = quartile_3 + (iqr * 1.5)
-    
-    return np.where((x>upper_bound) |
-                    (x<lower_bound))
-    #두가지 조건 중 하나라도 만족하는게 있으면 리턴해내는것!
-    
-    
-    
-outliers_loc = outliers(x)
-print("이상치의 위치 :", outliers_loc)
-print((outliers_loc[0]))    #1513
-print(x.shape) #(1459, 9)
-x = x[x - ]
 
-
-
-# import matplotlib.pyplot as plt
-# plt.boxplot(x)
-# plt.show()
-
-'''
 
 print(train_csv.index)
 
@@ -112,7 +106,7 @@ model = RandomForestRegressor()
 
 
 
-    
+   
 
 #3. 컴파일, 훈련
 import datetime
@@ -188,58 +182,18 @@ submission_csv.to_csv(path + f"submission_{save_time}{rmse:.3f}.csv", index=Fals
 # plt.show()
 
 
-#False
-#로스 : 2293.54248046875
-#R2 스코어 : 0.6335092329496075
-#RMSE :  47.89094457607659
+############이전 성적############
 
-#True
-#로스 : 2127.522216796875
-#R2 스코어 : 0.6600380875767446
-#RMSE :  46.12506761007933
-
-#mms = MinMaxScaler()
-#로스 : [1820.0758056640625, 1820.0758056640625]
-#R2 스코어 : 0.7094709860009812
-
-#mms = StandardScaler()
-#R2 스코어 : 0.6445350921775757
-#RMSE :  47.18982098487192
-
-#mms = MaxAbsScaler()
-#R2 스코어 : 0.6698447206814732
-#RMSE :  45.47880938749681
 
 #mms = RobustScaler()
 #R2 스코어 : 0.6925418908853859
 #RMSE :  43.887711905291766
 
 
+##########결측치 처리###########3
 
-#R2 스코어 : 0.6664152491454213
-#RMSE :  45.714403597080334
-
-# R2 스코어 : 0.6350364816315133
-# RMSE :  47.81615942211361
+# R2 스코어 : 0.7668828250205346
+# RMSE :  38.21528468262513
 
 
-#drop
-#R2 스코어 : 0.710561916616094
-#RMSE :  42.58217106385377
 
-#로스 : 13.508710861206055
-#R2 스코어 : 0.8138156700987883
-#걸린 시간 : 363.63 초
-
-#cpu
-#걸린 시간 : 796.74 초
-#gpu
-#걸린 시간 : 1323.02 초
-
-#linear
-# model.score : 0.41578303426180474
-# R2 스코어 : 0.41578303426180474
-# 걸린 시간 : 0.02 초
-# RMSE :  60.497446733195545
-
-'''
