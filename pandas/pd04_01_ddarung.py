@@ -39,6 +39,14 @@ print(test_csv.info()) # 717 non-null
 ###########################결측치처리########################
 
 
+
+
+################# x와 y를 분리 ###########
+x = train_csv.drop(['count',], axis=1)
+#print(x)
+y = train_csv['count']
+#print(y)
+
 ###########################이상치처리########################
 
 
@@ -66,15 +74,8 @@ def fit_outlier(data):
 
 
 
-################# x와 y를 분리 ###########
-x = train_csv.drop(['count',], axis=1)
-#print(x)
-y = train_csv['count']
-#print(y)
 
-
-
-
+x = fit_outlier(x)
 
 
 
@@ -190,7 +191,7 @@ submission_csv.to_csv(path + f"submission_{save_time}{rmse:.3f}.csv", index=Fals
 #RMSE :  43.887711905291766
 
 
-##########결측치 처리###########3
+##########결측치/이상치 처리###########
 
 # R2 스코어 : 0.7668828250205346
 # RMSE :  38.21528468262513

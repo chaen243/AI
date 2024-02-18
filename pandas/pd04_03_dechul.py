@@ -136,13 +136,6 @@ train_loan_perpose = train_loan_perpose.fillna(method='ffill')
 
 test_csv['대출목적'] = test_loan_perpose
 train_csv['대출목적'] = train_loan_perpose
-
-
-
-
-
-
-
 ######## 결측치확인
 # print(test_csv.isnull().sum()) #없음.
 # print(train_csv.isnull().sum()) #없음.
@@ -183,8 +176,34 @@ test_csv['대출기간'] = le.transform(test_csv['대출기간'])
 
 
 
+
 x = train_csv.drop(['대출등급'], axis = 1)
 
+def fit_outlier(x):  
+    x = pd.DataFrame(x)
+    for label in x:
+        series = x[label]
+        q1 = series.quantile(0.2)      
+        q3 = series.quantile(0.8)
+        iqr = q3 - q1
+        upper_bound = q3 + iqr
+        lower_bound = q1 - iqr
+        
+        series[series > upper_bound] = np.nan
+        series[series < lower_bound] = np.nan
+        print(series.isna().sum())
+        series = series.interpolate()
+        x[label] = series
+        
+    x = x.fillna(x.mean())
+    return x
+
+x = fit_outlier(x)
+
+
+import matplotlib.pyplot as plt
+plt.boxplot(x)
+plt.show()
 
 #print(x)
 y = train_csv['대출등급']
@@ -194,17 +213,16 @@ y = le.fit_transform(y)
 
 
 
-# ohe = OneHotEncoder(sparse = False)
-# ohe.fit(y)
-# y_ohe = ohe.transform(y)
-# print(y_ohe.shape)  
+
+
+
 
 
      
 from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
 from sklearn.preprocessing import StandardScaler, RobustScaler
 
-mms = MinMaxScaler(feature_range=(1,3))
+mms = MinMaxScaler()
 #mms = StandardScaler()
 #mms = MaxAbsScaler()
 #mms = RobustScaler()
@@ -220,33 +238,6 @@ test_csv=mms.transform(test_csv)
 #print(y.shape) #(96294,)
 #print(np.unique(y, return_counts= True)) #Name: 근로기간, Length: 96294, dtype: float64
 
-# columns = datasets.feature_names
-columns = x.columns
-x = pd.DataFrame(x,columns=columns)
-print("x.shape",x.shape)
-''' 이 밑에 숫자에 얻은 feature_importances 넣고 줄 끝마다 \만 붙여주기'''
-fi_str = "0.04608915 0.40687552 0.0116357  0.01653006 0.03530279 0.01693228\
-  0.01299725 0.02246723 0.02015632 0.1899054  0.1991351  0.01186655\
-  0.01010665"
- 
-''' str에서 숫자로 변환하는 구간 '''
-fi_str = fi_str.split()
-fi_float = [float(s) for s in fi_str]
-print(fi_float)
-fi_list = pd.Series(fi_float)
-
-''' 25퍼 미만 인덱스 구하기 '''
-low_idx_list = fi_list[fi_list <= fi_list.quantile(0.25)].index
-print('low_idx_list',low_idx_list)
-
-''' 25퍼 미만 제거하기 '''
-low_col_list = [x.columns[index] for index in low_idx_list]
-# 이건 혹여 중복되는 값들이 많아 25퍼이상으로 넘어갈시 25퍼로 자르기
-if len(low_col_list) > len(x.columns) * 0.25:   
-    low_col_list = low_col_list[:int(len(x.columns)*0.25)]
-print('low_col_list',low_col_list)
-x.drop(low_col_list,axis=1,inplace=True)
-print("after x.shape",x.shape)
 
 
 x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.88,  shuffle= True, random_state= 279, stratify= y) #170 #279 
@@ -267,32 +258,21 @@ mms = StandardScaler()
 
 
 #2. 모델구성
-models = [DecisionTreeClassifier(), RandomForestClassifier(), GradientBoostingClassifier(), XGBClassifier()]
+params = {
+    'n_estimators': 4000,
+    'learning_rate': 0.05,
+    "verbosity": 1,  
+    'max_depth': 20,
+    'n_jobs' : -1
+}
 
-for model in models:
-    model.fit(x_train, y_train)
-    results = model.score(x_test,y_test) #분류에서는 (디폴트값)acc 빼줌 회귀는 r2
-    y_predict = model.predict(x_test)
-    acc = accuracy_score(y_predict, y_test)
-    print(type(model).__name__, "acc :", acc)
-    print(type(model).__name__, ':', model.feature_importances_)
-        
-
-
-# # #2. 모델구성
-
-
-# model = LinearSVC(C=2200)
+model = XGBClassifier(**params)
 
 #3. 컴파일, 훈련
 
 import datetime
 date= datetime.datetime.now()
 date = date.strftime("%m%d-%H%M") #m=month, M=minutes
-
-path1= 'C:/_data/_save/MCP/_k28/' #경로(스트링data (문자))
-filename = '{epoch:04d}-{val_loss:.4f}.hdf5' #filename= 에포4자리수-발로스는 소숫점4자리까지 표시. 예)1000-0.3333.hdf5
-filepath = "".join([path1, 'k28_11_', date, "_", filename]) #""공간에 ([])를 합쳐라.
 
 
 x_train = np.asarray(x_train).astype(np.float32)
@@ -308,12 +288,12 @@ end_time = time.time()
 
 #4. 평가, 예측
 
-# results = model.score(x_test, y_test)
-# print("로스 :", results)
-# print("걸린 시간 :", round(end_time - start_time, 2), "초")
+results = model.score(x_test, y_test)
+print("로스 :", results)
+print("걸린 시간 :", round(end_time - start_time, 2), "초")
 
 
-# y_predict = model.predict(x_test )
+y_predict = model.predict(x_test )
 
 y_submit = model.predict(test_csv)
 
@@ -331,46 +311,14 @@ submission_csv.to_csv(path+f"submit_{dt.day}day{dt.hour:2}{dt.minute:2}_F1_{f1:4
 
 
 
-#minmax
-#로스 : 0.45476970076560974
-#정확도 : 0.8460853695869446
-
-#mms = StandardScaler()
-
-#로스 : 0.46329641342163086
-#정확도 : 0.8380373120307922
-
-#mms = MaxAbsScaler()
-#로스 : 0.44124674797058105
-#F1:  0.8497932009729917
-
+############이전성적############
 
 #mms = RobustScaler()
 #로스 : 0.3884388208389282
 #F1:  0.865791228309671
 
+############전처리 후 성적############
 
 
-#LinearSVC
-# 로스 : 0.3806680512287989
-# 걸린 시간 : 47.78 초
-# F1:  0.1864885248672083
-
-# DecisionTreeClassifier acc : 0.836362062997577
-# DecisionTreeClassifier : [6.23278999e-02 3.40621160e-02 1.34343606e-02 5.60502883e-03
-#  3.55177901e-02 3.22339821e-02 2.47850296e-02 7.53124870e-03
-#  4.93046315e-03 4.16771668e-01 3.62101547e-01 4.02583272e-04
-#  2.96282841e-04]
-# RandomForestClassifier acc : 0.8129975770162686
-# RandomForestClassifier : [0.10071168 0.02748362 0.04502038 0.01700423 0.08185421 0.08876457
-#  0.07070854 0.02039726 0.01600189 0.26403231 0.26649919 0.0005558
-#  0.00096632]
-# GradientBoostingClassifier acc : 0.7522499134648667
-# GradientBoostingClassifier : [2.18515854e-02 1.14308406e-01 5.97862156e-05 8.78593853e-04
-#  1.59119930e-02 6.16757041e-03 1.13258973e-03 3.77335004e-03
-#  9.85626067e-04 3.92378731e-01 4.42513453e-01 3.80708232e-05
-#  2.45007962e-07]
-# XGBClassifier acc : 0.856957424714434
-# XGBClassifier : [0.04608915 0.40687552 0.0116357  0.01653006 0.03530279 0.01693228
-#  0.01299725 0.02246723 0.02015632 0.1899054  0.1991351  0.01186655
-#  0.01010665]
+# 로스 0.3152079847689379
+# f1 0.8699150043102325

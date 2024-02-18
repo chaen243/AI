@@ -179,16 +179,31 @@ test_csv['MTRANS']= test_csv['MTRANS'].str.replace("Walking","4")
 
 
 x = train_csv.drop(['NObeyesdad'], axis = 1)
+
+def fit_outlier(x):  
+    x = pd.DataFrame(x)
+    for label in x:
+        series = x[label]
+        q1 = series.quantile(0.25)      
+        q3 = series.quantile(0.75)
+        iqr = q3 - q1
+        upper_bound = q3 + iqr
+        lower_bound = q1 - iqr
+        
+        series[series > upper_bound] = np.nan
+        series[series < lower_bound] = np.nan
+        print(series.isna().sum())
+        series = series.interpolate()
+        x[label] = series
+        
+    x = x.fillna(x.median())
+    return x
+
 y = train_csv['NObeyesdad']
 y = le.fit_transform(y)
 #test_csv = test_csv.drop(['FAVC'], axis = 1)
 
 
-# y = y.values.reshape(-1,1)
-# ohe = OneHotEncoder(sparse = False)
-# ohe.fit(y)
-# y = ohe.transform(y)
-# print(y.shape)  
 
 # from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
 # from sklearn.preprocessing import StandardScaler, RobustScaler
@@ -230,39 +245,26 @@ y = le.fit_transform(y)
 # plt.show()
 
 
-print(x.shape)
-pca = PCA(n_components=11)   # 컬럼을 몇개로 줄일것인가(숫자가 작을수록 데이터 손실이 많아짐) 
-                            #사용전에 스케일링(주로 standard)을 해서 모양을 어느정도 맞춰준 뒤 사용
-x = pca.fit_transform(x)
-test_csv = pca.transform(test_csv)
-print(x.shape)
+
+
+
+
 
 
 x_train, x_test, y_train, y_test = train_test_split(x, y, train_size = 0.9, shuffle=True, random_state=SEED1, stratify= y)
 #5 9158 19 9145
-n_splits=5
-kfold = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=SEED1)
 
-# y_train = to_categorical(y_train, 7)
-# y_test = to_categorical(y_test, 7) 
-
-
-
+#mms = MinMaxScaler() #(feature_range=(0,1))
+#mms = StandardScaler()
+mms = MaxAbsScaler()
+#mms = RobustScaler()
+#mms = Normalizer()
 
 
-
-
-# #mms = MinMaxScaler() #(feature_range=(0,1))
-# mms = StandardScaler()
-# #mms = MaxAbsScaler()
-# #mms = RobustScaler()
-# #mms = Normalizer()
-
-
-# mms.fit(x_train)
-# x_train= mms.transform(x_train)
-# x_test= mms.transform(x_test)
-# test_csv= mms.transform(test_csv)
+mms.fit(x_train)
+x_train= mms.transform(x_train)
+x_test= mms.transform(x_test)
+test_csv= mms.transform(test_csv)
 
 
 #==================================
@@ -273,128 +275,37 @@ from catboost import CatBoostClassifier
 from sklearn.decomposition import PCA #차원축소
 
 
-# rf = RandomForestClassifier(max_depth=30,
-#                             n_estimators=500,
+# model = RandomForestClassifier(max_depth=30,
+#                             n_estimators=1000,
 #                             min_samples_split=8,
-#                             min_samples_leaf=3,
+#                             min_samples_leaf=1,
 #                             oob_score=True,
 #                             max_samples=1.0,
 #                             random_state=42)#1001 #1117
 
+
 ################lgbm########################
-# lgb_params = {
-#     "metric": ["multi_logloss"],   
-#     #"deterministic": "true",    
-
-# #    "device_type":"GPU",
-# #    "boost_from_average": "False", 
-#     "verbosity": [-1],            
-#     "boosting_type": ["gbdt"],           
-#     "num_class": [17],                
-#     'learning_rate': [0.090962211546832760,0.21873571283690],  
-#     'n_estimators': [1000],                
-#     'reg_alpha' : [0.9269816785],
-#     #'lambda_l1': 0.9967446568254372,
-#     'num_leaves' : [128],
-#     #'lambda_l2': 0.09018641437301800,   
-#     'max_depth': [60,20,10],                  
-#     'colsample_bytree': [0.40977129346872643],
-#     'subsample': [0.835797422450176],   
-#     'n_jobs' : [-1],
-#     'min_child_samples': [1,2,4]          
-# }
-
-#model = LGBMClassifier(**lgb_params)
-################lgbm########################
-
-# params = {
-#     'n_estimators': 4000,
-#     'learning_rate': 0.1,
-#     'gamma': 0.9024196354156454324,
-#     'reg_alpha': 0.7,
-#     "verbosity": 1,  
-#     'reg_lambda': 0.9935667255875388,
-#     'max_depth': 12,
-#     'min_child_weight': 1, #4
-#     'subsample': 0.393274050086088,
-#     'colsample_bytree': 0.4579828557036317,
-#     'n_jobs' : -1
-# }
-
-
-
-################xgb########################
-
 params = {
     'n_estimators': 4000,
-    'learning_rate': 0.012,
+    'learning_rate': 0.1,
     'gamma': 0.9024196354156454324,
-    'reg_alpha': 0.99025931173755949,
+    'reg_alpha': 0.7,
     "verbosity": 1,  
-    'reg_lambda': 0.8835667255875388,
-    'max_depth': 10,
-    'min_child_weight': 2,
+    'reg_lambda': 0.9935667255875388,
+    'max_depth': 12,
+    'min_child_weight': 1, #4
     'subsample': 0.393274050086088,
     'colsample_bytree': 0.4579828557036317,
     'n_jobs' : -1
 }
 
-#model = XGBClassifier(**params, random_state = 189)
-model = make_pipeline(MinMaxScaler(),
-                      StandardScaler(),
-                      #PCA(),
-                      XGBClassifier(**params, random_state = 189)
-                      )
-################xgb########################
-
-# model = HalvingGridSearchCV(LGBMClassifier(), 
-#                      lgb_params, 
-#                      cv=kfold, 
-#                      verbose=1, 
-#                      min_resources=20,
-#                      #n_iter=10,
-#                      refit= True, #디폴트 트루~
-#                      n_jobs=-1) #CPU 다 쓴다!
-
-# model = HalvingGridSearchCV(LGBMClassifier(), 
-#                      lgb_params, 
-#                      cv=kfold, 
-#                      verbose=1, 
-#                      min_resources=20,
-#                      #n_iter=10,
-#                      refit= True, #디폴트 트루~
-#                      n_jobs=-1) #CPU 다 쓴다!
-
-model = GridSearchCV(XGBClassifier(tree_method= 'hist',device= 'cuda'), 
-                     params, 
-                     #random_state=SEED1,
-                     cv=kfold, 
-                     verbose=1, 
-                     #min_resources=20,
-                     #n_iter=10,
-                     refit= True, #디폴트 트루~
-                     n_jobs=-3) #CPU 다 쓴다!
-
-################catboost########################
-# model = CatBoostClassifier(auto_class_weights = 'Balanced', 
-#                            iterations=5000,
-#                            learning_rate=0.032162645,
-#                            max_depth=10,
-#                            #task_type= 'GPU',
-#                            l2_leaf_reg=18,
-#                            max_bin=10,
-#                            early_stopping_rounds=70, 
-#                            random_state=98765)
 
 
-#param = {'auto_class_weights':'Balanced','iterations':10000,'early_stopping_rounds':100,'l2_leaf_reg':18,'learning_rate':0.0021626,
-#         'max_depth':16,'task_type':'GPU','max_bin':8, 'random_state':9876}
-#model = CatBoostClassifier(**param, bootstrap_type='Poisson')
-
-################catboost########################
+model = LGBMClassifier(**params)
+################lgbm########################
 
 
-#model = VotingClassifier(estimators=[('xgb', xgb),('lgb', lgb),('rf', rf)], voting='soft',weights= [1,1,1])
+
 
 #3. 컴파일 , 훈련
 
@@ -412,27 +323,23 @@ end_time = time.time()
 
 
 #4. 평가, 예측
-print("최적의 매개변수 : ", model.best_estimator_)
-print("최적의 파라미터 : ", model.best_params_)
-print('best_score :', model.best_score_)
-# print(rf.oob_score)
-print('score :', model.score(x_test, y_test))
 
 
 results = model.score(x_test, y_test)
+print('score :', model.score(x_test, y_test))
+
 print("acc :", results)
 
 
 y_predict = model.predict(x_test)
-
+y_submit = model.predict(test_csv)
+y_submit = le.inverse_transform(y_submit)
 
 
 
 #########catboost###########
 #y_submit = model.predict(test_csv)[:,0]
 
-y_submit = model.predict(test_csv)
-y_submit = le.inverse_transform(y_submit)
 
 
 acc = model.score(x_test, y_test)
@@ -447,3 +354,16 @@ submission_csv['NObeyesdad'] = y_submit
 
 #print(np.unique(y_submit, return_counts= True))
 submission_csv.to_csv(path+f"submit_{dt.day}day{dt.hour:2}{dt.minute:2}_acc_{acc:4}.csv",index=False)
+
+
+#이전 성적
+
+# score : 0.9205202312138728
+# acc : 0.9205202312138728
+# 0.9205202312138728
+
+#이상치.결측치 처리 후 성적
+
+# score : 0.9210019267822736
+# acc : 0.9210019267822736
+# 0.9210019267822736
