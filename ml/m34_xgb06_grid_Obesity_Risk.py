@@ -184,8 +184,8 @@ def fit_outlier(x):
     x = pd.DataFrame(x)
     for label in x:
         series = x[label]
-        q1 = series.quantile(0.20)      
-        q3 = series.quantile(0.80)
+        q1 = series.quantile(0.25)      
+        q3 = series.quantile(0.75)
         iqr = q3 - q1
         upper_bound = q3 + iqr
         lower_bound = q1 - iqr
@@ -196,7 +196,7 @@ def fit_outlier(x):
         series = series.interpolate()
         x[label] = series
         
-    x = x.fillna(x.mean())
+    x = x.fillna(x.median())
     return x
 
 y = train_csv['NObeyesdad']
@@ -205,44 +205,22 @@ y = le.fit_transform(y)
 
 
 
-# from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
-# from sklearn.preprocessing import StandardScaler, RobustScaler
-# import time
+from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
+from sklearn.preprocessing import StandardScaler, RobustScaler
+import time
 
 
-# mms = MinMaxScaler()
-# # mms = MinMaxScaler(feature_range=(0,1))
-# # mms = StandardScaler()
-# # mms = MaxAbsScaler()
-# # mms = RobustScaler()
+mms = MinMaxScaler()
+# mms = MinMaxScaler(feature_range=(0,1))
+# mms = StandardScaler()
+# mms = MaxAbsScaler()
+# mms = RobustScaler()
 
-# mms.fit(x)
-# x = mms.transform(x)
-# test_csv=mms.transform(test_csv)
-#print(x.shape, y.shape)  #(20758, 16) (20758,)
-#print(np.unique(y, return_counts= True))
-#(array([0, 1, 2, 3, 4, 5, 6]), array([2523, 3082, 2910, 3248, 4046, 2427, 2522], dtype=int64))
+mms.fit(x)
+x = mms.transform(x)
+test_csv=mms.transform(test_csv)
 
 
-# df = pd.DataFrame(x, columns= train_csv.columns)
-# print(df)    
-# df['Target(Y)'] = y
-# print(df)    
-
-# print('=================상관계수 히트맵==============================')    
-# print(df.corr())
-
-#x끼리의 상관계수가 너무 높을땐 다른 데이터에 영향을 미칠수 있어(과적합확률) 컬럼처리가 필요함.
-#y와 상관관계가 있는 데이터가 중요.
-
-# import matplotlib.pyplot as plt
-# import seaborn as sns
-# sns.set(font_scale=0.6)
-# sns.heatmap(data=df.corr(),
-#             square= True,
-#             annot=True,
-#             cbar=True)
-# plt.show()
 
 
 
@@ -254,119 +232,73 @@ y = le.fit_transform(y)
 x_train, x_test, y_train, y_test = train_test_split(x, y, train_size = 0.9, shuffle=True, random_state=SEED1, stratify= y)
 #5 9158 19 9145
 
-#mms = MinMaxScaler() #(feature_range=(0,1))
-mms = StandardScaler()
-#mms = MaxAbsScaler()
-#mms = RobustScaler()
-#mms = Normalizer()
+n_splits=5
+kfold = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=123)
 
-
-mms.fit(x_train)
-x_train= mms.transform(x_train)
-x_test= mms.transform(x_test)
-test_csv= mms.transform(test_csv)
-
-
-#==================================
-#2. 모델
-from sklearn.ensemble import RandomForestClassifier
-from lightgbm import LGBMClassifier
-from catboost import CatBoostClassifier
-from sklearn.decomposition import PCA #차원축소
-
-
-################lgbm########################
-params = {
-    'n_estimators': 4000,
-    'learning_rate': 0.005 ,
-    'reg_alpha': 0.7,
-    "verbosity": 1,  
-    'reg_lambda': 0.9935667255875388,
-    'max_depth': 12,
-    'num_leaves': 30,
-    'min_child_weight': 1, #4
-    'subsample': 0.393274050086088,
-    'colsample_bytree': 0.4579828557036317,
-    'n_jobs' : -1
-}
-
-
-
-model = XGBClassifier(**params)
-
-
-model.set_params(learning_rate=0.003,
-                 n_estimators=4500,
-                 max_depth=18, 
-                 reg_alpha=0, 
-                 min_child_weight = 4,
-                 early_stopping_rounds= 50
-                 )
-
-
-################lgbm########################
+parameters = [
+    {"n_estimators": [1400, 2000], "max_depth": [14, 10, 12], "min_samples_leaf": [3,1],"learning_rate" : [0.1, 0.01, 0.005], "gamma": [0,0.15]},
+    {"n_estimators": [1500, 1900], "max_depth": [6, 8, 10, 12], "min_samples_leaf": [3, 5, 1],"learning_rate" : [0.1, 0.01, 0.005],"gamma": [0,0.15]},
+    {"n_estimators": [1600, 1800], "min_samples_leaf": [3, 5, 7], "min_samples_split": [2, 3, 4],"learning_rate" : [0.1, 0.01, 0.005],"gamma": [0,0.15]},
+    {"n_estimators": [2200, 1700], "min_samples_split": [2, 3, 5], "subsample": [0, 0.3],"learning_rate" : [0.1, 0.01, 0.005],"gamma": [0,0.21]},
+    {"n_estimators": [2300, 2100], "reg_alpha": [0.2351, 0.135], "min_samples_leaf": [2, 3, 5], "learning_rate" : [0.1, 0.01, 0.005], "max_depth" : [4, 8, 10, 11]}]
 
 
 
 
-#3. 컴파일 , 훈련
 
-x_train = np.asarray(x_train).astype(np.float32)
-x_test = np.asarray(x_test).astype(np.float32)
-test_csv = np.asarray(test_csv).astype(np.float32)
+model = RandomizedSearchCV(XGBClassifier(), 
+                     parameters, 
+                     cv=kfold, 
+                     verbose=1, 
+                     refit= True, #디폴트 트루~
+                     random_state= 123,
+                     )#n_jobs=-1) #CPU 다 쓴다!
 
 
 
+
+#3. 훈련
 start_time = time.time()
-model.fit(x_train, y_train, eval_set=[(x_train, y_train),(x_test, y_test)],
-          verbose = 1)
+model.fit(x_train, y_train)
 end_time = time.time()
 
 
-
-
 #4. 평가, 예측
+from sklearn.metrics import accuracy_score
+best_predict = model.best_estimator_.predict(x_test)
+best_acc_score = accuracy_score(y_test, best_predict)
 
+print("최적의 매개변수 : ", model.best_estimator_)
+print("최적의 파라미터 : ", model.best_params_)
+print('best_score :', model.best_score_)                #train의 결과이기 때문에 절대적으로 믿을 수 는 없음.
 
 results = model.score(x_test, y_test)
-print('score :', model.score(x_test, y_test))
 
-print("점수1 :", results)
-
+print('score :', results)
 
 y_predict = model.predict(x_test)
+print("accuracy_score :", accuracy_score(y_test, y_predict))
+
+y_pred_best = model.best_estimator_.predict(x_test)
+print("최적튠 ACC :", accuracy_score(y_test, y_predict))
+
+print("걸린시간 :", round(end_time - start_time, 2), "초")
+
+
 y_submit = model.predict(test_csv)
 y_submit = le.inverse_transform(y_submit)
 
 
 
-#########catboost###########
-#y_submit = model.predict(test_csv)[:,0]
-
-
-
-acc = model.score(x_test, y_test)
 end_time = time.time()
-
-
-
-
-
-results2 = model.score(x_test, y_test)
-print('최종점수2 : ',results2)
 
 print('걸린시간 :', round(end_time - start_time,2),'초')
 import datetime
 dt = datetime.datetime.now()
 submission_csv['NObeyesdad'] = y_submit
 
-submission_csv.to_csv(path+f"submit_{dt.day}day{dt.hour:2}{dt.minute:2}_acc_{acc:4}.csv",index=False)
+submission_csv.to_csv(path+f"submit_{dt.day}day{dt.hour:2}{dt.minute:2}_.csv",index=False)
 
-
-import pickle
-
-path = "C:\\_data\\_save\\_kaggle_Obesity_Risk\\"
-pickle.dump(model, open(path + f'submit_{dt.day}day{dt.hour:2}{dt.minute:2}_acc_{acc:4}.dat', 'wb'))
 
 #이전 성적
 
