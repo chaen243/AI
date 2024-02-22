@@ -77,7 +77,7 @@ model.add(Conv1D(512, kernel_size=2, input_shape= (150, 1), activation= 'relu'))
 model.add(Flatten())
 model.add(Dense(64, activation='relu'))
 model.add(Dense(64, activation='relu'))
-model.add(Dense(46, activation='softmax'))
+model.add(Dense(1, activation='softmax'))
 
 model.summary()
 
