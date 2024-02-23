@@ -16,7 +16,7 @@
 
 import os
 
-from clip import simple_tokenizer
+#from clip import simple_tokenizer
 from dmvr import builders
 from dmvr import modalities
 from dmvr import tokenizers

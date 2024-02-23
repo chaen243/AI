@@ -205,20 +205,20 @@ y = le.fit_transform(y)
 
 
 
-# from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
-# from sklearn.preprocessing import StandardScaler, RobustScaler
-# import time
+from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
+from sklearn.preprocessing import StandardScaler, RobustScaler
+import time
 
 
-# mms = MinMaxScaler()
-# # mms = MinMaxScaler(feature_range=(0,1))
-# # mms = StandardScaler()
-# # mms = MaxAbsScaler()
-# # mms = RobustScaler()
+mms = MinMaxScaler()
+# mms = MinMaxScaler(feature_range=(0,1))
+# mms = StandardScaler()
+# mms = MaxAbsScaler()
+# mms = RobustScaler()
 
-# mms.fit(x)
-# x = mms.transform(x)
-# test_csv=mms.transform(test_csv)
+mms.fit(x)
+x = mms.transform(x)
+test_csv=mms.transform(test_csv)
 #print(x.shape, y.shape)  #(20758, 16) (20758,)
 #print(np.unique(y, return_counts= True))
 #(array([0, 1, 2, 3, 4, 5, 6]), array([2523, 3082, 2910, 3248, 4046, 2427, 2522], dtype=int64))
