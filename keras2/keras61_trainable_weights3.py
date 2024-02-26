@@ -7,7 +7,7 @@ from tensorflow.python.keras.models import Sequential
 from tensorflow.python.keras.layers import Dense
 import tensorflow as tf
 tf.random.set_seed(777)
-np.random.seed(777)1
+np.random.seed(778)
 print(tf.__version__) #2.9.1
 
 #1. 데이터
