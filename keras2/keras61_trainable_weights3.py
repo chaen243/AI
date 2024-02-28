@@ -8,7 +8,7 @@ from tensorflow.python.keras.layers import Dense
 import tensorflow as tf
 tf.random.set_seed(777)
 np.random.seed(779)
-print(tf.__version__) #2.9.0
+print(tf.__version__) #2.9.01
 
 #1. 데이터
 x = np.array([1,2,])
