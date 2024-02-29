@@ -26,7 +26,7 @@ model.add(Dense(1))
 
 #############################################################
 model.trainable = False #★★★ 훈련을 시키지 않는다!
-#model.trainable = True #디폴트! 
+#model.trainable = True #디폴트!!
 #############################################################
 
 print(model.weights)
