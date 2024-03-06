@@ -83,7 +83,7 @@ x_test= mms.transform(x_test)
 # model = LogisticRegression() model.score: 0.5445454545454546
 # model = KNeighborsRegressor() model.score: 0.3039799363745327
 # model =DecisionTreeRegressor() model.score: -0.15681670886797772
-# model = RandomForestRegressor() model.score: 0.4886878590721122
+model = RandomForestRegressor() model.score: 0.4886878590721122
 
 x_train = np.asarray(x_train).astype(np.float32)
 x_test = np.asarray(x_test).astype(np.float32)
