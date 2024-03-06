@@ -244,26 +244,26 @@ from catboost import CatBoostClassifier
 from sklearn.decomposition import PCA #차원축소
 
 
-Params = {
-    'n_estimators': 4000,
-    'learning_rate': 0.005 ,
-    'reg_alpha': 0.7,
-    "verbosity": 1,  
-    'reg_lambda': 0.9935667255875388,
-    'max_depth': 12,
-    'num_leaves': 30,
-    'min_child_weight': 1, #4
-    'subsample': 0.393274050086088,
-    'colsample_bytree': 0.4579828557036317,
-    'n_jobs' : -1
-}
+# Params = {
+#     'n_estimators': 4000,
+#     'learning_rate': 0.005 ,
+#     'reg_alpha': 0.7,
+#     "verbosity": 1,  
+#     'reg_lambda': 0.9935667255875388,
+#     'max_depth': 12,
+#     'num_leaves': 30,
+#     'min_child_weight': 1, #4
+#     'subsample': 0.393274050086088,
+#     'colsample_bytree': 0.4579828557036317,
+#     'n_jobs' : -1
+# }
 
 
-model = XGBClassifier(tree_method = 'hist', device = "cuda")
-model.set_params( **Params)
+# model = XGBClassifier(tree_method = 'hist', device = "cuda")
+# model.set_params( **Params)
 
 
-# model = RandomForestClassifier()
+model = RandomForestClassifier()
 
 
 ################lgbm########################
@@ -280,8 +280,8 @@ test_csv = np.asarray(test_csv).astype(np.float32)
 
 
 start_time = time.time()
-model.fit(x_train, y_train, eval_set=[(x_train, y_train),(x_test, y_test)],
-          verbose = 1)
+model.fit(x_train, y_train)#, eval_set=[(x_train, y_train),(x_test, y_test)],
+          #verbose = 1)
 end_time = time.time()
 
 
@@ -289,13 +289,15 @@ end_time = time.time()
 
 #4. 평가, 예측
 
-f1 = f1_score(x_test, y_test)
 results = model.score(x_test, y_test)
 print("acc :", results)
-print("f1 :", f1)
 
 y_predict = model.predict(x_test)
 y_submit = model.predict(test_csv)
+
+f1 = f1_score(y_test,y_predict,average='macro')
+print("F1: ",f1)
+
 y_submit = le.inverse_transform(y_submit)
 
 
@@ -321,3 +323,11 @@ import pickle
 path = "C:\\_data\\_save\\_kaggle_Obesity_Risk\\"
 pickle.dump(model, open(path + f'submit_{dt.day}day{dt.hour:2}{dt.minute:2}_acc_{acc:4}.dat', 'wb'))
 
+
+#xgb
+# acc : 0.918111753371869
+# F1:  0.9094161791672631
+
+#랜포
+# acc : 0.9002890173410405
+# F1:  0.8893997159212138
