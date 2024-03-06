@@ -31,7 +31,7 @@ model = Sequential()
 #model.add(SimpleRNN(units= 1024, input_shape=(3,1), activation='relu')) # <- timesteps, features
 #rnn model inputshape = 3-D tensor with shape (batch_size, timesteps, features).
 #model.add(Bidirectional(SimpleRNN(units=5), input_shape=(3,1))) #보조적인 친구, simplernn까지 랩핑하여 사용해야함.
-model.add(GRU(units=5, input_shape=(3,1))) #보조적인 친구, simplernn까지 랩핑하여 사용해야함.
+model.add(GRU(units=5, input_shape=(3,1)))
 
 # 연산을 한번 더 해서 연산량이 늘어남 (위 레이어만 두배가 됨)
 #model.add(LSTM(units= 1024, input_shape=(3,1), activation='relu')) # <- timesteps, features
