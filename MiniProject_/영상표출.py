@@ -521,7 +521,7 @@ font_path = "C:\\Users\\user\\Downloads\\nanum-all\\나눔 글꼴\\나눔고딕�
 #font_path = "C:\\Users\\AIA\\Documents\\카카오톡 받은 파일\\NanumGothicEco.ttf"
 
 
-
+'''
 def play_videos_with_korean_labels(video_paths, actual_labels, predicted_labels, font_path):
     for index, video_path in enumerate(video_paths):
         cap = cv2.VideoCapture(video_path)
@@ -557,6 +557,78 @@ def play_videos_with_korean_labels(video_paths, actual_labels, predicted_labels,
                 
         cap.release()
     cv2.destroyAllWindows()
+'''
+'''
+def play_videos_with_korean_labels(video_paths, actual_labels, predicted_labels, font_path, delay_frames=50):
+    for index, video_path in enumerate(video_paths):
+        cap = cv2.VideoCapture(video_path)
+        if not cap.isOpened():
+            print(f"Error opening video file: {video_path}")
+            continue
 
+        frame_count = 0  # 현재 프레임 번호를 추적하기 위한 카운터
+
+        while cap.isOpened():
+            ret, frame = cap.read()
+            if ret:
+                frame = cv2.resize(frame, (500, 500))  # 프레임 크기 조정
+
+                if frame_count < delay_frames:
+                    # 지연 프레임 수 이전에는 실제 라벨만 표시
+                    label_text = f"실제: {actual_labels[index]}"
+                else:
+                    # 지연 프레임 수 이후에는 실제와 예측 라벨 모두 표시
+                    label_text = f"실제: {actual_labels[index]}, 예측: {predicted_labels[index]}"
+
+                frame = draw_text_on_frame(frame, label_text, (10, 30), font_path, 30, (255, 255, 255))
+
+                cv2.imshow('Video', frame)
+                if cv2.waitKey(25) & 0xFF == ord('q'):
+                    break
+
+                frame_count += 1  # 프레임 번호 업데이트
+            else:
+                break
+
+        cap.release()
+    cv2.destroyAllWindows()
 # 영상 재생 및 라벨 표시
 play_videos_with_korean_labels(video_paths, y_test, y_pred, font_path)
+'''
+def play_videos_with_korean_labels(video_paths, actual_labels, predicted_labels, font_path, delay_frames_from_end=30):
+    for index, video_path in enumerate(video_paths):
+        cap = cv2.VideoCapture(video_path)
+        if not cap.isOpened():
+            print(f"Error opening video file: {video_path}")
+            continue
+
+        total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))  # 비디오의 전체 프레임 수
+        frame_count = 0  # 현재 프레임 번호를 추적하기 위한 카운터
+        show_prediction_from_frame = max(0, total_frames - delay_frames_from_end)  # 예측 라벨 표시 시작 프레임 번호
+
+        while cap.isOpened():
+            ret, frame = cap.read()
+            if ret:
+                frame = cv2.resize(frame, (500, 500))  # 프레임 크기 조정
+
+                if frame_count < show_prediction_from_frame:
+                    # 예측 라벨 표시 시작 프레임에 도달하기 전에는 실제 라벨만 표시
+                    label_text = f"실제: {actual_labels[index]}"
+                else:
+                    # 예측 라벨 표시 시작 프레임 이후에는 실제와 예측 라벨 모두 표시
+                    label_text = f"실제: {actual_labels[index]}, 예측: {predicted_labels[index]}"
+
+                frame = draw_text_on_frame(frame, label_text, (10, 30), font_path, 30, (255, 255, 255))
+
+                cv2.imshow('Video', frame)
+                if cv2.waitKey(25) & 0xFF == ord('q'):
+                    break
+
+                frame_count += 1  # 프레임 번호 업데이트
+            else:
+                break
+
+        cap.release()
+    cv2.destroyAllWindows()
+    
+play_videos_with_korean_labels(video_paths, y_test, y_pred, font_path,)    
