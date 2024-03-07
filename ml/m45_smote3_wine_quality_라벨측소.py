@@ -1,4 +1,4 @@
-
+#라벨/클래스의 갯수를 조절할 권리가 있을때 사용할수 있는방법.
 
 import numpy as np
 import pandas as pd
