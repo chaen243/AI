@@ -1,4 +1,4 @@
-# from tensorflow.keras.models import Sequential  # Ctrl / = 주석처리, 라인 앞에서 Ctrl C 누르면 라인 전체 복사 Shift del 한줄 삭제
+# from tensorflow.keras.models import Sequential  # Ctrl / = 주석처리, 라인에서 Ctrl C 누르면 라인 전체 복사 Shift del 한줄 삭제
 # from tensorflow.keras.layers import Dense
 import numpy as np
 from keras.models import Sequential
