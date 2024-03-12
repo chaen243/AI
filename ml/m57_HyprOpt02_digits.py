@@ -106,7 +106,7 @@ print('best :', best)
 print(n_iter, '번 걸린시간 :', round(end_time - start_time, 2), '초')
 
 # 일반모델 acc : 0.98
-# PF acc : 0.98222222222222
+# PF acc : 0.9822222222222222
 
 
 
