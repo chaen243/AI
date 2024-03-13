@@ -8,6 +8,7 @@ y = [1,2,3]
 
 w = tf.Variable(111, dtype=tf.float32) #weight
 b = tf.Variable(0, dtype=tf.float32) #bias
+'''weight, bias 지정 해줘야 사용가능'''
 
 #2. 모델구성
 # y = wx + b

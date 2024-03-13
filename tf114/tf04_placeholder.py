@@ -19,4 +19,4 @@ print(sess.run(add_node, feed_dict={a:30, b:4.5}))
 
 add_and_triple = add_node * 3
 print(sess.run(add_and_triple, feed_dict={a:3, b:4}))
-#run에 feed_dict는 시점마다 작성해줘야함.
+#run할때의 feed_dict는 시점마다 작성해줘야함.
