@@ -17,12 +17,12 @@ X_train = train_csv.drop(['person_id', 'login'], axis=1)
 y_train = train_csv['login']
 
 param_search_space = {
-    'n_estimators': [1000, 999, 998, 997, 996],
-    'bootstrap': [True, False],
+    'n_estimators': [995, 999, 998, 997, 996],
+    'bootstrap': [True],
     'max_depth': [9, 8, 10, 6, 7],
-    'min_samples_split': [2, 3, 4, 5, 6, 7],
+    'min_samples_split': [2, 3, 4,],
     'min_samples_leaf': [1, 3, 2, 4, 5, 6],
-    'min_weight_fraction_leaf': [0.00005, 0.005, 0.0005, 0.000005]
+    'min_weight_fraction_leaf': [0.00005,0.0005, 0.000005]
     
 }
  

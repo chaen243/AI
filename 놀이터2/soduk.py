@@ -198,17 +198,18 @@ scaler.transform(x_test)
 test_csv= scaler.transform(test_csv)
 
 parameters = {
-    'n_estimators' : 20000,
-    'learning_rate' : 0.001,
+    'n_estimators' : 10000,
+    'learning_rate' : 0.01,
     'max_depth' : 35,
     'num_leaves' : 30,
     'min_child_weight' : 1,
     'min_child_samples' : 10,
     'subsample' : 0.7,
+    'min_sample_leaf' : 3
     
 }
 
-model = XGBRegressor()
+model = XGBRegressor(bootstrap = True)
 model.set_params(early_stopping_round= 500, #반환 디폴트 트루!
 **parameters)
 
