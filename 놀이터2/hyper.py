@@ -18,6 +18,7 @@ y_train = train_csv['login']
 
 param_search_space = {
     'n_estimators': [1000, 999, 998, 997, 996],
+    'bootstrap': [True, False],
     'max_depth': [9, 8, 10, 6, 7],
     'min_samples_split': [2, 3, 4, 5, 6, 7],
     'min_samples_leaf': [1, 3, 2, 4, 5, 6],
