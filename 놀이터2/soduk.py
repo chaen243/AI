@@ -199,7 +199,7 @@ test_csv= scaler.transform(test_csv)
 
 parameters = {
     'n_estimators' : 20000,
-    'learning_rate' : 0.01,
+    'learning_rate' : 0.001,
     'max_depth' : 35,
     'num_leaves' : 30,
     'min_child_weight' : 1,
