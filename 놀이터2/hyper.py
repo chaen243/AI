@@ -21,7 +21,7 @@ param_search_space = {
     'max_depth': [9, 8, 10, 6, 7],
     'min_samples_split': [2, 3, 4, 5, 6, 7],
     'min_samples_leaf': [1, 3, 2, 4, 5, 6],
-    'min_weight_fraction_leaf': [0.1, 0.005, 0.0005, 0.000005]
+    'min_weight_fraction_leaf': [0.00005, 0.005, 0.0005, 0.000005]
     
 }
  
