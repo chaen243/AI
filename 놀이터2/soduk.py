@@ -2,9 +2,12 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 from sklearn.preprocessing import OneHotEncoder, LabelEncoder, MinMaxScaler, Normalizer
-from sklearn.model_selection import train_test_split
+from sklearn.experimental import enable_halving_search_cv #정식버전이 아님!
+from sklearn.model_selection import train_test_split, HalvingGridSearchCV, StratifiedKFold
 from xgboost import XGBRegressor
+from lightgbm import LGBMRegressor
 from keras.callbacks import ReduceLROnPlateau
+
 import time
 import random
 
@@ -138,6 +141,7 @@ test_csv['Birth_Country'] = test_csv['Birth_Country'].replace(to_replace_values4
 train_csv['Birth_Country'] = train_csv['Birth_Country'].replace(to_replace_with_nan, np.nan)
 test_csv['Birth_Country'] = test_csv['Birth_Country'].replace(to_replace_with_nan, np.nan)
 
+
 le.fit(train_csv['Birth_Country'])
 train_csv['Birth_Country'] = le.transform(train_csv['Birth_Country'])
 le.fit(test_csv['Birth_Country'])
@@ -150,6 +154,18 @@ train_csv['Tax_Status'] = le.transform(train_csv['Tax_Status'])
 le.fit(test_csv['Tax_Status'])
 test_csv['Tax_Status'] = le.transform(test_csv['Tax_Status'])
 
+
+le.fit(train_csv['Income_Status'])
+train_csv['Income_Status'] = le.transform(train_csv['Income_Status'])
+le.fit(test_csv['Income_Status'])
+test_csv['Income_Status'] = le.transform(test_csv['Income_Status'])
+
+le.fit(train_csv['Birth_Country (Father)'])
+train_csv['Birth_Country (Father)'] = le.transform(train_csv['Birth_Country (Father)'])
+le.fit(test_csv['Birth_Country (Father)'])
+test_csv['Birth_Country (Father)'] = le.transform(test_csv['Birth_Country (Father)'])
+
+
 # print(test_csv.isnull().sum()) #없음.
 # print(train_csv.isnull().sum()) #없음.
 
@@ -160,8 +176,8 @@ test_csv['Tax_Status'] = le.transform(test_csv['Tax_Status'])
 # Birth_Country (Mother)
 # Income_Status
 
-x = train_csv.drop(['Household_Summary','Birth_Country (Father)','Birth_Country (Mother)','Income_Status','Income'], axis=1)
-test_csv = test_csv.drop(['Household_Summary','Birth_Country (Father)','Birth_Country (Mother)','Income_Status'], axis=1)
+x = train_csv.drop(['Household_Summary','Birth_Country (Mother)','Income'], axis=1)
+test_csv = test_csv.drop(['Household_Summary','Birth_Country (Mother)',], axis=1)
 
 # print(x)
 
@@ -172,8 +188,8 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler, MaxAbsScaler, Ro
 
 x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.85,  shuffle= True, random_state= 1117)
 
-#scaler = MinMaxScaler(feature_range=(1,2))
-scaler = StandardScaler()
+scaler = MinMaxScaler()
+#scaler = StandardScaler()
 # scaler = MaxAbsScaler()
 # scaler = RobustScaler()
 
@@ -182,23 +198,39 @@ scaler.transform(x_test)
 test_csv= scaler.transform(test_csv)
 
 parameters = {
-    'n_estimators' : 9000,
-    'learning_rate' : 0.0001,
-    'max_depth' : 30,
+    'n_estimators' : 20000,
+    'learning_rate' : 0.01,
+    'max_depth' : 35,
     'num_leaves' : 30,
     'min_child_weight' : 1,
-    'min_child_samples' : 100,
+    'min_child_samples' : 10,
     'subsample' : 0.7,
-    'min_samples_split': 3,
     
 }
 
+model = XGBRegressor()
+model.set_params(early_stopping_round= 500, #반환 디폴트 트루!
+**parameters)
 
-model = XGBRegressor(random_state = 42
-                    , **parameters)
+# parameters = [
+#     {"n_estimators": [18000, 20000], "max_depth": [30, 10, 20], "min_samples_leaf": [3, 10], "subsample": [0.7, 0.8, 0,9]},
+#     {"max_depth": [30, 20, 10, 12], "min_samples_leaf": [3, 5, 7, 10], 'subsample': [0.7, 0.8, 0,9]},
+#     {"min_samples_leaf": [3, 5, 7, 10], "min_samples_split": [2, 3, 5, 10], 'subsample': [0.7, 0.8, 0,9]},
+# ]    
 
-model.set_params(early_stopping_rounds= 100, #반환 디폴트 트루!
-    **parameters)
+# n_splits=5
+# kfold = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
+
+# model = HalvingGridSearchCV(LGBMRegressor(), 
+#                      parameters, 
+#                      cv=kfold, 
+#                      verbose=1, 
+#                      random_state=42,
+#                      refit= True, #디폴트 트루~
+#                      n_jobs=-1) #CPU 다 쓴다!
+
+# model.set_params(early_stopping_rounds= 100, #반환 디폴트 트루!
+#     **parameters)
 
 
 #3. 훈련
@@ -206,7 +238,7 @@ model.set_params(early_stopping_rounds= 100, #반환 디폴트 트루!
 start_time = time.time()
 model.fit(x_train, y_train, 
           eval_set=[(x_train, y_train),(x_test, y_test)],
-          verbose= 1, #2부터는 step으로 보여줌
+          #verbose= 1, #2부터는 step으로 보여줌
           eval_metric = 'rmse' 
           )
 

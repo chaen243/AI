@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import GridSearchCV
+from sklearn.experimental import enable_halving_search_cv 
+from sklearn.model_selection import GridSearchCV, HalvingGridSearchCV, StratifiedKFold
 from sklearn.ensemble import RandomForestClassifier
 from hyperopt import hp, fmin, tpe, Trials, STATUS_OK
 import time
@@ -16,17 +17,24 @@ X_train = train_csv.drop(['person_id', 'login'], axis=1)
 y_train = train_csv['login']
 
 param_search_space = {
-    'n_estimators': [950, 900, 1000],
-    'max_depth': [None, 8, 10, 6],
-    'min_samples_split': [3, 4, 5, 6],
-    'min_samples_leaf': [3, 2, 4]
+    'n_estimators': [1000, 999, 998, 997, 996],
+    'max_depth': [9, 8, 10, 6, 7],
+    'min_samples_split': [2, 3, 4, 5, 6, 7],
+    'min_samples_leaf': [1, 3, 2, 4, 5, 6],
+    'min_weight_fraction_leaf': [0.1, 0.005, 0.0005, 0.000005]
+    
 }
+ 
+n_splits = 5
+kfold = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42) 
            
 # RandomForestClassifier 객체 생성
 rf = RandomForestClassifier(random_state=42)
 
 # GridSearchCV 객체 생성
-grid_search = GridSearchCV(estimator=rf, param_grid=param_search_space, cv=7, n_jobs=-1, verbose=2, scoring='roc_auc')
+grid_search = GridSearchCV(estimator=rf, param_grid=param_search_space,
+                                  cv=kfold, n_jobs=-1, verbose=2, scoring='roc_auc',
+                                  )
 
 # GridSearchCV를 사용한 학습
 grid_search.fit(X_train, y_train)
