@@ -165,6 +165,11 @@ train_csv['Birth_Country (Father)'] = le.transform(train_csv['Birth_Country (Fat
 le.fit(test_csv['Birth_Country (Father)'])
 test_csv['Birth_Country (Father)'] = le.transform(test_csv['Birth_Country (Father)'])
 
+le.fit(train_csv['Birth_Country (Mother)'])
+train_csv['Birth_Country (Mother)'] = le.transform(train_csv['Birth_Country (Mother)'])
+le.fit(test_csv['Birth_Country (Mother)'])
+test_csv['Birth_Country (Mother)'] = le.transform(test_csv['Birth_Country (Mother)'])
+
 
 # print(test_csv.isnull().sum()) #없음.
 # print(train_csv.isnull().sum()) #없음.
@@ -172,12 +177,10 @@ test_csv['Birth_Country (Father)'] = le.transform(test_csv['Birth_Country (Fathe
 
 # 삭제할 컬럼
 # Household_Summary
-# Birth_Country (Father)
-# Birth_Country (Mother)
 # Income_Status
 
-x = train_csv.drop(['Household_Summary','Birth_Country (Mother)','Income'], axis=1)
-test_csv = test_csv.drop(['Household_Summary','Birth_Country (Mother)',], axis=1)
+x = train_csv.drop(['Household_Summary','Income'], axis=1)
+test_csv = test_csv.drop(['Household_Summary'], axis=1)
 
 # print(x)
 
@@ -198,8 +201,8 @@ scaler.transform(x_test)
 test_csv= scaler.transform(test_csv)
 
 parameters = {
-    'n_estimators' : 10000,
-    'learning_rate' : 0.01,
+    'n_estimators' : 5000,
+    'learning_rate' : 0.1,
     'max_depth' : 35,
     'num_leaves' : 30,
     'min_child_weight' : 1,
