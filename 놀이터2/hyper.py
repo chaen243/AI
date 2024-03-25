@@ -17,7 +17,7 @@ X_train = train_csv.drop(['person_id', 'login'], axis=1)
 y_train = train_csv['login']
 
 param_search_space = {
-    'n_estimators': [700, 600, 500],
+    'n_estimators': [650, 550, 500],
     'bootstrap': [True, False],
     'max_depth': [14, 9, 7, 6],
     'min_samples_split': [2, 3, 4,],
