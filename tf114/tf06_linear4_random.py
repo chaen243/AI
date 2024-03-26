@@ -26,13 +26,17 @@ train = optimizer.minimize(loss) #(로스를 줄인다)
 
 
 #3-2. 훈련
-sess = tf.compat.v1.Session()
-sess.run(tf.global_variables_initializer()) #위의 변수를 초기화!
 
+#sess = tf.compat.v1.Session()
 
-epochs= 2000 #for문!
-for step in range(epochs):
-    sess.run(train)
-    if step % 20 == 0: #tf2의 verbose
-        print(step+1, sess.run(loss), sess.run(w), sess.run(b)) #verbose와 model.weight에서 봤던것들
-sess.close()
+#with가 알아서 session을 close 해줌!
+with tf.compat.v1.Session() as sess:
+    sess.run(tf.global_variables_initializer()) #위의 변수를 초기화!
+
+    #model.fit
+    epochs= 2000 #for문!
+    for step in range(epochs):
+        sess.run(train)
+        if step % 20 == 0: #tf2의 verbose
+            print(step+1, sess.run(loss), sess.run(w), sess.run(b)) #verbose와 model.weight에서 봤던것들
+#    sess.close()

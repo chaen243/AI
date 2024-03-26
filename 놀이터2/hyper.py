@@ -26,7 +26,7 @@ param_search_space = {
     
 }
  
-n_splits = 5
+n_splits = 6
 kfold = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42) 
            
 # RandomForestClassifier 객체 생성

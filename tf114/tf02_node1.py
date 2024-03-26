@@ -7,6 +7,7 @@ node3 = tf.add(node1, node2)
 
 print(node3) #Tensor("Add:0", shape=(), dtype=float32)
 
-sess = tf.Session()
+sess = tf.Session() #실행시킬 변수!
 print(sess.run(node3)) #최종연산만 run시키면 됨
+# node3을 연산 시켜라! (위의 과정까지 모두 실행 시키는 방식.)
 

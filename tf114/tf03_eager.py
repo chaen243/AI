@@ -15,7 +15,7 @@ sess = tf.Session()
 print(sess.run(hello))
 
 #가상환경   즉시실행          사용가능여부
-#1.14.0    disable (디폴트)     가능
+#1.14.0    disable (디폴트)     가능!!!
 #1.14.0    enable               에러
-# 2.9.0    disable              가능  
+# 2.9.0    disable              가능!!!  
 # 2.9.0    enable (디폴트)      에러

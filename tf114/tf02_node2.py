@@ -16,7 +16,7 @@ node6 = tf.divide(node1, node2)
 
 
 sess = tf.Session()
-print(sess.run(node3))
-print(sess.run(node4))
-print(sess.run(node5))
-print(sess.run(node6))
+print(sess.run(node3)) #4
+print(sess.run(node4)) #0 
+print(sess.run(node5)) #4
+print(sess.run(node6)) #1

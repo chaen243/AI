@@ -10,11 +10,11 @@ node3 = tf.add(node1, node2)
  
 sess = tf.compat.v1.Session()
 
-a = tf.compat.v1.placeholder(tf.float32)
+a = tf.compat.v1.placeholder(tf.float32) #variable과 거의유사.
 b = tf.compat.v1.placeholder(tf.float32)
 add_node = a + b
 
-print(sess.run(add_node, feed_dict={a:3, b:4}))
+print(sess.run(add_node, feed_dict={a:3, b:4})) #place holder 사용시 feed_dict가 무조건필요함. (sess.run 할때!)
 print(sess.run(add_node, feed_dict={a:30, b:4.5}))
 
 add_and_triple = add_node * 3
