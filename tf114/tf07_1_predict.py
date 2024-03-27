@@ -2,6 +2,8 @@ import tensorflow as tf
 tf.compat.v1.set_random_seed(777)
 
 #1. 데이터
+x_data = [1, 2, 3, 4, 5]
+y_data = [3, 5, 7, 9, 11]
 x = tf.compat.v1.placeholder(tf.float32, shape=[None]) #placeholder로 지정
 y = tf.compat.v1.placeholder(tf.float32, shape=[None]) #placeholder로 지정
 
@@ -62,12 +64,28 @@ with tf.compat.v1.Session() as sess:
     sess.run(tf.global_variables_initializer()) #위의 변수를 초기화!
 
     #model.fit
-    epochs= 2000 #for문!
+    epochs= 100 #for문!
     for step in range(epochs):
-        _,y_predict, w_val, b_val = sess.run([train, loss, w, b],
-                                             feed_dict= {x:[1,2,3,4,5], y:[3,5,7,9,11]})
+        _,loss_val, w_val, b_val = sess.run([train, loss, w, b],
+                                             feed_dict= {x:x_data, y:y_data})
 
         
         if step % 20 == 0: #tf2의 verbose
-            print(step+1, y_predict, w_val, b_val) #verbose와 model.weight에서 봤던것들
+            print(step+1, loss_val, w_val, b_val) #verbose와 model.weight에서 봤던것들
 
+    print('='*100)
+    #4. 예측
+    ################실습########################
+    x_pred_data = [6,7,8]
+    # 예측값 뽑기
+    x_test = tf.compat.v1.placeholder(tf.float32, shape=[None])
+
+
+
+    ###################파이썬방식######################
+    # pred = x_pred_data * w_val + b_val
+    # print('[6,7,8]의 예측 : ', pred )
+
+    #######placeholder#########
+    y_pred2 = x_test * w_val + b_val
+    print('[6,7,8]의 예측 : ', sess.run(y_pred2, feed_dict= {x_test: x_pred_data}))

@@ -2,6 +2,8 @@ import tensorflow as tf
 tf.compat.v1.set_random_seed(777)
 
 #1. 데이터
+x_data = [1, 2, 3, 4, 5]
+y_data = [3, 5, 7, 9, 11]
 x = tf.compat.v1.placeholder(tf.float32, shape=[None]) #placeholder로 지정
 y = tf.compat.v1.placeholder(tf.float32, shape=[None]) #placeholder로 지정
 
@@ -65,7 +67,7 @@ with tf.compat.v1.Session() as sess:
     epochs= 2000 #for문!
     for step in range(epochs):
         _,y_predict, w_val, b_val = sess.run([train, loss, w, b],
-                                             feed_dict= {x:[1,2,3,4,5], y:[3,5,7,9,11]})
+                                             feed_dict= {x:x_data, y:y_data})
 
         
         if step % 20 == 0: #tf2의 verbose

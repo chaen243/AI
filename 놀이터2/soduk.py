@@ -4,9 +4,13 @@ import tensorflow as tf
 from sklearn.preprocessing import OneHotEncoder, LabelEncoder, MinMaxScaler, Normalizer
 from sklearn.experimental import enable_halving_search_cv #정식버전이 아님!
 from sklearn.model_selection import train_test_split, HalvingGridSearchCV, StratifiedKFold
+from sklearn.metrics import r2_score, mean_squared_error
 from xgboost import XGBRegressor
 from lightgbm import LGBMRegressor
+from sklearn.ensemble import RandomForestRegressor, StackingRegressor, VotingRegressor
 from keras.callbacks import ReduceLROnPlateau
+import optuna
+from catboost import CatBoostRegressor
 
 import time
 import random
@@ -40,57 +44,11 @@ submission_csv = pd.read_csv(path + 'sample_submission.csv')
 #        'Birth_Country (Father)', 'Birth_Country (Mother)', 'Tax_Status',
 #        'Gains', 'Losses', 'Dividends', 'Income_Status', 'Income'],
 
-le = LabelEncoder()
-le.fit(train_csv['Gender'])
-train_csv['Gender'] = le.transform(train_csv['Gender'])
-le.fit(test_csv['Gender'])
-test_csv['Gender'] = le.transform(test_csv['Gender'])
-#print(train_csv)
+#print(test_csv.isnull().sum()) #1개
+#print(train_csv.isnull().sum()) #없음.
 
-le.fit(train_csv['Education_Status'])
-train_csv['Education_Status'] = le.transform(train_csv['Education_Status'])
-le.fit(test_csv['Education_Status'])
-test_csv['Education_Status'] = le.transform(test_csv['Education_Status'])
-#print(train_csv)
+test_csv = test_csv.fillna(method= 'bfill')
 
-le.fit(train_csv['Employment_Status'])
-train_csv['Employment_Status'] = le.transform(train_csv['Employment_Status'])
-le.fit(test_csv['Employment_Status'])
-test_csv['Employment_Status'] = le.transform(test_csv['Employment_Status'])
-
-
-le.fit(train_csv['Industry_Status'])
-train_csv['Industry_Status'] = le.transform(train_csv['Industry_Status'])
-le.fit(test_csv['Industry_Status'])
-test_csv['Industry_Status'] = le.transform(test_csv['Industry_Status'])
-
-
-le.fit(train_csv['Occupation_Status'])
-train_csv['Occupation_Status'] = le.transform(train_csv['Occupation_Status'])
-le.fit(test_csv['Occupation_Status'])
-test_csv['Occupation_Status'] = le.transform(test_csv['Occupation_Status'])
-
-le.fit(train_csv['Race'])
-train_csv['Race'] = le.transform(train_csv['Race'])
-le.fit(test_csv['Race'])
-test_csv['Race'] = le.transform(test_csv['Race'])
-
-le.fit(train_csv['Hispanic_Origin'])
-train_csv['Hispanic_Origin'] = le.transform(train_csv['Hispanic_Origin'])
-le.fit(test_csv['Hispanic_Origin'])
-test_csv['Hispanic_Origin'] = le.transform(test_csv['Hispanic_Origin'])
-
-le.fit(train_csv['Martial_Status'])
-train_csv['Martial_Status'] = le.transform(train_csv['Martial_Status'])
-le.fit(test_csv['Martial_Status'])
-test_csv['Martial_Status'] = le.transform(test_csv['Martial_Status'])
-
-le.fit(train_csv['Household_Status'])
-train_csv['Household_Status'] = le.transform(train_csv['Household_Status'])
-le.fit(test_csv['Household_Status'])
-test_csv['Household_Status'] = le.transform(test_csv['Household_Status'])
-
-#print(train_csv['Household_Status'])
 
 
 ##########Citizen 값 병합#################
@@ -98,101 +56,80 @@ train_csv['Citizenship'] = train_csv['Citizenship'].apply(lambda x: 'Native' if 
 test_csv['Citizenship'] = test_csv['Citizenship'].apply(lambda x: 'Native' if 'Native' in x else x)
 # print(np.unique(train_csv['Citizenship'], return_counts= True))
 
-le.fit(train_csv['Citizenship'])
-train_csv['Citizenship'] = le.transform(train_csv['Citizenship'])
-le.fit(test_csv['Citizenship'])
-test_csv['Citizenship'] = le.transform(test_csv['Citizenship'])
-# print(np.unique(train_csv['Citizenship'], return_counts= True))
-# print(np.unique(test_csv['Citizenship'], return_counts= True))
-
-
 ###########Birth_Country 병합############
 #print(np.unique(train_csv['Birth_Country'], return_counts= True))
 
-to_replace_values1 = ['Greece''Hungary','Poland', 'Scotland','Ireland', 'Italy', 'Canada','England','France', 'Germany']
-target_value1 = 'Italy'
+train_csv.loc[train_csv['Birth_Country'] != 'US', 'Birth_Country'] = 'not US'
+train_csv.loc[train_csv['Birth_Country (Father)'] != 'US', 'Birth_Country (Father)'] = 'not US'
+train_csv.loc[train_csv['Birth_Country (Mother)'] != 'US', 'Birth_Country (Mother)'] = 'not US'
 
-to_replace_values2 = ['Trinadad&Tobago','Haiti','Holand-Netherlands','Nicaragua','Dominican-Republic','Yugoslavia','Honduras','Portugal', 
-                      'Puerto-Rico', 'Jamaica', 'Laos', 'Panama', 'Peru','Mexico','Ecuador', 'El-Salvador','Guatemala','Columbia', 'Cuba','Cambodia']
-target_value2 = 'Mexico'
-
-to_replace_values3 = ['Thailand','Philippines','Vietnam','India','Iran']
-target_value3 = 'Thailand'
-
-to_replace_values4 = ['South Korea', 'China','Taiwan','Hong Kong','Japan']
-target_value4 = 'Soutn Korea'
-
-to_replace_with_nan = ['Outlying-U S (Guam USVI etc)','Unknown']
+test_csv.loc[test_csv['Birth_Country'] != 'US', 'Birth_Country'] = 'not US'
+test_csv.loc[test_csv['Birth_Country (Father)'] != 'US', 'Birth_Country (Father)'] = 'not US'
+test_csv.loc[test_csv['Birth_Country (Mother)'] != 'US', 'Birth_Country (Mother)'] = 'not US'
 
 
-# .replace()를 사용하여 여러 값을 한 가지 값으로 변경
-train_csv['Birth_Country'] = train_csv['Birth_Country'].replace(to_replace_values1, target_value1)
-test_csv['Birth_Country'] = test_csv['Birth_Country'].replace(to_replace_values1, target_value1)
+label_encoder_dict = {}
+for label in train_csv:
+    data = train_csv[label].copy()
+    if data.dtypes == 'object':
+        label_encoder = LabelEncoder()
+        train_csv[label] = label_encoder.fit_transform(data)
+        label_encoder_dict[label] = label_encoder
+  
+# # inverse_transform 작동 확인 완료
+# for label, label_encoder in label_encoder_dict.items():
+#     data = train_csv[label].copy()
+#     train_csv[label] = label_encoder.inverse_transform(data)
+# print(train_csv.head(10))
+#
 
-train_csv['Birth_Country'] = train_csv['Birth_Country'].replace(to_replace_values2, target_value2)
-test_csv['Birth_Country'] = test_csv['Birth_Country'].replace(to_replace_values2, target_value2)
+for label, encoder in label_encoder_dict.items():
+    data = test_csv[label]
+    test_csv[label] = encoder.transform(data)
+#print(test_csv.head(10))
 
-train_csv['Birth_Country'] = train_csv['Birth_Country'].replace(to_replace_values3, target_value3)
-test_csv['Birth_Country'] = test_csv['Birth_Country'].replace(to_replace_values3, target_value3)
-
-train_csv['Birth_Country'] = train_csv['Birth_Country'].replace(to_replace_values4, target_value4)
-test_csv['Birth_Country'] = test_csv['Birth_Country'].replace(to_replace_values4, target_value4)
-
-train_csv['Birth_Country'] = train_csv['Birth_Country'].replace(to_replace_with_nan, np.nan)
-test_csv['Birth_Country'] = test_csv['Birth_Country'].replace(to_replace_with_nan, np.nan)
-
-
-le.fit(train_csv['Birth_Country'])
-train_csv['Birth_Country'] = le.transform(train_csv['Birth_Country'])
-le.fit(test_csv['Birth_Country'])
-test_csv['Birth_Country'] = le.transform(test_csv['Birth_Country'])
-
-print(np.unique(test_csv['Birth_Country'], return_counts= True))
-
-le.fit(train_csv['Tax_Status'])
-train_csv['Tax_Status'] = le.transform(train_csv['Tax_Status'])
-le.fit(test_csv['Tax_Status'])
-test_csv['Tax_Status'] = le.transform(test_csv['Tax_Status'])
+# print(test_csv.isna().sum())
 
 
-le.fit(train_csv['Income_Status'])
-train_csv['Income_Status'] = le.transform(train_csv['Income_Status'])
-le.fit(test_csv['Income_Status'])
-test_csv['Income_Status'] = le.transform(test_csv['Income_Status'])
-
-le.fit(train_csv['Birth_Country (Father)'])
-train_csv['Birth_Country (Father)'] = le.transform(train_csv['Birth_Country (Father)'])
-le.fit(test_csv['Birth_Country (Father)'])
-test_csv['Birth_Country (Father)'] = le.transform(test_csv['Birth_Country (Father)'])
-
-le.fit(train_csv['Birth_Country (Mother)'])
-train_csv['Birth_Country (Mother)'] = le.transform(train_csv['Birth_Country (Mother)'])
-le.fit(test_csv['Birth_Country (Mother)'])
-test_csv['Birth_Country (Mother)'] = le.transform(test_csv['Birth_Country (Mother)'])
-
-
-# print(test_csv.isnull().sum()) #없음.
-# print(train_csv.isnull().sum()) #없음.
 
 
 # 삭제할 컬럼
 # Household_Summary
 # Income_Status
 
+
+
+###이상치 10%씩 삭제
+quantile_01 = train_csv[['Age', 'Working_Week (Yearly)', 'Gains', 'Losses', 'Dividends']].quantile(0.01)
+quantile_09 = train_csv[['Age', 'Working_Week (Yearly)', 'Gains', 'Losses', 'Dividends']].quantile(0.99)
+
+# Apply trimming
+trimmed_data = train_csv.copy()
+for column in ['Age', 'Working_Week (Yearly)', 'Gains', 'Losses', 'Dividends']:
+    lower_bound = quantile_01[column]
+    upper_bound = quantile_09[column]
+    trimmed_data = trimmed_data[(trimmed_data[column] >= lower_bound) & (trimmed_data[column] <= upper_bound)]
+
+# Descriptive statistics for the trimmed data for comparison
+train_csv = trimmed_data
+
+
 x = train_csv.drop(['Household_Summary','Income'], axis=1)
+# x = train_csv.drop(['Income'], axis=1)
+
 test_csv = test_csv.drop(['Household_Summary'], axis=1)
 
-# print(x)
 
 y = train_csv['Income']
+
 
 from sklearn.preprocessing import MinMaxScaler, StandardScaler, MaxAbsScaler, RobustScaler
 
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.85,  shuffle= True, random_state= 1117)
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.8,  shuffle= True, random_state= 1117)
 
-scaler = MinMaxScaler()
-#scaler = StandardScaler()
+# scaler = MinMaxScaler()
+scaler = StandardScaler()
 # scaler = MaxAbsScaler()
 # scaler = RobustScaler()
 
@@ -200,76 +137,141 @@ scaler.fit_transform(x_train)
 scaler.transform(x_test)
 test_csv= scaler.transform(test_csv)
 
-parameters = {
-    'n_estimators' : 5000,
-    'learning_rate' : 0.1,
-    'max_depth' : 35,
-    'num_leaves' : 30,
-    'min_child_weight' : 1,
-    'min_child_samples' : 10,
-    'subsample' : 0.7,
-    'min_sample_leaf' : 3
+# def objectiveXGB(trial):
+#     param = {
+#         'n_estimators' : trial.suggest_int('n_estimators', 500, 2000),
+#         'max_depth' : trial.suggest_int('max_depth', 5, 15),
+#         'min_child_weight' : trial.suggest_int('min_child_weight', 1, 10),
+#         'gamma' : trial.suggest_float('gamma', 1, 5.0),
+#         'learning_rate' : trial.suggest_float('learning_rate', 0.0001, 0.008),
+#         'colsample_bytree' : trial.suggest_float('colsample_bytree', 0.3, 1),
+#         'nthread' : -2,
+#         'tree_method' : 'hist',
+#         'device' : 'cuda',
+#         'lambda' : trial.suggest_float('lambda', 1.0, 5.0),
+#         'alpha' : trial.suggest_float('alpha', 1.0, 5.0),
+#         'subsample' : trial.suggest_float('subsample', 0.5, 1),
+#         #'random_state' : trial.suggest_int('random_state', 1, 10000)
+#     }
     
-}
+#     # BEST PARAM:  {'n_estimators': 1557, 'max_depth': 9, 'min_child_weight': 8, 
+#     #               'gamma': 3.903915892360949, 'learning_rate': 0.005244213833337055, 'colsample_bytree': 0.6497242994796232, 'lambda': 4.257154545398103, 'alpha': 1.2487172832917386, 'subsample': 1.0}
+    
+#     # BEST PARAM:  {'n_estimators': 1098, 'max_depth': 12, 'min_child_weight': 7,
+#     #               'gamma': 2.6792433250176106, 'learning_rate': 0.003462313983240453, 'colsample_bytree': 0.9887926225119256, 'lambda': 1.7754130865891198, 'alpha': 2.308523947262986, 'subsample': 0.7882610347122883}
+    
+#     # BEST PARAM:  {'n_estimators': 1338, 'max_depth': 11, 'min_child_weight': 9,
+#     #               'gamma': 1.2362621416480555, 'learning_rate': 0.0030242459366422907, 'colsample_bytree': 0.8917657962273478, 'lambda': 3.1461166883225427, 'alpha': 3.128671605110223, 'subsample': 0.6856006013705762}
+#     # 학습 모델 생성
+#     model = XGBRegressor(**param)
+#     model = model.fit(x_train, y_train) # 학습 진행
+    
+#     # 모델 성능 확인
+#     y_predict = model.predict(x_test)
+#     score = r2_score(y_test, y_predict)
+    
+#     print('score : ', score)
+#     return score
 
-model = XGBRegressor(bootstrap = True)
-model.set_params(early_stopping_round= 500, #반환 디폴트 트루!
-**parameters)
+# study = optuna.create_study(direction='maximize')
+# study.optimize(objectiveXGB, n_trials=30)
 
-# parameters = [
-#     {"n_estimators": [18000, 20000], "max_depth": [30, 10, 20], "min_samples_leaf": [3, 10], "subsample": [0.7, 0.8, 0,9]},
-#     {"max_depth": [30, 20, 10, 12], "min_samples_leaf": [3, 5, 7, 10], 'subsample': [0.7, 0.8, 0,9]},
-#     {"min_samples_leaf": [3, 5, 7, 10], "min_samples_split": [2, 3, 5, 10], 'subsample': [0.7, 0.8, 0,9]},
-# ]    
+# best_params = study.best_params
+# print("BEST PARAM: ",best_params)
 
-# n_splits=5
-# kfold = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
 
-# model = HalvingGridSearchCV(LGBMRegressor(), 
-#                      parameters, 
-#                      cv=kfold, 
-#                      verbose=1, 
-#                      random_state=42,
-#                      refit= True, #디폴트 트루~
-#                      n_jobs=-1) #CPU 다 쓴다!
+# def objectiveLGBM(trial):
+#     param = {
+#         'n_estimators' : trial.suggest_int('n_estimators', 600, 1500),
+#         'max_depth' : trial.suggest_int('max_depth', 10, 35),
+#         'min_child_weight' : trial.suggest_int('min_child_weight', 1, 10),
+#         'gamma' : trial.suggest_float('gamma', 0, 3.0),
+#         'learning_rate' : trial.suggest_float('learning_rate', 0.0001, 0.05),
+#         'colsample_bytree' : trial.suggest_float('colsample_bytree', 0.5, 1),
+#         'nthread' : -2,
+#         # 'tree_method' : 'hist',
+#         # 'device' : 'cuda',
+#         'lambda' : trial.suggest_float('lambda', 0, 3.0),
+#         'alpha' : trial.suggest_float('alpha', 0, 5.0),
+#         'subsample' : trial.suggest_float('subsample', 0.5, 0.9),
+#         #'random_state' : trial.suggest_int('random_state', 1, 10000)
+#     }
+#     # 학습 모델 생성
+#     model = LGBMRegressor(**param)
+#     model = model.fit(x_train, y_train) # 학습 진행
+    
+#     # 모델 성능 확인
+#     y_predict = model.predict(x_test)
+#     score = r2_score(y_test, y_predict)
+    
+#     print('score : ', score)
+#     return score
 
-# model.set_params(early_stopping_rounds= 100, #반환 디폴트 트루!
-#     **parameters)
+# study = optuna.create_study(direction='maximize')
+# study.optimize(objectiveLGBM, n_trials=300)
+
+# best_params = study.best_params
+# print("BEST PARAM: ",best_params) 
+
 
 
 #3. 훈련
 
-start_time = time.time()
-model.fit(x_train, y_train, 
-          eval_set=[(x_train, y_train),(x_test, y_test)],
-          #verbose= 1, #2부터는 step으로 보여줌
-          eval_metric = 'rmse' 
-          )
+xgb_params=  {'n_estimators': 1973, 'max_depth': 8, 'min_child_weight': 10, 'gamma': 2.6161556938062667, 
+              'learning_rate': 0.0032711508067253814, 'colsample_bytree': 0.43588430169744163,
+              'lambda': 4.109502820985298, 'alpha': 1.094236763660126, 'subsample': 0.6818116013889788}
 
-end_time = time.time()
-
+lgbm_params=  {'n_estimators': 712, 'max_depth': 12, 'min_child_weight': 3, 'gamma': 0.06758159010720036,
+               'learning_rate': 0.006282962079755867, 'colsample_bytree': 0.50943319775463, 'lambda': 1.0531659844876415,
+               'alpha': 4.683034028814744, 'subsample': 0.8645935942835695}
 
 
-#4. 평가, 예측
-from sklearn.metrics import r2_score
-  
-results = model.score(x_test, y_test)
-print('최종점수 :', results) #회귀 디폴트 rmse
+xgb = XGBRegressor(**xgb_params)
+lgb = LGBMRegressor(**lgbm_params)
+rf = RandomForestRegressor()
 
-y_predict = model.predict(x_test)
-print("r2_score :", r2_score(y_test, y_predict))
+model = StackingRegressor(
+     estimators=[('LGBM',lgb),
+                  ('RF',rf),
+                 ('XGB',xgb)],
+    # final_estimator=CatBoostRegressor(verbose=0),
+    n_jobs= -1,
+    cv=7, 
+)
+                    
+#3. 훈련
 
+model.fit(x_train, y_train)
 
-print("걸린시간 :", round(end_time - start_time, 2), "초")
-
-
+#4.  평가, 예측
+                    
+ 
+print("=====================================")
 y_submit = model.predict(test_csv)
+submission_csv['Income'] = y_submit
+
+
+r2 = model.score(x_test,y_test)
+pred = model.predict(x_test)
+rmse = np.sqrt(mean_squared_error(pred,y_test))
+y_predict = model.predict(x_test)
+score = r2_score(y_test, y_predict)
 
 import datetime
 dt = datetime.datetime.now()
+y_submit = model.predict(test_csv)
 submission_csv['Income'] = y_submit
+submission_csv.to_csv(path+f'submit_{dt.day}day{dt.hour:2}{dt.minute:2}_rmse_{rmse:4f}.csv',index=False)
+print("R2:   ",r2)
+print("RMSE: ",rmse)
 
-submission_csv.to_csv(path+f"submit_{dt.day}day{dt.hour:2}{dt.minute:2}_.csv",index=False)
+# RMSE:  562.0450116401987
+
+# cv 5
+# R2:    0.3078894273354884
+# RMSE:  556.721173816561
 
 
-
+#cv 7
+# R2:    0.3076517751190555
+# RMSE:  556.8167471761383
