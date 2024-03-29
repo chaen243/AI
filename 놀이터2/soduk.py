@@ -9,9 +9,9 @@ from xgboost import XGBRegressor
 from lightgbm import LGBMRegressor
 from sklearn.ensemble import RandomForestRegressor, StackingRegressor, VotingRegressor
 from keras.callbacks import ReduceLROnPlateau
-import optuna
+#import optuna
 from catboost import CatBoostRegressor
-
+import pickle
 import time
 import random
 
@@ -68,6 +68,8 @@ test_csv.loc[test_csv['Birth_Country (Father)'] != 'US', 'Birth_Country (Father)
 test_csv.loc[test_csv['Birth_Country (Mother)'] != 'US', 'Birth_Country (Mother)'] = 'not US'
 
 
+
+###########label encoder############
 label_encoder_dict = {}
 for label in train_csv:
     data = train_csv[label].copy()
@@ -99,25 +101,11 @@ for label, encoder in label_encoder_dict.items():
 
 
 
-###이상치 10%씩 삭제
-quantile_01 = train_csv[['Age', 'Working_Week (Yearly)', 'Gains', 'Losses', 'Dividends']].quantile(0.01)
-quantile_09 = train_csv[['Age', 'Working_Week (Yearly)', 'Gains', 'Losses', 'Dividends']].quantile(0.99)
 
-# Apply trimming
-trimmed_data = train_csv.copy()
-for column in ['Age', 'Working_Week (Yearly)', 'Gains', 'Losses', 'Dividends']:
-    lower_bound = quantile_01[column]
-    upper_bound = quantile_09[column]
-    trimmed_data = trimmed_data[(trimmed_data[column] >= lower_bound) & (trimmed_data[column] <= upper_bound)]
+# x = train_csv.drop(['Household_Summary','Income'], axis=1)
+x = train_csv.drop(['Income'], axis=1)
 
-# Descriptive statistics for the trimmed data for comparison
-train_csv = trimmed_data
-
-
-x = train_csv.drop(['Household_Summary','Income'], axis=1)
-# x = train_csv.drop(['Income'], axis=1)
-
-test_csv = test_csv.drop(['Household_Summary'], axis=1)
+# test_csv = test_csv.drop(['Household_Summary'], axis=1)
 
 
 y = train_csv['Income']
@@ -126,16 +114,16 @@ y = train_csv['Income']
 from sklearn.preprocessing import MinMaxScaler, StandardScaler, MaxAbsScaler, RobustScaler
 
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.8,  shuffle= True, random_state= 1117)
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.8,  shuffle= True, random_state= 42)
 
-# scaler = MinMaxScaler()
-scaler = StandardScaler()
-# scaler = MaxAbsScaler()
-# scaler = RobustScaler()
+# # scaler = MinMaxScaler()
+# scaler = StandardScaler()
+# # scaler = MaxAbsScaler()
+# # scaler = RobustScaler()
 
-scaler.fit_transform(x_train)
-scaler.transform(x_test)
-test_csv= scaler.transform(test_csv)
+# scaler.fit_transform(x_train)
+# scaler.transform(x_test)
+# test_csv= scaler.transform(test_csv)
 
 # def objectiveXGB(trial):
 #     param = {
@@ -183,11 +171,12 @@ test_csv= scaler.transform(test_csv)
 # def objectiveLGBM(trial):
 #     param = {
 #         'n_estimators' : trial.suggest_int('n_estimators', 600, 1500),
-#         'max_depth' : trial.suggest_int('max_depth', 10, 35),
+#         'max_depth' : trial.suggest_int('max_depth', 10, 50),
 #         'min_child_weight' : trial.suggest_int('min_child_weight', 1, 10),
 #         'gamma' : trial.suggest_float('gamma', 0, 3.0),
 #         'learning_rate' : trial.suggest_float('learning_rate', 0.0001, 0.05),
 #         'colsample_bytree' : trial.suggest_float('colsample_bytree', 0.5, 1),
+#         'num_leaves' : trial.suggest_int('num_leaves', 2, 50),
 #         'nthread' : -2,
 #         # 'tree_method' : 'hist',
 #         # 'device' : 'cuda',
@@ -197,8 +186,8 @@ test_csv= scaler.transform(test_csv)
 #         #'random_state' : trial.suggest_int('random_state', 1, 10000)
 #     }
 #     # 학습 모델 생성
-#     model = LGBMRegressor(**param)
-#     model = model.fit(x_train, y_train) # 학습 진행
+#     model = LGBMRegressor(**param, random_state = 42)
+#     model = model.fit(x_train, y_train, ) # 학습 진행
     
 #     # 모델 성능 확인
 #     y_predict = model.predict(x_test)
@@ -213,29 +202,57 @@ test_csv= scaler.transform(test_csv)
 # best_params = study.best_params
 # print("BEST PARAM: ",best_params) 
 
+# def objectiveCATBOOST(trial):
+#     param = {
+#         'n_estimators' : trial.suggest_int('n_estimators', 600, 1500),
+#         'max_depth' : trial.suggest_int('max_depth', 10, 16),
+#         'learning_rate' : trial.suggest_float('learning_rate', 0.0001, 0.05),
+#         'bootstrap_type' : trial.suggest_categorical('bootstrap_type', ['Bayesian','Bernoulli','MVS']),
+#         'boosting_type' : trial.suggest_categorical('boosting_type', ['Ordered']),
+#         'task_type' : 'GPU',
+#         #'subsample' : trial.suggest_float('subsample', 0.5, 0.9),
+#         #'random_state' : trial.suggest_int('random_state', 1, 10000)
+#     }
+#     # 학습 모델 생성
+#     model = CatBoostRegressor(**param)
+#     model = model.fit(x_train, y_train) # 학습 진행
+    
+#     # 모델 성능 확인
+#     y_predict = model.predict(x_test)
+#     score = r2_score(y_test, y_predict)
+    
+#     print('score : ', score)
+#     return score
+
+# study = optuna.create_study(direction='maximize')
+# study.optimize(objectiveCATBOOST, n_trials=300)
+
+# best_params = study.best_params
+# print("BEST PARAM: ",best_params) 
 
 
 #3. 훈련
 
+
 xgb_params=  {'n_estimators': 1973, 'max_depth': 8, 'min_child_weight': 10, 'gamma': 2.6161556938062667, 
               'learning_rate': 0.0032711508067253814, 'colsample_bytree': 0.43588430169744163,
-              'lambda': 4.109502820985298, 'alpha': 1.094236763660126, 'subsample': 0.6818116013889788}
+              'lambda': 4.109502820985298, 'alpha': 1.094236763660126, 'subsample': 0.6818116013889788, 'n_jobs': -1}
 
-lgbm_params=  {'n_estimators': 712, 'max_depth': 12, 'min_child_weight': 3, 'gamma': 0.06758159010720036,
-               'learning_rate': 0.006282962079755867, 'colsample_bytree': 0.50943319775463, 'lambda': 1.0531659844876415,
-               'alpha': 4.683034028814744, 'subsample': 0.8645935942835695}
-
+lgbm_params=  {'n_estimators': 820, 'max_depth': 13, 'min_child_weight': 1,#'gamma': 0.8787397106554804,
+            'learning_rate': 0.008262704782718127, 'colsample_bytree': 0.9525731858721108, 'num_leaves': 44,
+            'alpha': 1.5559896871264183, 'subsample': 0.7299426393373126, 'n_jobs': -1}
+cat_params= {'n_estimators': 1174, 'max_depth': 14, 'learning_rate': 0.030137373447938796, 'bootstrap_type': 'Bernoulli', 'boosting_type': 'Ordered'}
 
 xgb = XGBRegressor(**xgb_params)
 lgb = LGBMRegressor(**lgbm_params)
 rf = RandomForestRegressor()
-
+cb = CatBoostRegressor(**cat_params)
 model = StackingRegressor(
      estimators=[('LGBM',lgb),
                   ('RF',rf),
                  ('XGB',xgb)],
-    # final_estimator=CatBoostRegressor(verbose=0),
-    n_jobs= -1,
+    final_estimator=CatBoostRegressor(verbose=0, **cat_params),
+    #n_jobs= -1,
     cv=7, 
 )
                     
@@ -265,6 +282,8 @@ submission_csv.to_csv(path+f'submit_{dt.day}day{dt.hour:2}{dt.minute:2}_rmse_{rm
 print("R2:   ",r2)
 print("RMSE: ",rmse)
 
+
+pickle.dump(model, open(path + f'submit_{dt.day}day{dt.hour:2}{dt.minute:2}_rmse_{rmse:4f}.dat', 'wb'))
 # RMSE:  562.0450116401987
 
 # cv 5

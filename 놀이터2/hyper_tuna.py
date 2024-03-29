@@ -34,8 +34,6 @@ def objectiveRF(trial):
         'random_state' : 42,
         'min_samples_split' : trial.suggest_int('min_samples_split', 2, 200),
         'min_samples_leaf' : trial.suggest_int('min_samples_leaf', 1, 200),
-        # 'min_samples_split' : trial.suggest_uniform('min_samples_split',0,1),
-        # 'min_samples_leaf' : trial.suggest_uniform('min_samples_leaf',0,1),
         'min_weight_fraction_leaf' : trial.suggest_float('min_weight_fraction_leaf',0, 0.5),
     }
             
