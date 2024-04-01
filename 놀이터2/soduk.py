@@ -102,10 +102,10 @@ for label, encoder in label_encoder_dict.items():
 
 
 
-# x = train_csv.drop(['Household_Summary','Income'], axis=1)
-x = train_csv.drop(['Income'], axis=1)
+x = train_csv.drop(['Household_Summary','Income'], axis=1)
+#x = train_csv.drop(['Income'], axis=1)
 
-# test_csv = test_csv.drop(['Household_Summary'], axis=1)
+test_csv = test_csv.drop(['Household_Summary'], axis=1)
 
 
 y = train_csv['Income']
@@ -114,16 +114,16 @@ y = train_csv['Income']
 from sklearn.preprocessing import MinMaxScaler, StandardScaler, MaxAbsScaler, RobustScaler
 
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.8,  shuffle= True, random_state= 42)
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.85,  shuffle= True, random_state= 42)
 
-# # scaler = MinMaxScaler()
+# scaler = MinMaxScaler()
 # scaler = StandardScaler()
-# # scaler = MaxAbsScaler()
-# # scaler = RobustScaler()
+# scaler = MaxAbsScaler()
+scaler = RobustScaler()
 
-# scaler.fit_transform(x_train)
-# scaler.transform(x_test)
-# test_csv= scaler.transform(test_csv)
+scaler.fit_transform(x_train)
+scaler.transform(x_test)
+test_csv= scaler.transform(test_csv)
 
 # def objectiveXGB(trial):
 #     param = {
@@ -240,7 +240,7 @@ xgb_params=  {'n_estimators': 1973, 'max_depth': 8, 'min_child_weight': 10, 'gam
 
 lgbm_params=  {'n_estimators': 820, 'max_depth': 13, 'min_child_weight': 1,#'gamma': 0.8787397106554804,
             'learning_rate': 0.008262704782718127, 'colsample_bytree': 0.9525731858721108, 'num_leaves': 44,
-            'alpha': 1.5559896871264183, 'subsample': 0.7299426393373126, 'n_jobs': -1}
+            'alpha': 1.5559896871264183, 'subsample': 0.7299426393373126, 'n_jobs': -1, 'force_row_wise' : 'true', 'verbose' : 1}
 cat_params= {'n_estimators': 1174, 'max_depth': 14, 'learning_rate': 0.030137373447938796, 'bootstrap_type': 'Bernoulli', 'boosting_type': 'Ordered'}
 
 xgb = XGBRegressor(**xgb_params)
@@ -249,7 +249,7 @@ rf = RandomForestRegressor()
 cb = CatBoostRegressor(**cat_params)
 model = StackingRegressor(
      estimators=[('LGBM',lgb),
-                  ('RF',rf),
+                 # ('RF',rf),
                  ('XGB',xgb)],
     final_estimator=CatBoostRegressor(verbose=0, **cat_params),
     #n_jobs= -1,
