@@ -38,29 +38,29 @@ y = ohe.fit_transform(y)
 
 
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.7,  shuffle= True, random_state= 398, stratify= y) #y의 라벨값을 비율대로 잡아줌 #회귀모델에서는 ㄴㄴ 분류에서만 가능
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.8,  shuffle= True, random_state= 123, stratify= y) #y의 라벨값을 비율대로 잡아줌 #회귀모델에서는 ㄴㄴ 분류에서만 가능
 #print(x_train.shape, x_test.shape) #(7620, 8) (3266, 8)
 #print(y_train.shape, y_test.shape) #(7620, ) (3266, )
 print(np.unique(y_test, return_counts = True ))
 
 scaler = MinMaxScaler()
-scaler.fit_transform(x_train)
-scaler.fit_transform(x_test)
+x_train = scaler.fit_transform(x_train)
+x_test = scaler.transform(x_test)
 
-x = tf.compat.v1.placeholder(tf.float32, shape= [None, 54])
+xp = tf.compat.v1.placeholder(tf.float32, shape= [None, 54])
 w = tf.compat.v1.Variable(tf.random_normal([54,7]))
 b = tf.compat.v1.Variable(tf.zeros([1,7]))
-y = tf.compat.v1.placeholder(tf.float32, shape=[None, 7])
+yp = tf.compat.v1.placeholder(tf.float32, shape=[None, 7])
 
 #2. 모델구성
 
 #2. 모델
-hypothesis = tf.nn.softmax(tf.compat.v1.matmul(x, w) + b)
+hypothesis = tf.nn.softmax(tf.compat.v1.matmul(xp, w) + b)
 
 #3-1. 컴파일
-loss = tf.reduce_mean(-tf.reduce_sum(y * tf.log(hypothesis), axis =1 ))
+loss = tf.reduce_mean(-tf.reduce_sum(yp * tf.log(hypothesis), axis =1 ))
 
-train = tf.compat.v1.train.AdamOptimizer(learning_rate= 0.01).minimize(loss)
+train = tf.compat.v1.train.GradientDescentOptimizer(learning_rate= 0.1).minimize(loss)
 
 from sklearn.metrics import r2_score, accuracy_score
 
@@ -70,13 +70,13 @@ sess.run(tf.compat.v1.global_variables_initializer())
 epochs = 5001
 for step in range(epochs):
     cost_val, _ , w_val= sess.run([loss, train, w],
-                           feed_dict = {x : x_train, y : y_train})
+                           feed_dict = {xp : x_train, yp : y_train})
     if step % 20 == 0:
         print(step, 'loss :', cost_val)
    
    
 #4. 평가. 예측        
-y_predict = sess.run(hypothesis, feed_dict= {x : x_test})   
+y_predict = sess.run(hypothesis, feed_dict= {xp : x_test})   
 r2 = r2_score(y_test, y_predict) 
 
 print('y_pred :', y_predict)
@@ -91,5 +91,5 @@ y_test = np.argmax(y_test,1)
 acc = accuracy_score(y_predict, y_test)
 print('acc : ', acc)
 
-#로스가 너무 커...
+# acc :  0.6944571138438766
 

@@ -4,19 +4,16 @@
 #값 일부 자르기 (label encoder)
 #값 자른거 수치화까지!
 
-from keras.models import Sequential
-from keras.layers import Dense,Dropout, BatchNormalization,Conv2D,Flatten, MaxPooling2D
+import tensorflow as tf
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import f1_score
 from sklearn.preprocessing import OneHotEncoder, LabelEncoder, MinMaxScaler
-from keras.callbacks import EarlyStopping
 import sklearn as sk
 import time
 import warnings
 warnings.filterwarnings(action='ignore')
-from keras.utils import to_categorical
 from sklearn.svm import LinearSVC
 
 
@@ -189,7 +186,7 @@ y = train_csv['대출등급']
 y = le.fit_transform(y)
 
 
-
+y = y.reshape(-1,1)
 ohe = OneHotEncoder(sparse = False)
 ohe.fit(y)
 y_ohe = ohe.transform(y)
@@ -204,14 +201,7 @@ from sklearn.preprocessing import StandardScaler, RobustScaler
 
 
 
-# mms = MinMaxScaler(feature_range=(1,3))
-mms = StandardScaler()
-# #mms = MaxAbsScaler()
-# #mms = RobustScaler()
 
-# mms.fit(x)
-# x = mms.transform(x)
-# test_csv=mms.transform(test_csv)
 #print(x.shape, y.shape)  #(96294, 13) (96294, 7)
 #print(np.unique(y, return_counts= True)) #array(['A', 'B', 'C', 'D', 'E', 'F', 'G'], dtype=object), array([16772, 28817, 27623, 13354,  7354,  1954,   420],
 
@@ -220,49 +210,37 @@ mms = StandardScaler()
 #print(y.shape) #(96294,)
 #print(np.unique(y, return_counts= True)) #Name: 근로기간, Length: 96294, dtype: float64
 
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.preprocessing import StandardScaler, RobustScaler
-from sklearn.decomposition import PCA
 
 
 
-
-'''
 
 x_train, x_test, y_train, y_test = train_test_split(x, y, train_size= 0.88,  shuffle= True, random_state= 279, stratify= y) #170 #279 
 
-# smote = SMOTE(random_state=270,sampling_strategy='auto',k_neighbors=10,)
-# x_train, y_train =smote.fit_resample(x_train, y_train)
 
 
+mms = MinMaxScaler()
+# mms = StandardScaler()
+# #mms = MaxAbsScaler()
+# #mms = RobustScaler()
 
-
-from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
-from sklearn.preprocessing import StandardScaler, RobustScaler, Normalizer
-
-#mms = MinMaxScaler(feature_range=(1,5))
-mms = StandardScaler()
-#mms = MaxAbsScaler()
-#mms = RobustScaler()
-
-
-
+x_train = mms.fit_transform(x_train)
+x_test = mms.fit_transform(x_test)
+test_csv=mms.transform(test_csv)
+x = tf.compat.v1.placeholder(tf.float32, shape= [None, 13])
+w = tf.compat.v1.Variable(tf.random_normal([13,7]))
+b = tf.compat.v1.Variable(tf.zeros([1]))
+y = tf.compat.v1.placeholder(tf.float32, shape=[None, 1])
 
 
 # #2. 모델구성
 
+hypothesis = tf.nn.softmax(tf.compat.v1.matmul(x, w) + b)
 
-model = LinearSVC(C=2200)
-
-#3. 컴파일, 훈련
+#3-1. 컴파일
 
 import datetime
 date= datetime.datetime.now()
 date = date.strftime("%m%d-%H%M") #m=month, M=minutes
-
-path1= 'C:/_data/_save/MCP/_k28/' #경로(스트링data (문자))
-filename = '{epoch:04d}-{val_loss:.4f}.hdf5' #filename= 에포4자리수-발로스는 소숫점4자리까지 표시. 예)1000-0.3333.hdf5
-filepath = "".join([path1, 'k28_11_', date, "_", filename]) #""공간에 ([])를 합쳐라.
 
 
 x_train = np.asarray(x_train).astype(np.float32)
@@ -270,33 +248,34 @@ x_test = np.asarray(x_test).astype(np.float32)
 test_csv = np.asarray(test_csv).astype(np.float32)
 
 
+loss = tf.reduce_mean(-tf.reduce_sum(y * tf.log(hypothesis), axis =1 ))
 
-start_time = time.time()
-model.fit(x_train, y_train)
-end_time = time.time()
+train = tf.compat.v1.train.GradientDescentOptimizer(learning_rate= 0.1).minimize(loss)
+
+from sklearn.metrics import r2_score, accuracy_score
+
+sess = tf.compat.v1.Session()
+sess.run(tf.compat.v1.global_variables_initializer())
+
+epochs = 10001
+for step in range(epochs):
+    cost_val, _ , w_val= sess.run([loss, train, w],
+                           feed_dict = {x : x_train, y : y_train})
+    if step % 20 == 0:
+        print(step, 'loss :', cost_val)
+   
+   
+#4. 평가. 예측        
+y_predict = sess.run(hypothesis, feed_dict= {x : x_test})   
+
+print('y_pred :', y_predict)
+print(w_val)
+
+y_predict = np.argmax(y_predict,1)
+print(y_predict)        
+
+acc = accuracy_score(y_predict, y_test)
+print('acc : ', acc)
 
 
-#4. 평가, 예측
-'''
-#results = model.score(x_test, y_test)
-#print("로스 :", results)
-#print("걸린 시간 :", round(end_time - start_time, 2), "초")
-
-
-y_predict = model.predict(x_test )
-
-y_submit = model.predict(test_csv)
-
-
-f1 = f1_score(y_test,y_predict,average='macro')
-print("F1: ",f1)
-
-
-
-import datetime
-dt = datetime.datetime.now()
-submission_csv['대출등급'] = y_submit
-
-submission_csv.to_csv(path+f"submit_{dt.day}day{dt.hour:2}{dt.minute:2}_F1_{f1:4}.csv",index=False)
-
-
+#acc :  0.1273797161647629

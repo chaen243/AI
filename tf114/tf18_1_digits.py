@@ -37,6 +37,11 @@ y = ohe.fit_transform(y)
 
 x_train, x_test, y_train, y_test = train_test_split(x, y, shuffle=True, random_state=42, stratify=y)
 
+scaler = MinMaxScaler()
+x_train = scaler.fit_transform(x_train)
+x_test = scaler.fit_transform(x_test)
+
+
 x = tf.compat.v1.placeholder(tf.float32, shape= [None, 64])
 w = tf.compat.v1.Variable(tf.random_normal([64,10]))
 b = tf.compat.v1.Variable(tf.zeros([1,10]))
@@ -55,7 +60,7 @@ from sklearn.metrics import r2_score, accuracy_score
 sess = tf.compat.v1.Session()
 sess.run(tf.compat.v1.global_variables_initializer())
 
-epochs = 100001
+epochs = 50001
 for step in range(epochs):
     cost_val, _ , w_val= sess.run([loss, train, w],
                            feed_dict = {x : x_train, y : y_train})
@@ -72,9 +77,10 @@ print('r2 :', r2)
 print(w_val)
 
 y_predict = np.argmax(y_predict,1)
+y_test = np.argmax(y_test,1)
 print(y_predict)        
 
 acc = accuracy_score(y_predict, y_test)
 print('acc : ', acc)
 
-#로스가 너무 커...
+# acc :  0.9511111111111111
